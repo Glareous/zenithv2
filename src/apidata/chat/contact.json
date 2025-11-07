@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "roomId": 1,
+    "name": "Auli Ahokas",
+    "avatar": "/assets/images/avatar/user-5.png"
+  },
+  {
+    "id": 2,
+    "roomId": 1,
+    "name": "Sirpa Kolkka",
+    "avatar": "/assets/images/avatar/user-6.png"
+  },
+  {
+    "id": 3,
+    "roomId": 1,
+    "name": "Risto Saraste",
+    "avatar": "/assets/images/avatar/user-37.png"
+  },
+  {
+    "id": 4,
+    "roomId": 1,
+    "name": "Leena Laine",
+    "avatar": "/assets/images/avatar/user-36.png"
+  },
+  {
+    "id": 5,
+    "roomId": 1,
+    "name": "Mikko Virtanen",
+    "avatar": "/assets/images/avatar/user-9.png"
+  },
+  {
+    "id": 6,
+    "roomId": 1,
+    "name": "Tuula Nieminen",
+    "avatar": "/assets/images/avatar/user-29.png"
+  },
+  {
+    "id": 7,
+    "roomId": 1,
+    "name": "Jari Mäkinen",
+    "avatar": "/assets/images/avatar/user-31.png"
+  },
+  {
+    "id": 8,
+    "roomId": 1,
+    "name": "Heidi Kinnunen",
+    "avatar": "/assets/images/avatar/user-12.png"
+  },
+  {
+    "id": 9,
+    "roomId": 1,
+    "name": "Pekka Heikkinen",
+    "avatar": "/assets/images/avatar/user-21.png"
+  },
+  {
+    "id": 10,
+    "roomId": 1,
+    "name": "Kati Laakso",
+    "avatar": "/assets/images/avatar/user-14.png"
+  }
+]

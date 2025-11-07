@@ -1,0 +1,237 @@
+import { MegaMenu } from '@src/dtos'
+
+const menu: MegaMenu[] = [
+  {
+    separator: true,
+    title: 'Dashboards',
+    lang: 'pe-dashboards',
+    children: [],
+  },
+  {
+    title: 'Dashboards',
+    lang: 'pe-dashboards',
+    icon: 'gauge',
+    link: '/dashboards/ecommerce',
+  },
+  {
+    title: 'Projects',
+    lang: 'pe-projects',
+    icon: 'monitor',
+    link: '/apps/projects/grid',
+    separator: false,
+  },
+  {
+    title: 'Ecommerce',
+    lang: 'pe-ecommerce',
+    icon: 'shopping-bag',
+    link: '#',
+    separator: false,
+    children: [
+      {
+        title: 'Products',
+        link: '#',
+        lang: 'pe-products',
+        children: [
+          {
+            title: 'Products List',
+            lang: 'products-list',
+            link: '/apps/ecommerce/products/list',
+            dropdownPosition: null,
+            children: [],
+          },
+          {
+            title: 'Products Grid',
+            lang: 'products-grid',
+            link: '/apps/ecommerce/products/grid',
+            dropdownPosition: null,
+            children: [],
+          },
+          {
+            title: 'Create Product',
+            lang: 'create-product',
+            link: '/apps/ecommerce/products/create-products',
+            dropdownPosition: null,
+            children: [],
+          },
+          {
+            title: 'Warehouse',
+            lang: 'warehouse',
+            link: '/apps/ecommerce/products/warehouse',
+            dropdownPosition: null,
+            children: [],
+          },
+        ],
+      },
+      {
+        title: 'Service',
+        lang: 'service',
+        link: '#',
+        children: [
+          {
+            title: 'Services List',
+            lang: 'Services List',
+            link: '/apps/service/list',
+            dropdownPosition: null,
+            children: [],
+          },
+          {
+            title: 'Create Service',
+            lang: 'Create Service',
+            link: '/apps/service/create-service',
+            dropdownPosition: null,
+            children: [],
+          },
+        ],
+      },
+      {
+        title: 'Customers',
+        link: '#',
+        lang: 'pe-customers',
+        children: [
+          {
+            title: 'Customers List',
+            lang: 'customers-list',
+            link: '/apps/ecommerce/customer/list',
+            dropdownPosition: null,
+            children: [],
+          },
+        ],
+      },
+      {
+        title: 'Category',
+        lang: 'Category',
+        link: '/apps/category',
+      },
+    ],
+  },
+  {
+    title: 'Rrhh',
+    lang: 'pe-rrhh',
+    icon: 'users-round',
+    link: '/apps/rrhh/',
+    separator: false,
+    children: [
+      {
+        title: 'List',
+        lang: 'List',
+        link: '/apps/rrhh/rrhh-list',
+        dropdownPosition: null,
+        children: [],
+      },
+      {
+        title: 'Admission Form',
+        lang: 'pe-admission-form',
+        link: '/apps/rrhh/rrhh-admission',
+        dropdownPosition: null,
+        children: [],
+      },
+    ],
+  },
+  {
+    title: 'Orders',
+    lang: 'orders',
+    icon: 'mail',
+    link: '/apps/orders',
+    separator: false,
+    children: [
+      {
+        title: 'Orders List',
+        lang: 'Orders List',
+        link: '/apps/orders/list',
+        dropdownPosition: null,
+        children: [],
+      },
+      {
+        title: 'Create Order',
+        lang: 'Create Order',
+        link: '/apps/orders/create-order',
+        dropdownPosition: null,
+        children: [],
+      },
+    ],
+  },
+
+  {
+    title: 'Chat',
+    lang: 'pe-chat',
+    icon: 'messages-square',
+    link: '/apps/chat/default',
+    separator: false,
+  },
+  {
+    title: 'CRM',
+    lang: 'pe-crm',
+    icon: 'shapes',
+    link: '/apps/crm/default',
+    separator: false,
+    children: [
+      {
+        title: 'Lead',
+        link: '/apps/crm/lead',
+        lang: 'Lead',
+      },
+      {
+        title: 'Contact',
+        link: '/apps/crm/contact',
+        lang: 'Contact',
+      },
+      {
+        title: 'Deal',
+        link: '/apps/crm/deal',
+        lang: 'Deal',
+      },
+    ],
+  },
+  {
+    title: 'Agents',
+    lang: 'pe-agents',
+    icon: 'bot',
+    link: '/apps/agents/default',
+    separator: false,
+  },
+  {
+    title: 'Models',
+    lang: 'pe-models',
+    icon: 'dna',
+    link: '/apps/models',
+    separator: false,
+  },
+  {
+    title: 'PQR',
+    lang: 'pe-pqr',
+    icon: 'users-round',
+    link: '/apps/pqr/pqr-list',
+    separator: false,
+  },
+  {
+    title: 'FORECASTING',
+    lang: 'pe-forecasting',
+    icon: 'table-2',
+    link: '/apps/forecasting/forecasting-list',
+    separator: false,
+  },
+  {
+    title: 'API Keys',
+    lang: 'pe-api-keys',
+    icon: 'box',
+    link: '/api-keys',
+    separator: false,
+    isProjectIndependent: true,
+  },
+  {
+    title: 'Actions',
+    lang: 'pe-actions',
+    icon: 'life-buoy',
+    link: '/page/dashboard-actions',
+    separator: false,
+  },
+  {
+    title: 'Phone Numbers',
+    lang: 'pe-phoneNumbers',
+    icon: 'phone',
+    link: '/apps/phoneNumbers',
+    separator: false,
+  },
+]
+
+export { menu }

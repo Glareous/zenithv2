@@ -1,0 +1,1783 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Enums for role-based access control
+enum OrganizationRole {
+    OWNER   // Can do everything including delete organization
+    ADMIN   // Can create projects, manage users, see all tabs
+    MEMBER  // Can only view assigned projects, cannot create new ones
+}
+
+enum ProjectRole {
+    ADMIN   // Can manage project, add/remove users, configure agents
+    MEMBER  // Can view project data, interact with agents
+}
+
+enum AgentType {
+    INBOUND
+    OUTBOUND
+    PROCESS
+    RPA
+}
+
+enum IntegrationType {
+    WHATSAPP
+    TELEGRAM
+    EMAIL
+    SMS
+}
+
+enum ChatStatus {
+    ACTIVE
+    CLOSED
+    ARCHIVED
+}
+
+enum MessageType {
+    TEXT
+    IMAGE
+    AUDIO
+    DOCUMENT
+    VIDEO
+}
+
+enum MessageSender {
+    AGENT
+    CUSTOMER
+}
+
+enum ProjectStatus {
+    ACTIVE
+    CREATED
+    COMPLETED
+}
+
+enum FileType {
+    DOCUMENT
+    IMAGE
+    VIDEO
+    AUDIO
+    OTHER
+}
+
+enum OrderType {
+    PRODUCT
+    SERVICE
+    MIXED
+}
+
+enum ServicePricingType {
+    HOURLY
+    FIXED
+    MONTHLY
+    SQUARE_METER
+}
+
+enum OrderStatus {
+    NEW
+    DELIVERED
+    PENDING
+    SHIPPING
+    CANCELLED
+}
+
+enum PaymentStatus {
+    PAID
+    UNPAID
+    COD
+}
+
+enum EmployeeFileCategory {
+    PASSPORT_PHOTO
+    HIGH_SCHOOL_TRANSCRIPT
+}
+
+enum LeadStatus {
+    NEW
+    HOT
+    PENDING
+    LOST
+    CONVERTED_TO_CUSTOMER
+}
+
+enum Gender {
+    MALE
+    FEMALE
+    OTHER
+}
+
+enum ContactStatus {
+    CONTACT
+    CUSTOMER
+    LEAD
+}
+
+enum DealStatus {
+    PROPOSAL
+    NEGOTIATION
+    WON
+    LOST
+}
+
+enum StockMovementType {
+    PRODUCT_CREATE
+    PRODUCT_UPDATE  
+    PRODUCT_DELETE
+    ORDER_CREATE
+    ORDER_CANCELLED
+    ORDER_DELETE
+    ORDER_UPDATE
+}
+
+enum VariableType {
+    STRING
+    NUMBER
+    INT
+    FLOAT
+    BOOL
+    LIST
+}
+
+enum TriggerType {
+    WHATSAPP_MESSAGE
+    WHATSAPP_CALL
+    PHONE_CALL
+    WEBHOOK
+    CRON_JOB
+    MCP_PROTOCOL
+}
+
+enum JobExecutionStatus {
+    SUCCESS
+    FAILED
+    SKIPPED
+}
+
+enum PhoneProvider {
+    TWILIO
+    TELNYX
+    RINGCENTRAL
+    CUSTOM
+}
+
+enum CategoryType {
+    PRODUCT
+    SERVICE
+}
+
+enum ActionType {
+    CUSTOM
+    AGENT
+    MCP
+    DATABASE
+    WEBHOOK
+}
+
+enum ActionCallType {
+    BEFORE_CALL
+    DURING_CALL
+}
+
+enum UserRole {
+    USER        // Normal user (default)
+    SUPERADMIN  // Super administrator
+}
+
+// Organization model - each signup creates an organization
+model Organization {
+    id          String   @id @default(cuid()) @map("_id")
+  name        String
+    description String?
+    logoUrl     String?  // Logo de la organización (S3 URL)
+    slug        String?  @unique // Identificador único para login (opcional - solo para orgs multi-tenant creadas por SUPERADMIN)
+    allowedPages String[] @default([]) // Categorías de menú permitidas ["ecommerce", "projects", "crm"]
+    custom      Boolean  @default(false) // true for admin-created orgs, false for user signup orgs
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    owner        User                 @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  ownerId      String
+    projects     Project[]
+    members      OrganizationMember[]
+    phoneNumbers PhoneNumber[]
+    files        OrganizationFile[]
+
+  @@index([ownerId])
+}
+
+// Junction table for organization members with roles
+model OrganizationMember {
+    id             String   @id @default(cuid()) @map("_id")
+    role           OrganizationRole @default(MEMBER)
+    joinedAt       DateTime @default(now())
+
+    // Relations
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+    user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+}
+
+// Files for organization (logos, branding assets)
+model OrganizationFile {
+    id              String   @id @default(cuid()) @map("_id")
+    name            String   // Original file name
+    fileName        String   // File name in S3 bucket
+    fileType        FileType @default(IMAGE)
+    mimeType        String   // MIME type of the file
+    fileSize        Int      // File size in bytes
+    s3Key           String   // S3 object key
+    s3Bucket        String   // S3 bucket name
+    s3Url           String   // S3 URL for accessing the file
+    description     String?  // Optional description of the file
+    isPublic        Boolean  @default(false) // Whether file is publicly accessible
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    // Relations
+    organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    organizationId  String
+    uploadedBy      User     @relation("OrganizationFileUploadedBy", fields: [uploadedById], references: [id])
+    uploadedById    String
+
+    @@index([organizationId])
+    @@index([uploadedById])
+}
+
+// Project model - each organization can have multiple projects
+model Project {
+    id          String   @id @default(cuid()) @map("_id")
+    name        String
+    description String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    logoUrl     String?
+    
+    // Relations
+    organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    organizationId String
+    createdBy      User           @relation(fields: [createdById], references: [id])
+    createdById    String
+    products       ProjectProduct[]
+    agents         ProjectAgent[]
+    integrations   ProjectIntegration[]
+    members        ProjectMember[]
+    invitations    ProjectInvitation[]
+    files          ProjectFile[]
+    faqs           ProjectFaq[]
+    
+    categories     ProjectCategory[]
+    services       ProjectService[]
+    warehouses     ProjectProductWarehouse[]
+    customers      ProjectCustomer[]
+    orders         ProjectOrders[]
+    leads          ProjectLead[]
+    contacts       ProjectContact[]
+    deals          ProjectDeal[]
+    employees      ProjectEmployee[]
+    models         ProjectModel[]
+    pqrs           ProjectPQR[]
+    forecasting    ProjectForecasting[]
+
+    revenue Float?
+    status  ProjectStatus @default(CREATED)
+    action  String?
+
+    // PQR Agent configuration
+    pqrAgentId String?
+    pqrAgent   ProjectAgent? @relation("PQRAgent", fields: [pqrAgentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+    actions              ProjectAction[]
+    assignedPhoneNumbers ProjectPhoneNumber[]
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([pqrAgentId])
+}
+
+// Junction table for project members
+model ProjectMember {
+    id        String   @id @default(cuid()) @map("_id")
+    role      ProjectRole @default(MEMBER)
+    joinedAt  DateTime @default(now())
+    
+    // Relations
+    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+    user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    
+    @@unique([projectId, userId])
+    @@index([projectId])
+    @@index([userId])
+}
+
+// Project invitation model - for email invitations to join projects
+model ProjectInvitation {
+    id          String   @id @default(cuid()) @map("_id")
+    email       String   // Email of the invited user
+    role        ProjectRole @default(MEMBER)
+    token       String   @unique // Unique invitation token
+    expires     DateTime // Expiration date
+    used        Boolean  @default(false)
+    createdAt   DateTime @default(now())
+    
+    // Relations
+    project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId   String
+    invitedBy   User    @relation(fields: [invitedById], references: [id])
+    invitedById String
+    
+    @@unique([projectId, email]) // Prevent duplicate invitations for same email+project
+  @@index([projectId])
+    @@index([email])
+    @@index([expires])
+}
+
+// ProjectFile model - for storing project files in AWS S3
+model ProjectFile {
+    id           String   @id @default(cuid()) @map("_id")
+    name         String   // Original file name
+    fileName     String   // File name in S3 bucket
+    fileType     FileType @default(OTHER)
+    mimeType     String   // MIME type of the file
+    fileSize     Int      // File size in bytes
+    s3Key        String   // S3 object key
+    s3Bucket     String   // S3 bucket name
+    s3Url        String   // S3 URL for accessing the file
+    description  String?  // Optional description of the file
+    isPublic     Boolean  @default(false) // Whether file is publicly accessible
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    
+    // Relations
+    project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId    String
+    uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+    uploadedById String
+
+  @@index([projectId])
+  @@index([uploadedById])
+  @@index([fileType])
+  @@index([createdAt])
+}
+
+// Product model - each project can have multiple products
+model ProjectProduct {
+    id          String   @id @default(cuid()) @map("_id")
+    name        String
+    description String?
+    price       Float?
+    imageUrl    String?
+    isActive    Boolean  @default(true)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    
+    // Relations
+    project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId   String
+    createdBy   User    @relation(fields: [createdById], references: [id])
+    createdById String
+    
+    categories  ProjectProductCategory[]
+    warehouses  ProductWarehouse[]
+    files       ProjectProductFile[]
+    orderItems  ProjectOrdersItems[]
+    stockMovements ProjectProductStockMovement[]    
+
+    @@index([projectId])
+    @@index([createdById])
+}
+
+
+// ProjectAgent model - for managing different types of agents
+model ProjectAgent {
+    id                String   @id @default(cuid()) @map("_id")
+    name              String?
+    type              AgentType @default(INBOUND)
+    isActive          Boolean  @default(false)
+    systemInstructions String?  // Instructions for the AI agent
+
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
+
+    // Relations
+    project           Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    projectId         String
+    model             ProjectModel? @relation(fields: [modelId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+    modelId           String?
+    files             ProjectAgentFile[]
+    chats             Chat[]
+    workflow          ProjectAgentWorkflow? // One-to-one relationship with consolidated workflow
+    actions           ProjectAgentActions?  // One-to-one relationship with agent actions
+    projectActions    ProjectAction[]       // Agent-specific actions
+    cronExecutionLogs AgentCronExecutionLog[] // CRON job execution logs
+    pqrProjects       Project[] @relation("PQRAgent") // Projects using this agent for PQR
+
+    @@index([projectId])
+    @@index([modelId])
+}
+
+// ProjectAgentFile model - for storing agent files in AWS S3
+model ProjectAgentFile {
+    id           String   @id @default(cuid()) @map("_id")
+    name         String   // Original file name
+    fileName     String   // File name in S3 bucket
+    fileType     FileType @default(OTHER)
+    mimeType     String   // MIME type of the file
+    fileSize     Int      // File size in bytes
+    s3Key        String   // S3 object key
+    s3Bucket     String   // S3 bucket name
+    s3Url        String   // S3 URL for accessing the file
+    description  String?  // Optional description of the file
+    isPublic     Boolean  @default(false) // Whether file is publicly accessible
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    
+    // Relations
+    agent        ProjectAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+    agentId      String
+    uploadedBy   User        @relation(fields: [uploadedById], references: [id])
+    uploadedById String
+    
+    @@index([agentId])
+    @@index([uploadedById])
+    @@index([fileType])
+    @@index([createdAt])
+}
+
+// Chat model - records of agent conversations
+model Chat {
+    id          String   @id @default(cuid()) @map("_id")
+    
+    // Customer information
+    customerName    String?
+    customerPhone   String
+    customerEmail   String?
+    
+    // Chat metadata
+    status          ChatStatus @default(ACTIVE)
+    startedAt       DateTime @default(now())
+    endedAt         DateTime?
+    updatedAt       DateTime @updatedAt
+    
+    // Relations
+    agent           ProjectAgent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+    agentId         String
+    messages        Message[]
+    
+    @@index([agentId])
+    @@index([customerPhone])
+    @@index([status])
+}
+
+// Message model - individual messages in a chat
+model Message {
+    id          String   @id @default(cuid()) @map("_id")
+    content     String
+    messageType MessageType @default(TEXT)
+    sender      MessageSender
+    timestamp   DateTime @default(now())
+    
+    // WhatsApp specific fields
+    whatsappMessageId String?
+    mediaUrl          String? // For images, documents, etc.
+    
+    // Relations
+    chat        Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    chatId      String
+    
+    @@index([chatId])
+    @@index([timestamp])
+}
+
+// Project Integration model - for managing different integrations
+model ProjectIntegration {
+    id          String   @id @default(cuid()) @map("_id")
+    name        String
+    type        IntegrationType
+    isActive    Boolean  @default(true)
+    config      Json     // Flexible configuration for different integration types
+    
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    
+    // Relations
+    project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId   String
+    createdBy   User    @relation(fields: [createdById], references: [id])
+    createdById String
+    
+    @@index([projectId])
+    @@index([createdById])
+    @@index([type])
+}
+
+// Updated User model
+model User {
+    id            String    @id @default(cuid()) @map("_id")
+  firstName     String
+  lastName      String
+  username      String   @unique
+    email         String?   @unique
+    password      String?   // Hashed password for email/password auth
+    isVerified    Boolean   @default(false) // Email verification status
+    emailVerified DateTime?
+    image         String?
+    role          UserRole  @default(USER) // User role: USER (default) or SUPERADMIN
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+    
+    // Relations
+    accounts                Account[]
+    sessions                Session[]
+    passwordResetTokens     PasswordResetToken[]
+    emailVerificationTokens EmailVerificationToken[]
+    createdActions ProjectAction[]
+    
+    // Organization relations
+    ownedOrganizations      Organization[]       @relation("OrganizationOwner")
+    organizationMemberships OrganizationMember[]
+    
+    // Project relations
+    createdProjects         Project[]
+    projectMemberships      ProjectMember[]
+    
+    // Product relations
+    createdProducts         ProjectProduct[]
+    createdServices         ProjectService[]
+    createdCategories       ProjectCategory[]
+    createdWarehouses       ProjectProductWarehouse[] 
+    
+    // Customer relations
+    createdCustomers        ProjectCustomer[]
+    
+    // Order relations
+    createdOrders           ProjectOrders[]
+    
+    // Lead relations
+    createdLeads            ProjectLead[]
+    
+    // Contact relations
+    createdContacts         ProjectContact[]
+    
+    // Deal relations
+    createdDeals            ProjectDeal[]
+    
+    // Integration relations
+    createdIntegrations     ProjectIntegration[]
+
+    // Phone number relations
+    createdPhoneNumbers     PhoneNumber[]
+
+    // ProjectFile relations
+    uploadedFiles           ProjectFile[]
+
+    // OrganizationFile relations
+    uploadedOrganizationFiles OrganizationFile[] @relation("OrganizationFileUploadedBy")
+
+    // ProjectAgentFile relations
+    uploadedAgentFiles      ProjectAgentFile[]
+    
+    // ProjectProductFile relations
+    uploadedProductFiles    ProjectProductFile[]
+
+    // ProjectServiceFile relations
+    uploadedServiceFiles    ProjectServiceFile[]
+
+    // ProjectCustomerFile relations
+    uploadedCustomerFiles   ProjectCustomerFile[]
+    
+    // ProjectLeadFile relations
+    uploadedLeadFiles       ProjectLeadFile[]
+    
+    // ProjectContactFile relations
+    uploadedContactFiles    ProjectContactFile[]
+
+    // ProjectEmployee relations (RRHH)
+    employeesCreated        ProjectEmployee[]       @relation("EmployeesCreated")
+    employeeFilesUploaded   ProjectEmployeeFile[]   @relation("EmployeeFilesUploaded")
+    employeeHistoriesCreated ProjectEmployeeHistory[] @relation("EmployeeHistoriesCreated")
+
+    // ProjectModel relations
+    modelsCreated           ProjectModel[]          @relation("ProjectModelsCreated")
+    modelFilesUploaded      ProjectModelFile[]      @relation("ProjectModelFilesUploaded")
+
+    // ProjectPQR relations
+    pqrAnalysisCreated      ProjectPQRAnalysis[]    @relation("PQRAnalysisCreated")
+
+    // ProjectForecasting relations
+    forecastingCreated       ProjectForecasting[]        @relation("ForecastingCreated")
+    forecastingFilesUploaded ProjectForecastingFile[]    @relation("ForecastingFilesUploaded")
+    forecastingSeriesCreated ProjectForecastingSeries[]  @relation("ForecastingSeriesCreated")
+
+    // Project invitation relations
+    sentInvitations         ProjectInvitation[]
+
+    // API key relations
+    apiKeys                 UserApiKey[]
+}
+
+// Necessary for Next auth
+model Account {
+    id                       String  @id @default(cuid()) @map("_id")
+    userId                   String
+    type                     String
+    provider                 String
+    providerAccountId        String
+    refresh_token            String? // @db.Text
+    access_token             String? // @db.Text
+    expires_at               Int?
+    token_type               String?
+    scope                    String?
+    id_token                 String? // @db.Text
+    session_state            String?
+    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    refresh_token_expires_in Int?
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(cuid()) @map("_id")
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+    identifier String   @id @map("_id")
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
+
+// Password Reset Token for email/password auth
+model PasswordResetToken {
+    id        String   @id @default(cuid()) @map("_id")
+    token     String   @unique
+    expires   DateTime
+    used      Boolean  @default(false)
+    createdAt DateTime @default(now())
+    
+    // Relations
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    
+    @@index([userId])
+    @@index([expires])
+}
+
+// Email Verification Token for email verification
+model EmailVerificationToken {
+    id        String   @id @default(cuid()) @map("_id")
+    token     String   @unique
+    expires   DateTime
+    used      Boolean  @default(false)
+    createdAt DateTime @default(now())
+    
+    // Relations
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    
+    @@index([userId])
+    @@index([expires])
+}
+
+// FAQ model - for storing FAQ's for a project
+model ProjectFaq {
+    id        String   @id @default(cuid()) @map("_id")
+    question  String
+    answer    String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId String
+    
+    @@index([projectId])
+}
+
+// ProjectCategory model - for managing categories per project (products and services)
+model ProjectCategory {
+    id          String   @id @default(cuid()) @map("_id")
+    name        String
+    description String?
+    type        CategoryType
+    isDefault   Boolean  @default(false)
+    isActive    Boolean  @default(true)
+    projectId   String
+    project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    createdById String
+    createdBy   User     @relation(fields: [createdById], references: [id])
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations with pivot tables
+    productRelations  ProjectProductCategory[]
+    serviceRelations  ProjectServiceCategory[]
+
+    @@index([projectId])
+    @@index([createdById])
+    @@index([type])
+}
+
+// ProjectProductWarehouse model - for managing warehouses per project
+model ProjectProductWarehouse {
+    id          String   @id @default(cuid()) @map("_id")
+    warehouseId String  
+    name        String
+    description String?
+    isActive    Boolean  @default(true)
+    isDefault   Boolean  @default(false)
+    projectId   String
+    project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    createdById String
+    createdBy   User     @relation(fields: [createdById], references: [id])
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    products    ProductWarehouse[]
+    orderItems  ProjectOrdersItems[]  // New relation for order items
+    stockMovements ProjectProductStockMovement[]
+
+    @@unique([warehouseId, projectId])
+    @@index([projectId])
+    @@index([createdById])
+}
+
+// Pivot table: Product-Category relationship
+model ProjectProductCategory {
+    id         String   @id @default(cuid()) @map("_id")
+    productId  String
+    product    ProjectProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+    categoryId String
+    category   ProjectCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+    @@unique([productId, categoryId])
+    @@index([productId])
+    @@index([categoryId])
+}
+
+// Pivot table: Service-Category relationship
+model ProjectServiceCategory {
+    id         String   @id @default(cuid()) @map("_id")
+    serviceId  String
+    service    ProjectService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+    categoryId String
+    category   ProjectCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+    @@unique([serviceId, categoryId])
+    @@index([serviceId])
+    @@index([categoryId])
+}
+
+model ProductWarehouse {
+    id          String   @id @default(cuid()) @map("_id")
+    productId   String
+    product     ProjectProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+    warehouseId String
+    warehouse   ProjectProductWarehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+    stock       Int      @default(0)
+    
+    @@unique([productId, warehouseId])
+}
+
+// ProjectService model - for managing services per project (no warehouses/stock)
+model ProjectService {
+    id          String   @id @default(cuid()) @map("_id")
+    name        String
+    description String?
+    price       Float?
+    pricingType ServicePricingType @default(FIXED)
+    imageUrl    String?
+    isActive    Boolean  @default(true)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId   String
+    createdBy   User    @relation(fields: [createdById], references: [id])
+    createdById String
+
+    categories  ProjectServiceCategory[]
+    files       ProjectServiceFile[]
+    orderServices ProjectOrdersServices[]
+
+    @@index([projectId])
+    @@index([createdById])
+}
+
+// ProjectProductFile model - for storing product images in AWS S3
+model ProjectProductFile {
+    id           String   @id @default(cuid()) @map("_id")
+    name         String   // Original file name
+    fileName     String   // File name in S3 bucket
+    fileType     FileType @default(OTHER)
+    mimeType     String   // MIME type of the file
+    fileSize     Int      // File size in bytes
+    s3Key        String   // S3 object key
+    s3Bucket     String   // S3 bucket name
+    s3Url        String   // S3 URL for accessing the file
+    description  String?  // Optional description of the file
+    isPublic     Boolean  @default(false) // Whether file is publicly accessible
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    
+    // Relations
+    product     ProjectProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+    productId   String
+    uploadedBy   User        @relation(fields: [uploadedById], references: [id])
+    uploadedById String
+    
+    @@index([productId])
+    @@index([uploadedById])
+    @@index([fileType])
+    @@index([createdAt])
+}
+
+// ProjectServiceFile model - for storing service images in AWS S3
+model ProjectServiceFile {
+    id           String   @id @default(cuid()) @map("_id")
+    name         String   // Original file name
+    fileName     String   // File name in S3 bucket
+    fileType     FileType @default(OTHER)
+    mimeType     String   // MIME type of the file
+    fileSize     Int      // File size in bytes
+    s3Key        String   // S3 object key
+    s3Bucket     String   // S3 bucket name
+    s3Url        String   // S3 URL for accessing the file
+    description  String?  // Optional description of the file
+    isPublic     Boolean  @default(false) // Whether file is publicly accessible
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    // Relations
+    service      ProjectService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+    serviceId    String
+    uploadedBy   User @relation(fields: [uploadedById], references: [id])
+    uploadedById String
+
+    @@index([serviceId])
+    @@index([uploadedById])
+    @@index([fileType])
+    @@index([createdAt])
+}
+
+// ProjectOrdersServices model - for managing services in orders
+model ProjectOrdersServices {
+    id        String   @id @default(cuid()) @map("_id")
+    orderId   String
+    serviceId String
+    quantity  Int      @default(1)
+    price     Float    @default(0)
+    total     Float    @default(0)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    order     ProjectOrders @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    service   ProjectService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+    @@index([orderId])
+    @@index([serviceId])
+}
+
+// ProjectCustomer model - for managing customers per project
+model ProjectCustomer {
+    id          String   @id @default(cuid()) @map("_id")
+    name        String
+    email       String?
+    phoneNumber String?
+    subscriber  Boolean  @default(false)
+    gender      String?
+    location    String?
+    role        String?
+    website     String?
+    isActive    Boolean  @default(true)
+    origin      String?  // "FROM_CONTACT" or "FROM_CUSTOMER" to track origin
+    projectId   String
+    project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    createdById String
+    createdBy   User     @relation(fields: [createdById], references: [id])
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    files       ProjectCustomerFile[]
+    orders      ProjectOrders[]
+    deals       ProjectDeal[] // Agregar esta relación
+    
+    @@index([projectId])
+    @@index([createdById])
+}
+
+// ProjectCustomerFile model - for storing customer profile images in AWS S3
+model ProjectCustomerFile {
+    id           String   @id @default(cuid()) @map("_id")
+    name         String   // Original file name
+    fileName     String   // File name in S3 bucket
+    fileType     FileType @default(OTHER)
+    mimeType     String   // MIME type of the file
+    fileSize     Int      // File size in bytes
+    s3Key        String   // S3 object key
+    s3Bucket     String   // S3 bucket name
+    s3Url        String   // S3 URL for accessing the file
+    description  String?  // Optional description of the file
+    isPublic     Boolean  @default(false) // Whether file is publicly accessible
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    
+    // Relations
+    customer    ProjectCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+    customerId  String
+    uploadedBy  User        @relation(fields: [uploadedById], references: [id])
+    uploadedById String
+    
+    @@index([customerId])
+    @@index([uploadedById])
+    @@index([fileType])
+    @@index([createdAt])
+}
+
+// ProjectOrders model - for managing orders per project
+model ProjectOrders {
+    id           String   @id @default(cuid()) @map("_id")
+    orderId      String
+    orderDate    DateTime @default(now())
+    deliveredDate DateTime?
+    customerId   String?
+    customerName String?
+    customerEmail String?
+    type         OrderType @default(PRODUCT)
+    status       OrderStatus @default(NEW)
+    payment      PaymentStatus @default(UNPAID)
+    taxPercentage Float   @default(0)
+    totalAmount  Float    @default(0)
+    projectId    String
+    project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    createdById  String
+    createdBy    User     @relation(fields: [createdById], references: [id])
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    // Relations
+    customer     ProjectCustomer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+    items        ProjectOrdersItems[]
+    services     ProjectOrdersServices[]
+    stockMovements ProjectProductStockMovement[]
+
+    @@index([projectId])
+    @@index([customerId])
+    @@index([createdById])
+    @@index([orderId])
+}
+
+// ProjectOrdersItems model - for managing order items
+model ProjectOrdersItems {
+    id        String   @id @default(cuid()) @map("_id")
+    orderId   String
+    productId String
+    warehouseId String  // New field for tracking which warehouse was used
+    quantity  Int      @default(1)
+    price     Float    @default(0)
+    total     Float    @default(0)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    order     ProjectOrders @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    product   ProjectProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+    warehouse ProjectProductWarehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+    
+    @@index([orderId])
+    @@index([productId])
+    @@index([warehouseId])
+}
+
+// ProjectLead model - for managing leads per project
+model ProjectLead {
+    id          String   @id @default(cuid()) @map("_id")
+    name        String
+    email       String?
+    phoneNumber String?
+    status      LeadStatus @default(NEW)
+    projectId   String
+    project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    createdById String
+    createdBy   User     @relation(fields: [createdById], references: [id])
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    files       ProjectLeadFile[]
+    
+    // New relation to ProjectContact (optional)
+    contactId   String?
+    contact     ProjectContact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+    
+    @@index([projectId])
+    @@index([createdById])
+    @@index([contactId])
+}
+
+// ProjectContact model - for managing contacts per project
+model ProjectContact {
+    id          String   @id @default(cuid()) @map("_id")
+    name        String
+    companyName String?
+    role        String?
+    email       String?
+    phoneNumber String?
+    website     String?
+    status      ContactStatus @default(CONTACT)
+    subscriber  Boolean  @default(false)
+    gender      Gender?
+    location    String?
+    projectId   String
+    project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    createdById String
+    createdBy   User     @relation(fields: [createdById], references: [id])
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    files       ProjectContactFile[]
+    
+    // New relation to ProjectLead (one-to-many)
+    leads       ProjectLead[]
+    
+    @@index([projectId])
+    @@index([createdById])
+}
+
+// ProjectDeal model - for managing deals per project
+model ProjectDeal {
+    id          String   @id @default(cuid()) @map("_id")
+    name        String
+    dealDate    DateTime?
+    isActive    Boolean  @default(true)
+    isExpired   Boolean  @default(true)
+    revenue     Float?
+    status      DealStatus @default(PROPOSAL)
+    customerId  String
+    projectId   String
+    project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    createdById String
+    createdBy   User     @relation(fields: [createdById], references: [id])
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    customer    ProjectCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+    
+    // New relation to ProjectDealMessage (one-to-one)
+    dealMessage ProjectDealMessage?
+    
+    @@index([projectId])
+    @@index([customerId])
+    @@index([createdById])
+}
+
+// ProjectLeadFile model - for storing lead profile images in AWS S3
+model ProjectLeadFile {
+    id           String   @id @default(cuid()) @map("_id")
+    name         String   // Original file name
+    fileName     String   // File name in S3 bucket
+    fileType     FileType @default(OTHER)
+    mimeType     String   // MIME type of the file
+    fileSize     Int      // File size in bytes
+    s3Key        String   // S3 object key
+    s3Bucket     String   // S3 bucket name
+    s3Url        String   // S3 URL for accessing the file
+    description  String?  // Optional description of the file
+    isPublic     Boolean  @default(false) // Whether file is publicly accessible
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    
+    // Relations
+    lead        ProjectLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+    leadId      String
+    uploadedBy  User        @relation(fields: [uploadedById], references: [id])
+    uploadedById String
+    
+    @@index([leadId])
+    @@index([uploadedById])
+    @@index([fileType])
+    @@index([createdAt])
+}
+
+// ProjectContactFile model - for storing contact profile images in AWS S3
+model ProjectContactFile {
+    id           String   @id @default(cuid()) @map("_id")
+    name         String   // Original file name
+    fileName     String   // File name in S3 bucket
+    fileType     FileType @default(OTHER)
+    mimeType     String   // MIME type of the file
+    fileSize     Int      // File size in bytes
+    s3Key        String   // S3 object key
+    s3Bucket     String   // S3 bucket name
+    s3Url        String   // S3 URL for accessing the file
+    description  String?  // Optional description of the file
+    isPublic     Boolean  @default(false) // Whether file is publicly accessible
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    
+    // Relations
+    contact     ProjectContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+    contactId   String
+    uploadedBy  User        @relation(fields: [uploadedById], references: [id])
+    uploadedById String
+    
+    @@index([contactId])
+    @@index([uploadedById])
+    @@index([fileType])
+    @@index([createdAt])
+}
+
+// ProjectDealMessage model - for managing deal messages
+model ProjectDealMessage {
+    id          String   @id @default(cuid()) @map("_id")
+    dealId      String   @unique // One-to-one relationship with ProjectDeal
+    dealName    String
+    dealImage   String
+    status      ChatStatus @default(ACTIVE)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    deal        ProjectDeal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+    
+    @@index([status])
+    @@index([createdAt])
+}
+
+model ProjectProductStockMovement {
+    id String @id @default(cuid()) @map("_id")
+    movementId String             
+    productId String
+    warehouseId String
+    movementType StockMovementType @default(PRODUCT_CREATE)
+    orderId String?
+    quantity Int  
+    previousStock Int
+    newStock Int
+    createdAt DateTime @default(now())
+
+// Relations
+    product ProjectProduct @relation(fields: [productId], references: [id])
+    warehouse ProjectProductWarehouse @relation(fields: [warehouseId], references: [id])
+    order ProjectOrders? @relation(fields: [orderId], references: [id])
+
+    @@index([productId])
+    @@index([warehouseId])
+    @@index([createdAt])
+}
+
+// UserApiKey model for API key management
+model UserApiKey {
+  id          String   @id @default(cuid()) @map("_id")
+  name        String   // User-defined name for the API key
+  keyHash     String   @unique // Hashed version of the API key
+  keyPreview  String   // First 8 characters for display (e.g., "ak_12345...")
+  isActive    Boolean  @default(true)
+  admin       Boolean  @default(false) // Super admin access (only modifiable directly in DB)
+  lastUsedAt  DateTime?
+  expiresAt   DateTime? // Optional expiration
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  
+  @@index([userId])
+  @@index([isActive])
+}
+
+// Consolidated ProjectAgentWorkflow model - single source of truth for all workflow data
+model ProjectAgentWorkflow {
+  id            String   @id @default(cuid()) @map("_id")
+  agentId       String   @unique
+  
+  // Global workflow settings
+  name          String?
+  description   String?
+  instructions  String?
+  globalActions Json?    // Array of global action objects with {id, name, description, order}
+  globalFaqs    Json?    // Array of global FAQ objects with {id, question, answer}
+  globalObjections Json? // Array of global objection objects with {id, case, instructions}
+  
+  // Complete workflow structure - all nodes and edges with embedded data
+  nodes         Json     // Array of workflow nodes with embedded actions, faqs, objections
+  edges         Json     // Array of edge connections with styling and animation info
+  
+  // Global position for the workflow root node
+  positionX     Float    @default(250)
+  positionY     Float    @default(25)
+  
+  // Metadata
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  agent         ProjectAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  
+  @@index([createdAt])
+}
+
+// ProjectAgentTrigger model - for managing agent triggers (WhatsApp, Phone calls, etc)
+model ProjectAgentTrigger {
+  id                    String      @id @default(cuid()) @map("_id")
+  type                  TriggerType
+  isActive              Boolean     @default(true)
+
+  // Relations
+  agentActionsId        String
+  agentActions          ProjectAgentActions @relation(fields: [agentActionsId], references: [id], onDelete: Cascade)
+
+  projectPhoneNumberId  String?
+  projectPhoneNumber    ProjectPhoneNumber? @relation(fields: [projectPhoneNumberId], references: [id], onDelete: Cascade)
+
+  // CRON_JOB configuration
+  cronExpression        String?     // Cron expression (e.g., "0 9 * * *")
+  cronTimezone          String?     // Timezone (e.g., "America/New_York")
+
+  // WEBHOOK configuration
+  webhookConfig         Json?       // Webhook configuration: { requestBody: string, variables: [{key, type, value}] }
+
+  // CRON job execution logs
+  cronExecutionLogs     AgentCronExecutionLog[]
+
+  // Metadata
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  // Only one trigger per type per agent actions
+  @@unique([agentActionsId, type])
+  @@index([agentActionsId])
+  @@index([projectPhoneNumberId])
+}
+
+// ProjectAgentActions model - for managing agent actions
+model ProjectAgentActions {
+  id            String   @id @default(cuid()) @map("_id")
+  agentId       String   @unique
+
+  // Triggers relation
+  triggers      ProjectAgentTrigger[]
+
+  // AFTER_CALL phase actions
+  afterCallActions  Json?
+
+  // Metadata
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  agent         ProjectAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+}
+
+model ProjectAction {
+  id          String   @id @default(cuid()) @map("_id")
+  name        String
+  description String?
+  apiUrl      String
+  endpointUrl String?
+  headers     Json?
+  timeout     Int      @default(30000)
+  authorizationNeeded Boolean @default(false)
+  authenticationKey String?
+  authenticationValue String?
+  actionType      ActionType   @default(CUSTOM)
+  actionCallType  ActionCallType   @default(BEFORE_CALL)
+  agentId         String?  // Only for AGENT type actions
+  requestBody String?
+
+  // New JSON columns for storing arrays directly
+  variables       Json?    // Store before/during call variables as JSON array
+  queryParameters Json?    // Store query parameters as JSON array
+  results         Json?    // Store action results as JSON array
+
+  // Step 5 - Messages fields
+  agentSpeakNaturally Boolean @default(false)
+  startMessage        String?
+  delayMessage        String?
+  delayThreshold      Int    @default(7)
+  failureMessage      String?
+
+  isActive    Boolean  @default(true)
+  projectId   String
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   User    @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  agent       ProjectAgent? @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  // Removed workflowEdgesActions relation as it's now embedded in ProjectAgentWorkflow
+  // Removed actionVariables relation - now using JSON columns
+
+  @@index([projectId])
+  @@index([createdById])
+  @@index([agentId])
+}
+
+// PhoneNumber model - for managing phone numbers with different providers
+model PhoneNumber {
+  id          String   @id @default(cuid()) @map("_id")
+
+  // Basic info
+  provider    PhoneProvider
+  phoneNumber String
+  countryCode String
+
+  // SIP Configuration
+  sipDomain   String?
+  username    String?
+  password    String?
+
+  // Proxy Configuration
+  outboundProxy String?  // sip:proxy.provider.com:5060
+  authUsername  String?
+
+  // URI Configuration
+  originationUri String?  // Auto-generated or custom
+
+  friendlyName String?
+
+  // Status
+  isActive    Boolean  @default(true)
+
+  // Relations
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdById    String
+  createdBy      User     @relation(fields: [createdById], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([phoneNumber])
+
+  // Relations with projects (many-to-many)
+  projectAssignments ProjectPhoneNumber[]
+}
+
+// ProjectPhoneNumber model - Junction table for assigning phone numbers to projects
+model ProjectPhoneNumber {
+  id            String   @id @default(cuid()) @map("_id")
+
+  // Relations
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  phoneNumberId String
+  phoneNumber   PhoneNumber @relation(fields: [phoneNumberId], references: [id], onDelete: Cascade)
+
+  // Each project can activate/deactivate numbers individually
+  isActiveInProject Boolean @default(true)
+
+  // Relations with agent triggers - triggers use numbers in the context of a project
+  agentTriggers     ProjectAgentTrigger[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([projectId, phoneNumberId]) // A number cannot be added twice to the same project
+  @@index([projectId])
+  @@index([phoneNumberId])
+}
+
+// AgentCronExecutionLog model - for logging CRON job executions
+model AgentCronExecutionLog {
+  id          String   @id @default(cuid()) @map("_id")
+
+  // Relations
+  agentId     String
+  agent       ProjectAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  triggerId   String?
+  trigger     ProjectAgentTrigger? @relation(fields: [triggerId], references: [id], onDelete: SetNull)
+
+  // Execution details
+  triggerType TriggerType
+  status      JobExecutionStatus @default(SUCCESS)
+  errorMessage String?
+
+  // Timing
+  scheduledAt DateTime  // When it was supposed to run according to cron
+  executedAt  DateTime  @default(now()) // When it actually ran
+  duration    Int?      // Duration in milliseconds
+
+  // Metadata
+  cronExpression String?
+  timezone       String?
+
+  @@index([agentId])
+  @@index([triggerId])
+  @@index([executedAt])
+  @@index([status])
+}
+
+// ProjectEmployee model - for managing employees/students per project (RRHH system)
+model ProjectEmployee {
+    id              String   @id @default(cuid()) @map("_id")
+    employeeId      String   // Custom employee ID (e.g., "EMP001", "STU123")
+
+    // Personal Information
+    firstName       String
+    lastName        String
+    middleName      String?
+    image           String?  // Profile image URL or S3 key
+    gender          String?  // "Male", "Female", "Other"
+    birthDate       DateTime?
+    age             String?
+    religion        String?
+    nationality     String?
+
+    // Contact Information
+    email           String?
+    phone           String?
+    alternativePhone String?
+    address         String?
+    city            String?
+    country         String?
+    pinCode         String?
+    location        String?  // Location/State
+
+    // Employment/Student Details
+    rollNo          String?  // Roll number or employee number
+    class           String?  // Department, class, or position
+    admissionDate   DateTime? // Joining/Admission date (stored as "date" in original)
+
+    // Family Information (optional)
+    fatherName      String?
+    motherName      String?
+    fatherOccupation String?
+    parentsPhone    String?
+
+    // Status
+    isActive        Boolean  @default(true)
+
+    // Timestamps
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    // Relations
+    project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId       String
+    createdBy       User     @relation("EmployeesCreated", fields: [createdById], references: [id])
+    createdById     String
+
+    // Related data
+    files           ProjectEmployeeFile[]
+    histories       ProjectEmployeeHistory[]
+
+    @@index([projectId])
+    @@index([createdById])
+    @@index([employeeId])
+    @@index([email])
+    @@index([class])
+    @@index([createdAt])
+}
+
+// ProjectEmployeeFile model - for managing employee documents and images
+model ProjectEmployeeFile {
+    id           String   @id @default(cuid()) @map("_id")
+    name         String   // Original file name
+    fileName     String   // File name in S3 bucket
+    fileType     FileType @default(OTHER)
+    category     EmployeeFileCategory // Specific category (PASSPORT_PHOTO, HIGH_SCHOOL_TRANSCRIPT)
+    mimeType     String   // MIME type of the file
+    fileSize     Int      // File size in bytes
+    s3Key        String   // S3 object key
+    s3Bucket     String   // S3 bucket name
+    s3Url        String   // S3 URL for accessing the file
+    description  String?  // Optional description of the file
+    isPublic     Boolean  @default(false) // Whether file is publicly accessible
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    // Relations
+    employee     ProjectEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+    employeeId   String
+    uploadedBy   User     @relation("EmployeeFilesUploaded", fields: [uploadedById], references: [id])
+    uploadedById String
+
+    @@index([employeeId])
+    @@index([uploadedById])
+    @@index([fileType])
+    @@index([category])
+    @@index([createdAt])
+}
+
+// ProjectEmployeeHistory model - for tracking employee history/events
+model ProjectEmployeeHistory {
+    id          String   @id @default(cuid()) @map("_id")
+    title       String   // History title (e.g., "Promotion", "Training Completed")
+    description String   // Detailed description of the history event
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    employee    ProjectEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+    employeeId  String
+    createdBy   User     @relation("EmployeeHistoriesCreated", fields: [createdById], references: [id])
+    createdById String
+
+    @@index([employeeId])
+    @@index([createdById])
+    @@index([createdAt])
+}
+
+// ProjectModel model - for managing AI models used by agents
+model ProjectModel {
+    id          String   @id @default(cuid()) @map("_id")
+    name        String   // Display name (e.g., "GPT-4 Production")
+    provider    String   // Provider name (e.g., "OpenAI", "Anthropic", "Google")
+    modelName   String   // Actual model name (e.g., "gpt-4-turbo-preview", "claude-3-opus")
+    apiKey      String   // API key for the model (should be encrypted)
+    url         String?  // Optional URL for custom model endpoints
+    type        String   @default("GENERATIVE_MODEL") // Model type: GENERATIVE_MODEL, OTHERS
+    isActive    Boolean  @default(true)
+    isDefault   Boolean  @default(false)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    projectId   String
+    createdBy   User    @relation("ProjectModelsCreated", fields: [createdById], references: [id])
+    createdById String
+    agents      ProjectAgent[]
+    files       ProjectModelFile[]
+
+    @@index([projectId])
+    @@index([createdById])
+    @@index([isActive])
+}
+
+// ProjectModelFile model - for storing model icons in AWS S3
+model ProjectModelFile {
+    id           String   @id @default(cuid()) @map("_id")
+    name         String   // Original file name
+    fileName     String   // File name in S3 bucket
+    fileType     FileType @default(OTHER)
+    mimeType     String   // MIME type of the file
+    fileSize     Int      // File size in bytes
+    s3Key        String   // S3 object key
+    s3Bucket     String   // S3 bucket name
+    s3Url        String   // S3 URL for accessing the file
+    description  String?  // Optional description of the file
+    isPublic     Boolean  @default(true) // Model icons are usually public
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    // Relations
+    model        ProjectModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    modelId      String
+    uploadedBy   User        @relation("ProjectModelFilesUploaded", fields: [uploadedById], references: [id])
+    uploadedById String
+
+    @@index([modelId])
+    @@index([uploadedById])
+    @@index([fileType])
+}
+
+// ProjectPQR model - for managing customer PQRs (Peticiones, Quejas y Reclamos / Requests, Complaints, Claims)
+enum PQRStatus {
+    PROCESSING
+    COMPLETED
+}
+
+model ProjectPQR {
+    id                String   @id @default(cuid()) @map("_id")
+
+    // Personal Information
+    firstName         String
+    lastName          String
+
+    // Contact Information
+    phone             String
+    email             String
+    city              String
+
+    // Document Information
+    documentType      String   // "CC", "CE", "PASSPORT", "NIT"
+    documentNumber    String
+
+    // PQR Details
+    message           String   @db.String
+    status            PQRStatus @default(PROCESSING)
+
+    // Metadata
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
+
+    // Relations
+    project           Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId         String
+    analysis          ProjectPQRAnalysis? // One-to-one relation with analysis
+
+    @@index([projectId])
+    @@index([documentType])
+    @@index([status])
+    @@index([createdAt])
+}
+
+// ProjectPQRAnalysis model - for AI analysis of PQR tickets
+model ProjectPQRAnalysis {
+    id          String   @id @default(cuid()) @map("_id")
+
+    // Analysis Data - All strings for easy AI generation
+    customer    String   // Customer name (firstName + lastName from PQR)
+    type        String   // Type of PQR: "REQUEST", "COMPLAINT", "CLAIM"
+    priority    String   // Priority level: "LOW", "MEDIUM", "HIGH", "CRITICAL"
+    risk        String   // Risk percentage: "10%", "25%", "50%", "75%", "100%"
+    sla         String   // SLA status: "ON_TIME", "AT_RISK", "BREACHED"
+    sentiment   String   // Sentiment analysis: "POSITIVE", "NEUTRAL", "NEGATIVE"
+    emotion     String   // Detected emotion: "HAPPY", "ANGRY", "FRUSTRATED", "CONFUSED", "SATISFIED"
+    topic       String   // Main topic/category of the PQR
+    keywords    String   // Comma-separated keywords extracted from message
+    analysis    String   @db.String // Full AI analysis text
+    pts         String?  // Points/Score of the analysis (e.g., "85", "92")
+    override    Boolean  @default(false) // Manual override flag
+
+    // Metadata
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    pqr         ProjectPQR @relation(fields: [pqrId], references: [id], onDelete: Cascade)
+    pqrId       String     @unique // One analysis per PQR
+
+    createdBy   User?      @relation("PQRAnalysisCreated", fields: [createdById], references: [id])
+    createdById String?    // Can be null if auto-generated by AI
+
+    @@index([createdById])
+    @@index([priority])
+    @@index([sentiment])
+    @@index([createdAt])
+}
+
+// ProjectForecasting model - for managing forecasting data
+enum ForecastingStatus {
+    PROCESSING
+    COMPLETED
+}
+
+enum TimeUnit {
+    SECONDS
+    MINUTES
+    HOURS
+    DAYS
+    MONTHS
+    YEARS
+}
+
+model ProjectForecasting {
+    id              String                    @id @default(cuid()) @map("_id")
+
+    // Time interval configuration for CSV validation
+    timeInterval    Int                       // Number (1, 2, 3, etc.)
+    timeUnit        TimeUnit                  // Unit (SECONDS, MINUTES, HOURS, DAYS, MONTHS, YEARS)
+
+    // Metadata
+    description     String?                   @db.String // Optional description
+    summary         String?                   @db.String // Summary/analysis shown when status is COMPLETED
+    status          ForecastingStatus         @default(PROCESSING)
+
+    // Timestamps
+    createdAt       DateTime                  @default(now())
+    updatedAt       DateTime                  @updatedAt
+
+    // Relations
+    project         Project                     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId       String
+    createdBy       User                        @relation("ForecastingCreated", fields: [createdById], references: [id])
+    createdById     String
+    files           ProjectForecastingFile[]    // CSV files uploaded
+    series          ProjectForecastingSeries[]  // Multiple data series for charts
+
+    @@index([projectId])
+    @@index([status])
+    @@index([createdAt])
+    @@index([createdById])
+}
+
+// ProjectForecastingFile model - for storing forecasting CSV files in AWS S3
+model ProjectForecastingFile {
+    id           String              @id @default(cuid()) @map("_id")
+    name         String              // Original file name (e.g., "hoja calculo 2.csv")
+    fileName     String              // File name in S3 bucket
+    fileType     String              @default("CSV") // File type (CSV, XLSX, etc.)
+    mimeType     String              // MIME type of the file
+    fileSize     Int                 // File size in bytes
+    s3Key        String              // S3 object key
+    s3Bucket     String              // S3 bucket name
+    s3Url        String              // S3 URL for accessing the file
+    description  String?             // Optional description of the file
+    isPublic     Boolean             @default(false)
+    createdAt    DateTime            @default(now())
+    updatedAt    DateTime            @updatedAt
+
+    // Relations
+    forecasting     ProjectForecasting @relation(fields: [forecastingId], references: [id], onDelete: Cascade)
+    forecastingId   String
+    uploadedBy      User               @relation("ForecastingFilesUploaded", fields: [uploadedById], references: [id])
+    uploadedById    String
+
+    @@index([forecastingId])
+    @@index([uploadedById])
+    @@index([fileType])
+    @@index([createdAt])
+}
+
+// ProjectForecastingSeries model - for storing multiple data series in a forecasting
+model ProjectForecastingSeries {
+    id              String              @id @default(cuid()) @map("_id")
+
+    // Series configuration
+    name            String              // Name of the series (e.g., "Sales", "Inventory", "Demand")
+    csvFileName     String              // Name of the CSV file that contains this series data
+    values          Json                // Series values in JSON format: [{ timestamp, value }]
+    order           Int                 @default(0) // Display order (0 = first, 1 = second, etc.)
+
+    // Metadata
+    createdAt       DateTime            @default(now())
+    updatedAt       DateTime            @updatedAt
+
+    // Relations
+    forecasting     ProjectForecasting  @relation(fields: [forecastingId], references: [id], onDelete: Cascade)
+    forecastingId   String
+    createdBy       User                @relation("ForecastingSeriesCreated", fields: [createdById], references: [id])
+    createdById     String
+
+    @@index([forecastingId])
+    @@index([createdById])
+    @@index([order])
+}

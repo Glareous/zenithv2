@@ -1,0 +1,56 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# AgenticWeb Project Documentation Context
+
+When working on this AgenticWeb codebase, always reference these essential documentation files for complete project context:
+
+## Chat requirements
+
+Always first make a plan of the task you are being asked for and list it. Do not make changes that wasn't requested by the user. When modifying headless ui components keep catalyst structure of example `data-slot="..."` keep catalyst structure unless the user specifically told you to modify it.
+
+## Primary Project Guide
+
+Read [CLAUDE.md](mdc:CLAUDE.md) and [README.md](mdc:README.md) for comprehensive project overview, tech stack details, development commands, architecture patterns, and implementation guidelines also for forms we always use "zod" and "react-hook-form" packages.
+
+## Database Architecture
+
+Read [prisma/schema.prisma](mdc:prisma/schema.prisma) for comprehensive database context.
+
+## Design System
+
+Read [DESIGN.md](mdc:DESIGN.md) for comprehensive design system context.
+
+## Usage Guidelines
+
+Before making any code changes or answering questions about the project:
+
+1. **Always read CLAUDE.md first** for project overview and essential commands
+2. **Follow established patterns** documented in these files
+3. **Use the exact tech stack and conventions** specified in the documentation
+   These files contain critical information about the QR generator platform architecture, T3 Stack implementation, Prisma schema patterns, Tailwind CSS 4 usage, and the complete design system.
+   We use react-hot-toast for showing erros, success messages, etc..
+
+## Current Task Focus
+
+For active development context and requirements, refer to [SPEC.md](mdc:SPEC.md)
+which contains:
+
+- Current feature specifications being implemented
+- Acceptance criteria and technical requirements
+- UI/UX design guidelines for ongoing work
+- Integration requirements and dependencies
+
+Always check SPEC.md before starting new tasks to ensure alignment with current
+development priorities and avoid conflicts with ongoing work.
+
+This improvement:
+
+1. Provides context about what SPEC.md contains
+2. Explains the purpose of checking the file
+3. Gives clear guidance on when to reference it
+4. Uses better formatting with bullet points for clarity
+5. Adds actionable instruction to check before starting tasks
