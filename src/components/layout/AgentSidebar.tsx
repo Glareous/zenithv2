@@ -22,21 +22,28 @@ export const AgentSidebar = ({
 }) => {
   const router = useRouter()
   const [isTestModalOpen, setIsTestModalOpen] = useState(false)
+
+  // Detect if we're on PQR agent page
+  const isPQRAgent = currentPath.includes('/apps/pqr/pqr-agent/')
+  const baseRoute = isPQRAgent ? '/apps/pqr/pqr-agent' : '/apps/agents/default'
+  const backRoute = isPQRAgent ? '/apps/pqr/pqr-agent' : '/apps/agents/default'
+  const backText = isPQRAgent ? 'Back to PQR Agents' : 'Back to Agents'
+
   const navigationItems = [
     {
       name: 'Configure',
       path: '/configure',
-      href: `/apps/agents/default/${agentId}/configure`,
+      href: `${baseRoute}/${agentId}/configure`,
     },
     {
       name: 'Workflow',
       path: '/workflow',
-      href: `/apps/agents/default/${agentId}/workflow`,
+      href: `${baseRoute}/${agentId}/workflow`,
     },
     {
       name: 'Actions',
       path: '/action',
-      href: `/apps/agents/default/${agentId}/action`,
+      href: `${baseRoute}/${agentId}/action`,
     },
   ]
 
@@ -47,12 +54,12 @@ export const AgentSidebar = ({
         {/* Header with back button */}
         <div className="flex items-center p-4">
           <button
-            onClick={() => router.push('/apps/agents/default')}
+            onClick={() => router.push(backRoute)}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 w-full dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors ${isCollapsed ? 'justify-center px-2' : ''}`}
-            title={isCollapsed ? 'Back to Agents' : undefined}>
+            title={isCollapsed ? backText : undefined}>
             <ArrowLeft className="w-4 h-4" />
             {!isCollapsed && (
-              <span className="text-sm font-medium">Back to Agents</span>
+              <span className="text-sm font-medium">{backText}</span>
             )}
           </button>
         </div>
@@ -136,21 +143,25 @@ export const AgentMobileDrawer = ({
   isOpen: boolean
   onClose: () => void
 }) => {
+  // Detect if we're on PQR agent page
+  const isPQRAgent = currentPath.includes('/apps/pqr/pqr-agent/')
+  const baseRoute = isPQRAgent ? '/apps/pqr/pqr-agent' : '/apps/agents/default'
+
   const navigationItems = [
     {
       name: 'Configure',
       path: '/configure',
-      href: `/apps/agents/default/${agentId}/configure`,
+      href: `${baseRoute}/${agentId}/configure`,
     },
     {
       name: 'Workflow',
       path: '/workflow',
-      href: `/apps/agents/default/${agentId}/workflow`,
+      href: `${baseRoute}/${agentId}/workflow`,
     },
     {
       name: 'Actions',
       path: '/action',
-      href: `/apps/agents/default/${agentId}/action`,
+      href: `${baseRoute}/${agentId}/action`,
     },
   ]
 

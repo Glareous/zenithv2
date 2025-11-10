@@ -200,8 +200,30 @@ const menu: MegaMenu[] = [
     title: 'PQR',
     lang: 'pe-pqr',
     icon: 'users-round',
-    link: '/apps/pqr/pqr-list',
+    link: '/apps/pqr',
     separator: false,
+    children: [
+      {
+        title: 'Create-view Pqr',
+        link: '/apps/pqr/pqr-list',
+        lang: 'Create-view Pqr',
+      },
+      {
+        title: 'Landing',
+        link: '/apps/pqr/landing',
+        lang: 'Landing',
+      },
+      {
+        title: 'Documentation',
+        link: '/apps/pqr/documentation',
+        lang: 'Documentation',
+      },
+      {
+        title: 'Pqr Agent',
+        link: '/apps/pqr/pqr-agent',
+        lang: 'Pqr Agent',
+      },
+    ],
   },
   {
     title: 'FORECASTING',

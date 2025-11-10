@@ -65,9 +65,14 @@ export default function Layout({
 
   // Detect if we're on an agent page and extract agent ID
   const isAgentPage =
-    pathname?.includes('/apps/agents/default/') &&
+    (pathname?.includes('/apps/agents/default/') ||
+      pathname?.includes('/apps/pqr/pqr-agent/')) &&
     Boolean(pathname?.match(/\/[^/]+\/[^/]*$/))
-  const agentId = isAgentPage ? pathname?.split('/')[4] : null
+  const agentId = isAgentPage
+    ? pathname?.includes('/apps/pqr/pqr-agent/')
+      ? pathname?.split('/')[4]  // For PQR agent routes
+      : pathname?.split('/')[4]   // For regular agent routes
+    : null
 
   const {
     layoutMode,
