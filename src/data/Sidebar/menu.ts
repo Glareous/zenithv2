@@ -198,7 +198,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'Pqr Agent',
-        link: '/apps/pqr/pqr-agent/cmhuuat6w000d5a58fnw78cdt',
+        link: '/apps/agents/default/cmhux8s60007hjbh4ylr1iiys/configure',
         lang: 'Pqr Agent',
       },
     ],
@@ -251,7 +251,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'RRHH Agent',
-        link: '/apps/rrhh/rrhh-agent/cmhuuaujv000l5a58e1ly9iii',
+        link: '/apps/agents/default/cmhux8so5007ljbh4ica1nsqa/configure',
         lang: 'RRHH Agent',
       },
       {

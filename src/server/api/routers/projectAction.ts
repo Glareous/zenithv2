@@ -341,6 +341,40 @@ export const projectActionRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
+      // SUPERADMIN can access any action
+      if (ctx.session.user.role === 'SUPERADMIN') {
+        const action = await ctx.db.projectAction.findUnique({
+          where: { id: input.id },
+          include: {
+            project: true,
+            createdBy: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+            agent: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+              },
+            },
+          },
+        })
+
+        if (!action) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Action not found',
+          })
+        }
+
+        return action
+      }
+
+      // Regular users - check project membership
       const action = await ctx.db.projectAction.findFirst({
         where: {
           id: input.id,
@@ -386,6 +420,42 @@ export const projectActionRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, variables, queryParameters, results, ...updateData } = input
 
+      // SUPERADMIN can update any action
+      if (ctx.session.user.role === 'SUPERADMIN') {
+        const action = await ctx.db.projectAction.findUnique({
+          where: { id },
+        })
+
+        if (!action) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Action not found',
+          })
+        }
+
+        // Update action with new JSON columns
+        const updatedAction = await ctx.db.projectAction.update({
+          where: { id },
+          data: {
+            ...updateData,
+            headers: updateData.headers as any,
+            // Store arrays directly as JSON (not stringified)
+            variables: variables || undefined,
+            queryParameters: queryParameters || undefined,
+            results: results || undefined,
+          },
+          include: {
+            project: true,
+            createdBy: {
+              select: { id: true, firstName: true, lastName: true },
+            },
+          },
+        })
+
+        return updatedAction
+      }
+
+      // Regular users - check project membership and ADMIN role
       const action = await ctx.db.projectAction.findFirst({
         where: {
           id,

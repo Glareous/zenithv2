@@ -206,7 +206,37 @@ export async function initializeAgenda() {
     await loadAllCronJobs()
 
     console.log('✅ Agenda initialized successfully')
-  } catch (error) {
+  } catch (error: unknown) {
+    // Check if it's a MongoDB authorization error related to index creation
+    if (
+      error &&
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === 13 &&
+      'codeName' in error &&
+      error.codeName === 'Unauthorized'
+    ) {
+      console.error(
+        '❌ MongoDB Authorization Error: The database user does not have permission to create indexes.'
+      )
+      console.error(
+        '📋 To fix this issue, you need to grant the MongoDB user proper permissions:'
+      )
+      console.error(
+        '   1. Connect to MongoDB with admin privileges'
+      )
+      console.error(
+        '   2. Run: db.grantRolesToUser("yourUsername", [{ role: "dbAdmin", db: "zenith" }])'
+      )
+      console.error(
+        '   OR use a user with "dbOwner" or "readWrite" role that includes createIndex permission'
+      )
+      console.error(
+        '   3. Make sure your DATABASE_URL connection string uses a user with these permissions'
+      )
+      throw error
+    }
+    
     console.error('❌ Failed to initialize Agenda:', error)
     throw error
   }

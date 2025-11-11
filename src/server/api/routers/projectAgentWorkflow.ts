@@ -342,6 +342,54 @@ export const projectAgentWorkflowRouter = createTRPCRouter({
         },
       })
 
+      // Find all child agents (agents with sourceAgentId pointing to this agent)
+      const childAgents = await ctx.db.projectAgent.findMany({
+        where: {
+          sourceAgentId: agentId,
+        },
+        select: {
+          id: true,
+        },
+      })
+
+      // Update workflows for all child agents with the same workflow data
+      if (childAgents.length > 0) {
+        await Promise.all(
+          childAgents.map(async (childAgent) => {
+            await ctx.db.projectAgentWorkflow.upsert({
+              where: {
+                agentId: childAgent.id,
+              },
+              update: {
+                name: workflow.name,
+                description: workflow.description,
+                instructions: workflow.instructions,
+                globalActions: workflow.globalActions,
+                globalFaqs: workflow.globalFaqs,
+                globalObjections: workflow.globalObjections,
+                nodes: workflow.nodes,
+                edges: workflow.edges,
+                positionX: workflow.positionX,
+                positionY: workflow.positionY,
+              },
+              create: {
+                agentId: childAgent.id,
+                name: workflow.name,
+                description: workflow.description,
+                instructions: workflow.instructions,
+                globalActions: workflow.globalActions,
+                globalFaqs: workflow.globalFaqs,
+                globalObjections: workflow.globalObjections,
+                nodes: workflow.nodes,
+                edges: workflow.edges,
+                positionX: workflow.positionX,
+                positionY: workflow.positionY,
+              },
+            })
+          })
+        )
+      }
+
       return upsertedWorkflow
     }),
 })
