@@ -406,8 +406,8 @@ export function WorkflowProvider({
   )
 
   const { data: projectActionsData } = api.projectAction.getAllActive.useQuery(
-    { projectId: workflowData?.projectId || '' },
-    { enabled: !!workflowData?.projectId }
+    { projectId: workflowData?.projectId || undefined },
+    { enabled: workflowData !== undefined }
   )
 
   const saveWorkflowMutation = api.projectAgentWorkflow.upsert.useMutation({

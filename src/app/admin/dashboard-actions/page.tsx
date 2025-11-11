@@ -39,6 +39,11 @@ const DashboardActionsContent: React.FC = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  // Check if we're on admin route
+  const isAdminRoute =
+    typeof window !== 'undefined' &&
+    window.location.pathname.startsWith('/admin/dashboard-actions')
+
   const [currentPage, setCurrentPage] = useState(() => {
     const pageParam = searchParams.get('page')
     return pageParam ? parseInt(pageParam, 10) : 1

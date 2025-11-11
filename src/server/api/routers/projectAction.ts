@@ -8,7 +8,9 @@ const createActionSchema = z.object({
   description: z.string().optional(),
   apiUrl: z.string().min(1, 'API URL is required'),
   projectId: z.string().min(1, 'Project ID is required'),
-  actionType: z.enum(['CUSTOM', 'AGENT', 'MCP', 'DATABASE', 'WEBHOOK']).default('CUSTOM'),
+  actionType: z
+    .enum(['CUSTOM', 'AGENT', 'MCP', 'DATABASE', 'WEBHOOK'])
+    .default('CUSTOM'),
   agentId: z.string().optional(),
 })
 
@@ -33,7 +35,9 @@ const updateActionSchema = z.object({
   authorizationNeeded: z.boolean().optional(),
   authenticationKey: z.string().optional(),
   authenticationValue: z.string().optional(),
-  actionType: z.enum(['CUSTOM', 'AGENT', 'MCP', 'DATABASE', 'WEBHOOK']).optional(),
+  actionType: z
+    .enum(['CUSTOM', 'AGENT', 'MCP', 'DATABASE', 'WEBHOOK'])
+    .optional(),
   actionCallType: z.enum(['BEFORE_CALL', 'DURING_CALL']).optional(),
   agentId: z.string().optional(),
   requestBody: z.string().optional(),
@@ -237,28 +241,41 @@ export const projectActionRouter = createTRPCRouter({
   getAllActive: protectedProcedure
     .input(
       z.object({
-        projectId: z.string().min(1, 'Project ID is required'),
+        projectId: z.string().min(1, 'Project ID is required').optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const membership = await ctx.db.projectMember.findFirst({
-        where: {
-          userId: ctx.session.user.id,
-          projectId: input.projectId,
-        },
-      })
-
-      if (!membership) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'You do not have permission to view actions in this project',
+      // If projectId is provided, check membership
+      if (input.projectId) {
+        const membership = await ctx.db.projectMember.findFirst({
+          where: {
+            userId: ctx.session.user.id,
+            projectId: input.projectId,
+          },
         })
+
+        if (!membership && ctx.session.user.role !== 'SUPERADMIN') {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message:
+              'You do not have permission to view actions in this project',
+          })
+        }
       }
+
       console.log({ inputProjectId: input.projectId })
+
+      // Get both project-specific actions AND global actions
       const actions = await ctx.db.projectAction.findMany({
         where: {
-          projectId: input.projectId,
-          isActive: true,
+          OR: [
+            // Project-specific actions (if projectId provided)
+            ...(input.projectId
+              ? [{ projectId: input.projectId, isActive: true }]
+              : []),
+            // Global actions (always included)
+            { isGlobal: true, isActive: true },
+          ],
         },
         select: {
           id: true,
@@ -271,6 +288,7 @@ export const projectActionRouter = createTRPCRouter({
           queryParameters: true,
           apiUrl: true,
           actionType: true,
+          isGlobal: true,
         },
         orderBy: { createdAt: 'desc' },
       })
@@ -560,7 +578,8 @@ export const projectActionRouter = createTRPCRouter({
       if (!membership) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: 'You do not have permission to manage actions in this project',
+          message:
+            'You do not have permission to manage actions in this project',
         })
       }
 

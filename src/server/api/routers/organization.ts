@@ -373,6 +373,7 @@ export const organizationRouter = createTRPCRouter({
           const { DATABASE_ACTIONS_TEMPLATES } = await import('@src/config/databaseActionsTemplate')
           const { buildEndpointUrl, buildVariables, buildResults, buildHeaders } = await import('@src/utils/generateDatabaseActions')
 
+          // Create project-specific DATABASE actions
           const databaseActions = DATABASE_ACTIONS_TEMPLATES.map((template) => ({
             name: template.name,
             description: template.description,
@@ -393,6 +394,38 @@ export const organizationRouter = createTRPCRouter({
           await tx.projectAction.createMany({
             data: databaseActions,
           })
+
+          // If SUPERADMIN, create global DATABASE actions (only once for entire system)
+          if (ownerUser.role === 'SUPERADMIN') {
+            // Check if global actions already exist
+            const existingGlobalActions = await tx.projectAction.findFirst({
+              where: { isGlobal: true },
+            })
+
+            if (!existingGlobalActions) {
+              const globalDatabaseActions = DATABASE_ACTIONS_TEMPLATES.map((template) => ({
+                name: template.name,
+                description: template.description,
+                actionType: 'DATABASE' as const,
+                apiUrl: template.method,
+                endpointUrl: buildEndpointUrl(template, '', true), // Use {projectId} placeholder
+                timeout: 30000,
+                headers: buildHeaders(),
+                authorizationNeeded: true,
+                authenticationKey: 'Authorization',
+                authenticationValue: 'Bearer {apiKey}', // Placeholder for API key
+                variables: buildVariables(template),
+                results: buildResults(template),
+                projectId: null,
+                isGlobal: true,
+                createdById: ownerUser.id,
+              }))
+
+              await tx.projectAction.createMany({
+                data: globalDatabaseActions,
+              })
+            }
+          }
 
           // Clone assigned agents to this project
           if (input.assignedAgentIds && input.assignedAgentIds.length > 0) {

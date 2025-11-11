@@ -22,14 +22,17 @@ export function hashApiKey(key: string): string {
 
 /**
  * Build the full endpoint URL for a database action
- * Replaces project.id with the actual project ID
+ * Replaces project.id with the actual project ID or uses {projectId} placeholder for global actions
  */
 export function buildEndpointUrl(
   template: DatabaseActionTemplate,
-  projectId: string
+  projectId: string,
+  isGlobal: boolean = false
 ): string {
   const baseUrl = env.NEXT_PUBLIC_BASE_URL
-  const projectPath = `/api/rest/projects/${projectId}`
+  const projectPath = isGlobal
+    ? `/api/rest/projects/{projectId}`
+    : `/api/rest/projects/${projectId}`
   return `${baseUrl}${projectPath}${template.endpoint}`
 }
 

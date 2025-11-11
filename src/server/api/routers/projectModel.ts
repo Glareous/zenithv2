@@ -404,6 +404,17 @@ export const projectModelRouter = createTRPCRouter({
             name: true,
           },
         },
+        files: {
+          take: 1,
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+        _count: {
+          select: {
+            agents: true,
+          },
+        },
       },
     })
 

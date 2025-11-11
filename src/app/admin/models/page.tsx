@@ -264,6 +264,7 @@ const ModelsPage: NextPageWithLayout = () => {
       })
 
       toast.success('Icon uploaded successfully')
+      refetch()
     } catch (error) {
       console.error('Icon upload error:', error)
       toast.error('Failed to upload icon')

@@ -1355,12 +1355,13 @@ model ProjectAction {
   failureMessage      String?
 
   isActive    Boolean  @default(true)
-  projectId   String
+  isGlobal    Boolean  @default(false)
+  projectId   String?
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdBy   User    @relation(fields: [createdById], references: [id], onDelete: Cascade)
   agent       ProjectAgent? @relation(fields: [agentId], references: [id], onDelete: Cascade)
 

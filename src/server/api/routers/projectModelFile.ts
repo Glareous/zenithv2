@@ -33,34 +33,40 @@ export const projectModelFileRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // Check if user has access to this model
-      const model = await ctx.db.projectModel.findFirst({
-        where: {
-          id: input.modelId,
-          project: {
-            OR: [
-              // User is a project member
-              {
-                members: {
-                  some: {
-                    userId: ctx.session.user.id,
-                  },
-                },
-              },
-              // User is organization owner/admin
-              {
-                organization: {
-                  members: {
-                    some: {
-                      userId: ctx.session.user.id,
-                      role: { in: ['OWNER', 'ADMIN'] },
+      const isSuperAdmin = ctx.session.user.role === 'SUPERADMIN'
+
+      const model = isSuperAdmin
+        ? await ctx.db.projectModel.findUnique({
+            where: { id: input.modelId },
+          })
+        : await ctx.db.projectModel.findFirst({
+            where: {
+              id: input.modelId,
+              project: {
+                OR: [
+                  // User is a project member
+                  {
+                    members: {
+                      some: {
+                        userId: ctx.session.user.id,
+                      },
                     },
                   },
-                },
+                  // User is organization owner/admin
+                  {
+                    organization: {
+                      members: {
+                        some: {
+                          userId: ctx.session.user.id,
+                          role: { in: ['OWNER', 'ADMIN'] },
+                        },
+                      },
+                    },
+                  },
+                ],
               },
-            ],
-          },
-        },
-      })
+            },
+          })
 
       if (!model) {
         throw new TRPCError({
@@ -118,34 +124,40 @@ export const projectModelFileRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // Check if user has access to this model
-      const model = await ctx.db.projectModel.findFirst({
-        where: {
-          id: input.modelId,
-          project: {
-            OR: [
-              // User is a project member
-              {
-                members: {
-                  some: {
-                    userId: ctx.session.user.id,
-                  },
-                },
-              },
-              // User is organization owner/admin
-              {
-                organization: {
-                  members: {
-                    some: {
-                      userId: ctx.session.user.id,
-                      role: { in: ['OWNER', 'ADMIN'] },
+      const isSuperAdmin = ctx.session.user.role === 'SUPERADMIN'
+
+      const model = isSuperAdmin
+        ? await ctx.db.projectModel.findUnique({
+            where: { id: input.modelId },
+          })
+        : await ctx.db.projectModel.findFirst({
+            where: {
+              id: input.modelId,
+              project: {
+                OR: [
+                  // User is a project member
+                  {
+                    members: {
+                      some: {
+                        userId: ctx.session.user.id,
+                      },
                     },
                   },
-                },
+                  // User is organization owner/admin
+                  {
+                    organization: {
+                      members: {
+                        some: {
+                          userId: ctx.session.user.id,
+                          role: { in: ['OWNER', 'ADMIN'] },
+                        },
+                      },
+                    },
+                  },
+                ],
               },
-            ],
-          },
-        },
-      })
+            },
+          })
 
       if (!model) {
         throw new TRPCError({
