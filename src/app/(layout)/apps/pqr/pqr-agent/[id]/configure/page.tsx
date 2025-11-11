@@ -177,7 +177,7 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
     )
       return
 
-    if (agent.project.id !== currentProject.id) {
+    if (agent.project?.id !== currentProject.id) {
       if (currentProjectAgents.length === 0) {
         return
       }
@@ -364,7 +364,7 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
     )
   }
 
-  if (agentError || !agent || agent.project.id !== currentProject.id) {
+  if (agentError || !agent || agent.project?.id !== currentProject.id) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

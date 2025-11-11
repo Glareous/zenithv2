@@ -153,16 +153,19 @@ export const projectAgentTriggerRouter = createTRPCRouter({
       // Verify ProjectPhoneNumber exists for phone-based triggers
       let projectPhoneNumber = null
       if (type === 'WHATSAPP_MESSAGE' || type === 'WHATSAPP_CALL' || type === 'PHONE_CALL') {
-        projectPhoneNumber = await ctx.db.projectPhoneNumber.findFirst({
-          where: {
-            id: projectPhoneNumberId,
-            projectId: agent.projectId,
-            isActiveInProject: true,
-          },
-        })
+        // Only verify phone number if agent belongs to a project
+        if (agent.projectId) {
+          projectPhoneNumber = await ctx.db.projectPhoneNumber.findFirst({
+            where: {
+              id: projectPhoneNumberId,
+              projectId: agent.projectId,
+              isActiveInProject: true,
+            },
+          })
 
-        if (!projectPhoneNumber) {
-          throw new Error('Phone number not found or not active in this project')
+          if (!projectPhoneNumber) {
+            throw new Error('Phone number not found or not active in this project')
+          }
         }
       }
 

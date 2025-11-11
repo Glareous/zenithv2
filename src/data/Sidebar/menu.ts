@@ -218,11 +218,6 @@ const menu: MegaMenu[] = [
         link: '/apps/pqr/documentation',
         lang: 'Documentation',
       },
-      {
-        title: 'Pqr Agent',
-        link: '/apps/pqr/pqr-agent',
-        lang: 'Pqr Agent',
-      },
     ],
   },
   {

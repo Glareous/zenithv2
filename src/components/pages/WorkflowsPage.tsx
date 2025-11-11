@@ -220,7 +220,6 @@ const WorkflowsPage: React.FC<WorkflowsPageProps> = ({
           }}
           nodeTypes={nodeTypes}
           nodesDraggable={false}
-          edgesUpdatable={canManageAgents}
           nodesConnectable={canManageAgents}
           zoomOnDoubleClick={false}
           fitView={false}

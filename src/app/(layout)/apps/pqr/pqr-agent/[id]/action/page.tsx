@@ -74,7 +74,7 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
     refetch,
   } = api.projectAgentActions.getByAgentId.useQuery(
     { agentId: id },
-    { enabled: !!id && !!agent && agent.project.id === currentProject?.id }
+    { enabled: !!id && !!agent && agent.project?.id === currentProject?.id }
   )
 
   const {
@@ -83,7 +83,7 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
     refetch: refetchTriggers,
   } = api.projectAgentTrigger.getByAgentId.useQuery(
     { agentId: id },
-    { enabled: !!id && !!agent && agent.project.id === currentProject?.id }
+    { enabled: !!id && !!agent && agent.project?.id === currentProject?.id }
   )
 
   const triggers = allTriggers.filter((trigger) => trigger.isActive)
@@ -103,7 +103,7 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
     )
       return
 
-    if (agent.project.id !== currentProject.id) {
+    if (agent.project?.id !== currentProject.id) {
       if (currentProjectAgents.length === 0) {
         return
       }
@@ -646,13 +646,19 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
           </p>
         </div>
         <div>
-          <Dropdown position="right">
-            <DropdownButton
-              colorClass="btn btn-gray flex items-center"
-              disabled={!canManageAgents}>
+          {!canManageAgents ? (
+            <button
+              className="btn btn-gray flex items-center opacity-50 cursor-not-allowed"
+              disabled>
               <Plus className="w-4 h-4 mr-1" />
               Add Trigger
-            </DropdownButton>
+            </button>
+          ) : (
+            <Dropdown position="right">
+              <DropdownButton colorClass="btn btn-gray flex items-center">
+                <Plus className="w-4 h-4 mr-1" />
+                Add Trigger
+              </DropdownButton>
             <DropdownMenu menuClass="min-w-62 bg-white border border-gray-200 dark:bg-gray-900 mt-1  rounded-sm dark:border-gray-800 z-999">
               <ul className="py-2 space-y-1 font-light text-xs ">
                 <li className="hover:bg-blue-50/50">
@@ -724,6 +730,7 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
               </ul>
             </DropdownMenu>
           </Dropdown>
+          )}
         </div>
       </div>
 
@@ -948,50 +955,57 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
             </p>
           </div>
           <div>
-            <Dropdown position="right">
-              <DropdownButton
-                colorClass="btn btn-gray flex items-center"
-                disabled={!canManageAgents}>
+            {!canManageAgents ? (
+              <button
+                className="btn btn-gray flex items-center opacity-50 cursor-not-allowed"
+                disabled>
                 <Plus className="w-4 h-4 mr-1" />
                 Add Actions
-              </DropdownButton>
-              <DropdownMenu menuClass="min-w-62 bg-white border border-gray-200 dark:bg-gray-900 mt-1  rounded-sm dark:border-gray-800 z-999">
-                <ul className="py-2 space-y-1 font-light text-xs ">
-                  <li className="hover:bg-blue-50/50">
-                    <button
-                      className="dropdown-item w-full text-left flex items-center px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => handleAddAction('information-extractor')}
-                      disabled={!canManageAgents}>
-                      <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
-                        <FileSearch2 className="w-5 h-5 text-gray-400" />
-                      </div>
-                      <div>
-                        Information Extractor
-                        <p className="text-gray-500">
-                          Extracts information from the call
-                        </p>
-                      </div>
-                    </button>
-                  </li>
-                  <li className="hover:bg-blue-50/50">
-                    <button
-                      className="dropdown-item w-full text-left flex items-center px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => handleAddAction('custom-evaluation')}
-                      disabled={!canManageAgents}>
-                      <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
-                        <FileSearch2 className="w-5 h-5 text-gray-400" />
-                      </div>
-                      <div>
-                        Custom Evaluation
-                        <p className="text-gray-500">
-                          Create and manage evaluation templates
-                        </p>
-                      </div>
-                    </button>
-                  </li>
-                </ul>
-              </DropdownMenu>
-            </Dropdown>
+              </button>
+            ) : (
+              <Dropdown position="right">
+                <DropdownButton colorClass="btn btn-gray flex items-center">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Actions
+                </DropdownButton>
+                <DropdownMenu menuClass="min-w-62 bg-white border border-gray-200 dark:bg-gray-900 mt-1  rounded-sm dark:border-gray-800 z-999">
+                  <ul className="py-2 space-y-1 font-light text-xs ">
+                    <li className="hover:bg-blue-50/50">
+                      <button
+                        className="dropdown-item w-full text-left flex items-center px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => handleAddAction('information-extractor')}
+                        disabled={!canManageAgents}>
+                        <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
+                          <FileSearch2 className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <div>
+                          Information Extractor
+                          <p className="text-gray-500">
+                            Extracts information from the call
+                          </p>
+                        </div>
+                      </button>
+                    </li>
+                    <li className="hover:bg-blue-50/50">
+                      <button
+                        className="dropdown-item w-full text-left flex items-center px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => handleAddAction('custom-evaluation')}
+                        disabled={!canManageAgents}>
+                        <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
+                          <FileSearch2 className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <div>
+                          Custom Evaluation
+                          <p className="text-gray-500">
+                            Create and manage evaluation templates
+                          </p>
+                        </div>
+                      </button>
+                    </li>
+                  </ul>
+                </DropdownMenu>
+              </Dropdown>
+            )}
           </div>
         </div>
 
@@ -1187,7 +1201,7 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
     )
   }
 
-  if (agentError || !agent || agent.project.id !== currentProject.id) {
+  if (agentError || !agent || agent.project?.id !== currentProject.id) {
     return (
       <div>
         <div className="card">
