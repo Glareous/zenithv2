@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import DeleteModal from '@src/components/common/DeleteModal'
+import PermissionAlert from '@src/components/common/PermissionAlert'
+import { usePermissions } from '@src/hooks/usePermissions'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -52,6 +54,9 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
 
   const { currentProject } = useSelector((state: RootState) => state.Project)
   const [isNavigating, setIsNavigating] = useState(false)
+
+  // Get permissions
+  const { canManageAgents, isLoadingPermissions } = usePermissions()
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploadingFiles, setUploadingFiles] = useState(false)
@@ -391,6 +396,7 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
         </div>
         <div className="w-xs">
           <Select
+            isDisabled={!canManageAgents}
             value={{
               value: watch('type'),
               label:
@@ -441,9 +447,10 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
             {...register('name')}
             type="text"
             id="name"
+            disabled={!canManageAgents}
             className={`form-input ${
               errors.name ? 'border-red-500 focus:ring-red-500' : ''
-            }`}
+            } ${!canManageAgents ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''}`}
             placeholder="Enter agent name"
           />
           {errors.name && (
@@ -464,6 +471,7 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
         </div>
         <div className="w-xs">
           <Select
+            isDisabled={!canManageAgents}
             value={
               watch('isActive')
                 ? { value: true, label: 'Active' }
@@ -491,7 +499,8 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
             {...register('systemInstructions')}
             id="systemInstructions"
             rows={6}
-            className="form-input h-32 max-h-40 max-w-[500px]"
+            disabled={!canManageAgents}
+            className={`form-input h-32 max-h-40 max-w-[500px] ${!canManageAgents ? 'bg-gray-100 cursor-not-allowed dark:bg-gray-800' : ''}`}
             placeholder="Enter system instructions for the agent..."
           />
           <p className="mt-2 text-xs text-gray-400">
@@ -528,6 +537,7 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
             </div>
           ) : (
             <Select
+              isDisabled={!canManageAgents}
               value={
                 watch('modelId')
                   ? {
@@ -573,24 +583,27 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
           {/* File Upload Area */}
           <div
             className={`border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
-              dragActive
-                ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/10'
-                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+              !canManageAgents
+                ? 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 opacity-50 cursor-not-allowed'
+                : dragActive
+                  ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/10'
+                  : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
             }`}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}>
+            onDrop={canManageAgents ? handleDrop : undefined}
+            onDragOver={canManageAgents ? handleDragOver : undefined}
+            onDragLeave={canManageAgents ? handleDragLeave : undefined}>
             <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
             <div className="space-y-2">
               <label
                 htmlFor="file-upload"
-                className="cursor-pointer text-primary-600 hover:text-primary-500 font-medium">
-                Click to upload files
+                className={`${canManageAgents ? 'cursor-pointer text-primary-600 hover:text-primary-500' : 'cursor-not-allowed text-gray-400'} font-medium`}>
+                {canManageAgents ? 'Click to upload files' : 'File upload disabled'}
                 <input
                   id="file-upload"
                   name="file-upload"
                   type="file"
                   multiple
+                  disabled={!canManageAgents}
                   className="sr-only"
                   onChange={handleFileSelect}
                   accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.txt"
@@ -660,8 +673,8 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
                 <button
                   type="button"
                   onClick={() => handleDeleteFile(file.id)}
-                  className="text-red-500 hover:text-red-700 p-1"
-                  disabled={deleteFileMutation.isPending}>
+                  className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!canManageAgents || deleteFileMutation.isPending}>
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -690,6 +703,9 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
 
   return (
     <div>
+      {/* Permission Alert */}
+      <PermissionAlert show={!canManageAgents && !isLoadingPermissions} />
+
       <form onSubmit={handleSubmit(onSubmit)} className="card">
         {/* Tabs Navigation */}
         <div className="border-b border-gray-200 dark:border-gray-700">
@@ -742,7 +758,7 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
             <button
               type="button"
               onClick={() => setShowDeleteModal(true)}
-              disabled={deleteAgentMutation.isPending}
+              disabled={!canManageAgents || deleteAgentMutation.isPending}
               className="btn btn-red flex items-center gap-2">
               <Trash2 className="h-4 w-4" />
               {deleteAgentMutation.isPending ? 'Deleting...' : 'Delete Agent'}
@@ -756,7 +772,7 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
             </Link>
             <button
               type="submit"
-              disabled={isSubmitting || uploadingFiles}
+              disabled={!canManageAgents || isSubmitting || uploadingFiles}
               className="btn btn-primary">
               {isSubmitting || uploadingFiles ? 'Saving...' : 'Save Changes'}
             </button>

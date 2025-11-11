@@ -34,11 +34,14 @@ const CustomCardStep = ({
   selected,
   dragging,
   onDeleteRequest,
+  canManageAgents,
 }: any) => {
   const { openDrawer } = useWorkflow()
 
   const handleDoubleClick = (nodeId: string) => {
-    openDrawer(nodeId, data.variant)
+    if (canManageAgents) {
+      openDrawer(nodeId, data.variant)
+    }
   }
 
   return (
@@ -49,6 +52,7 @@ const CustomCardStep = ({
       dragging={dragging}
       onDoubleClick={handleDoubleClick}
       onDeleteRequest={onDeleteRequest}
+      canManageAgents={canManageAgents}
     />
   )
 }
@@ -57,7 +61,13 @@ const nodeTypes: NodeTypes = {
   cardStep: CustomCardStep,
 }
 
-const WorkflowsPage = () => {
+interface WorkflowsPageProps {
+  canManageAgents?: boolean
+}
+
+const WorkflowsPage: React.FC<WorkflowsPageProps> = ({
+  canManageAgents = true,
+}) => {
   const {
     layout,
     createNode,
@@ -120,6 +130,7 @@ const WorkflowsPage = () => {
         faqs: node.data?.faqs || [],
         objections: node.data?.objections || [],
         onDeleteRequest: handleDeleteRequest,
+        canManageAgents,
       },
     }
   })
@@ -200,10 +211,14 @@ const WorkflowsPage = () => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeDoubleClick={(event, node) => {
-            openDrawer(node.id, node.data?.variant as any)
+            if (canManageAgents) {
+              openDrawer(node.id, node.data?.variant as any)
+            }
           }}
           nodeTypes={nodeTypes}
           nodesDraggable={false}
+          edgesUpdatable={canManageAgents}
+          nodesConnectable={canManageAgents}
           zoomOnDoubleClick={false}
           fitView={false}
           defaultViewport={{ x: 0, y: 0, zoom: 1 }}
@@ -245,7 +260,7 @@ const WorkflowsPage = () => {
           )}
           <button
             onClick={handleSave}
-            disabled={!hasUnsavedChanges || isSaving}
+            disabled={!canManageAgents || !hasUnsavedChanges || isSaving}
             className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg">
             {isSaving ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

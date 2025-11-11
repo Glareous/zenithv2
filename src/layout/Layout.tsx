@@ -66,11 +66,14 @@ export default function Layout({
   // Detect if we're on an agent page and extract agent ID
   const isAgentPage =
     (pathname?.includes('/apps/agents/default/') ||
-      pathname?.includes('/apps/pqr/pqr-agent/')) &&
+      pathname?.includes('/apps/pqr/pqr-agent/') ||
+      pathname?.includes('/admin/agents/')) &&
     Boolean(pathname?.match(/\/[^/]+\/[^/]*$/))
   const agentId = isAgentPage
     ? pathname?.includes('/apps/pqr/pqr-agent/')
       ? pathname?.split('/')[4]  // For PQR agent routes
+      : pathname?.includes('/admin/agents/')
+      ? pathname?.split('/')[3]  // For admin agent routes
       : pathname?.split('/')[4]   // For regular agent routes
     : null
 
@@ -371,7 +374,7 @@ export default function Layout({
           {/* Main content */}
           <div className="flex-1 overflow-auto">
             {children}
-            <Footer />
+            <Footer organization={userOrganization} />
           </div>
         </div>
       </React.Fragment>
@@ -436,7 +439,7 @@ export default function Layout({
         <div className="page-wrapper pt-[calc(theme('spacing.topbar')_*_1.2)]">
           {children}
         </div>
-        <Footer />
+        <Footer organization={userOrganization} />
       </div>
     </React.Fragment>
   )

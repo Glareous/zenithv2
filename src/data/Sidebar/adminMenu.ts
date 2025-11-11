@@ -14,21 +14,27 @@ const adminMenu: MegaMenu[] = [
     link: '/admin/organizations',
     separator: false,
   },
-  // Aquí puedes agregar más opciones de administración en el futuro
-  // {
-  //   title: 'Users Management',
-  //   lang: 'users-management',
-  //   icon: 'users',
-  //   link: '/admin/users',
-  //   separator: false,
-  // },
-  // {
-  //   title: 'System Settings',
-  //   lang: 'system-settings',
-  //   icon: 'settings',
-  //   link: '/admin/settings',
-  //   separator: false,
-  // },
+  {
+    title: 'Agents',
+    lang: 'agents',
+    icon: 'bot',
+    link: '/admin/agents',
+    separator: false,
+  },
+  {
+    title: 'Actions',
+    lang: 'pe-actions',
+    icon: 'life-buoy',
+    link: '/admin/dashboard-actions',
+    separator: false,
+  },
+  {
+    title: 'Models',
+    lang: 'pe-models',
+    icon: 'dna',
+    link: '/admin/models',
+    separator: false,
+  },
 ]
 
 export { adminMenu }

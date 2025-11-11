@@ -8,49 +8,78 @@ export const projectAgentRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(1).max(100),
-        projectId: z.string(),
+        projectId: z.string().optional(), // Optional if isGlobal = true
         type: z
           .enum(['INBOUND', 'OUTBOUND', 'PROCESS', 'RPA'])
           .default('INBOUND'),
         systemInstructions: z.string().optional(),
         isActive: z.boolean().default(true),
+        isGlobal: z.boolean().default(false), // Only SUPERADMIN can set to true
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Check if user has permission to create agents in this project
-      const project = await ctx.db.project.findFirst({
-        where: {
-          id: input.projectId,
-          OR: [
-            // User is project admin
-            {
-              members: {
-                some: {
-                  userId: ctx.session.user.id,
-                  role: 'ADMIN',
-                },
-              },
-            },
-            // User is organization owner/admin
-            {
-              organization: {
+      // If creating a global agent, only SUPERADMIN can do it
+      if (input.isGlobal && ctx.session.user.role !== 'SUPERADMIN') {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Only SUPERADMIN can create global agents',
+        })
+      }
+
+      // If not global and not SUPERADMIN, projectId is required
+      // SUPERADMIN can create specific agents without projectId to assign to organizations later
+      if (
+        !input.isGlobal &&
+        !input.projectId &&
+        ctx.session.user.role !== 'SUPERADMIN'
+      ) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'projectId is required for non-global agents',
+        })
+      }
+
+      // Check permissions if creating a project-specific agent (with projectId)
+      if (
+        !input.isGlobal &&
+        input.projectId &&
+        ctx.session.user.role !== 'SUPERADMIN'
+      ) {
+        const project = await ctx.db.project.findFirst({
+          where: {
+            id: input.projectId,
+            OR: [
+              // User is project admin
+              {
                 members: {
                   some: {
                     userId: ctx.session.user.id,
-                    role: { in: ['OWNER', 'ADMIN'] },
+                    role: 'ADMIN',
                   },
                 },
               },
-            },
-          ],
-        },
-      })
-
-      if (!project) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: "You don't have permission to create agents in this project",
+              // User is organization owner/admin
+              {
+                organization: {
+                  members: {
+                    some: {
+                      userId: ctx.session.user.id,
+                      role: { in: ['OWNER', 'ADMIN'] },
+                    },
+                  },
+                },
+              },
+            ],
+          },
         })
+
+        if (!project) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message:
+              "You don't have permission to create agents in this project",
+          })
+        }
       }
 
       // Create agent and default workflow in a transaction
@@ -63,6 +92,7 @@ export const projectAgentRouter = createTRPCRouter({
             type: input.type,
             systemInstructions: input.systemInstructions,
             isActive: input.isActive,
+            isGlobal: input.isGlobal,
           },
           include: {
             _count: {
@@ -100,14 +130,12 @@ export const projectAgentRouter = createTRPCRouter({
     .input(
       z.object({
         projectId: z.string(),
-        type: z
-          .enum(['INBOUND', 'OUTBOUND', 'PROCESS', 'RPA'])
-          .optional(),
+        type: z.enum(['INBOUND', 'OUTBOUND', 'PROCESS', 'RPA']).optional(),
         isActive: z.boolean().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      // Check if user has access to this project
+      // Check if user has access to this project and get organization
       const project = await ctx.db.project.findFirst({
         where: {
           id: input.projectId,
@@ -133,6 +161,11 @@ export const projectAgentRouter = createTRPCRouter({
             },
           ],
         },
+        include: {
+          organization: {
+            select: { id: true },
+          },
+        },
       })
 
       if (!project) {
@@ -144,6 +177,7 @@ export const projectAgentRouter = createTRPCRouter({
 
       const agents = await ctx.db.projectAgent.findMany({
         where: {
+          // Only show agents that belong to this project (cloned agents)
           projectId: input.projectId,
           ...(input.type && { type: input.type }),
           ...(input.isActive !== undefined && { isActive: input.isActive }),
@@ -157,9 +191,8 @@ export const projectAgentRouter = createTRPCRouter({
           },
         },
         orderBy: [
-          {
-            createdAt: 'asc',
-          },
+          { isGlobal: 'desc' }, // Global agents first
+          { createdAt: 'asc' },
         ],
       })
 
@@ -170,7 +203,71 @@ export const projectAgentRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      // Check if user has access to this agent
+      // SUPERADMIN can access any agent
+      if (ctx.session.user.role === 'SUPERADMIN') {
+        const agent = await ctx.db.projectAgent.findUnique({
+          where: { id: input.id },
+          include: {
+            project: {
+              select: {
+                id: true,
+                name: true,
+                organization: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+            files: {
+              include: {
+                uploadedBy: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
+                },
+              },
+              orderBy: {
+                createdAt: 'desc',
+              },
+            },
+            chats: {
+              include: {
+                _count: {
+                  select: {
+                    messages: true,
+                  },
+                },
+              },
+              orderBy: {
+                updatedAt: 'desc',
+              },
+              take: 10,
+            },
+            _count: {
+              select: {
+                chats: true,
+                files: true,
+              },
+            },
+          },
+        })
+
+        if (!agent) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Agent not found',
+          })
+        }
+
+        return agent
+      }
+
+      // Regular users - check if user has access to this agent
       const agent = await ctx.db.projectAgent.findFirst({
         where: {
           id: input.id,
@@ -264,16 +361,64 @@ export const projectAgentRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         name: z.string().min(1).max(100).optional(),
-        type: z
-          .enum(['INBOUND', 'OUTBOUND', 'PROCESS', 'RPA'])
-          .optional(),
+        type: z.enum(['INBOUND', 'OUTBOUND', 'PROCESS', 'RPA']).optional(),
         systemInstructions: z.string().optional(),
         isActive: z.boolean().optional(),
         modelId: z.string().optional().nullable(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Check if user has permission to update this agent
+      // SUPERADMIN can update any agent
+      if (ctx.session.user.role === 'SUPERADMIN') {
+        const agent = await ctx.db.projectAgent.findUnique({
+          where: { id: input.id },
+          select: { id: true, sourceAgentId: true },
+        })
+
+        if (!agent) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Agent not found',
+          })
+        }
+
+        // Prepare update data
+        const updateData = {
+          ...(input.name && { name: input.name }),
+          ...(input.type && { type: input.type }),
+          ...(input.systemInstructions !== undefined && {
+            systemInstructions: input.systemInstructions,
+          }),
+          ...(input.isActive !== undefined && { isActive: input.isActive }),
+          ...(input.modelId !== undefined && { modelId: input.modelId }),
+        }
+
+        // Update the agent
+        const updated = await ctx.db.projectAgent.update({
+          where: { id: input.id },
+          data: updateData,
+          include: {
+            _count: {
+              select: {
+                chats: true,
+                files: true,
+              },
+            },
+          },
+        })
+
+        // If this is a template (no sourceAgentId), update all clones
+        if (!agent.sourceAgentId) {
+          await ctx.db.projectAgent.updateMany({
+            where: { sourceAgentId: input.id },
+            data: updateData,
+          })
+        }
+
+        return updated
+      }
+
+      // Regular users - check if user has permission to update this agent
       const agent = await ctx.db.projectAgent.findFirst({
         where: {
           id: input.id,
@@ -339,7 +484,57 @@ export const projectAgentRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      // Check if user has permission to delete this agent
+      // SUPERADMIN can delete any agent
+      if (ctx.session.user.role === 'SUPERADMIN') {
+        const agent = await ctx.db.projectAgent.findUnique({
+          where: { id: input.id },
+          select: {
+            id: true,
+            sourceAgentId: true,
+            files: true,
+            chats: true,
+          },
+        })
+
+        if (!agent) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Agent not found',
+          })
+        }
+
+        // Check if agent has active chats
+        const activeChats = await ctx.db.chat.count({
+          where: {
+            agentId: input.id,
+            status: 'ACTIVE',
+          },
+        })
+
+        if (activeChats > 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message:
+              'Cannot delete agent with active chats. Please close all chats first.',
+          })
+        }
+
+        // If this is a template (no sourceAgentId), delete all clones first
+        if (!agent.sourceAgentId) {
+          await ctx.db.projectAgent.deleteMany({
+            where: { sourceAgentId: input.id },
+          })
+        }
+
+        // Delete the agent (cascade will handle related records)
+        await ctx.db.projectAgent.delete({
+          where: { id: input.id },
+        })
+
+        return { success: true, message: 'Agent deleted successfully' }
+      }
+
+      // Regular users - check if user has permission to delete this agent
       const agent = await ctx.db.projectAgent.findFirst({
         where: {
           id: input.id,
@@ -532,4 +727,141 @@ export const projectAgentRouter = createTRPCRouter({
       { value: 'RPA', label: 'RPA Agent' },
     ]
   }),
+
+  // Get all agents (SUPERADMIN only - for admin pages)
+  getAll: protectedProcedure
+    .input(
+      z.object({
+        type: z.enum(['INBOUND', 'OUTBOUND', 'PROCESS', 'RPA']).optional(),
+        isActive: z.boolean().optional(),
+        isGlobal: z.boolean().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      // Only SUPERADMIN can access all agents
+      if (ctx.session.user.role !== 'SUPERADMIN') {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Only SUPERADMIN can access all agents',
+        })
+      }
+
+      // Get all agents and filter out clones (those with sourceAgentId)
+      const allAgents = await ctx.db.projectAgent.findMany({
+        where: {
+          ...(input.type && { type: input.type }),
+          ...(input.isActive !== undefined && { isActive: input.isActive }),
+          ...(input.isGlobal !== undefined && { isGlobal: input.isGlobal }),
+        },
+        include: {
+          _count: {
+            select: {
+              chats: true,
+              files: true,
+              organizationAgents: true,
+            },
+          },
+        },
+        orderBy: [
+          { isGlobal: 'desc' }, // Global agents first
+          { createdAt: 'desc' },
+        ],
+      })
+
+      // Filter out clones (agents with sourceAgentId or projectId)
+      // Only return templates (no sourceAgentId and no projectId)
+      const agents = allAgents.filter(
+        (agent) => !agent.sourceAgentId && !agent.projectId
+      )
+
+      return agents
+    }),
+
+  // Assign agent to organizations (SUPERADMIN only)
+  assignToOrganizations: protectedProcedure
+    .input(
+      z.object({
+        agentId: z.string(),
+        organizationIds: z.array(z.string()),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Only SUPERADMIN can assign agents to organizations
+      if (ctx.session.user.role !== 'SUPERADMIN') {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Only SUPERADMIN can assign agents to organizations',
+        })
+      }
+
+      // Check if agent exists and is not global
+      const agent = await ctx.db.projectAgent.findUnique({
+        where: { id: input.agentId },
+      })
+
+      if (!agent) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Agent not found',
+        })
+      }
+
+      if (agent.isGlobal) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message:
+            'Cannot assign global agents to specific organizations. Global agents are visible to all organizations automatically.',
+        })
+      }
+
+      // Delete existing assignments and create new ones
+      await ctx.db.$transaction(async (tx) => {
+        // Delete all existing assignments
+        await tx.organizationAgent.deleteMany({
+          where: { agentId: input.agentId },
+        })
+
+        // Create new assignments
+        if (input.organizationIds.length > 0) {
+          for (const orgId of input.organizationIds) {
+            await tx.organizationAgent.create({
+              data: {
+                agentId: input.agentId,
+                organizationId: orgId,
+              },
+            })
+          }
+        }
+      })
+
+      return { success: true }
+    }),
+
+  // Get organizations assigned to an agent (SUPERADMIN only)
+  getAssignedOrganizations: protectedProcedure
+    .input(z.object({ agentId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      // Only SUPERADMIN can view assignments
+      if (ctx.session.user.role !== 'SUPERADMIN') {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Only SUPERADMIN can view agent assignments',
+        })
+      }
+
+      const assignments = await ctx.db.organizationAgent.findMany({
+        where: { agentId: input.agentId },
+        include: {
+          organization: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+            },
+          },
+        },
+      })
+
+      return assignments.map((a) => a.organization)
+    }),
 })

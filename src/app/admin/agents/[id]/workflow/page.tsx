@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { usePermissions } from '@src/hooks/usePermissions'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
 import { useSelector } from 'react-redux'
@@ -20,7 +19,6 @@ interface PageProps {
 const WorkflowPage: React.FC<PageProps> = ({ params }) => {
   const { id } = React.use(params)
   const router = useRouter()
-  const { canManageAgents } = usePermissions()
 
   const { currentProject } = useSelector((state: RootState) => state.Project)
   const [isNavigating, setIsNavigating] = useState(false)
@@ -43,6 +41,10 @@ const WorkflowPage: React.FC<PageProps> = ({ params }) => {
   )
 
   useEffect(() => {
+    // Skip project validation for admin pages - agents don't need to belong to a project
+    const isAdminPage = window.location.pathname.startsWith('/admin/agents')
+    if (isAdminPage) return
+
     if (
       !currentProject ||
       !agent ||
@@ -63,14 +65,12 @@ const WorkflowPage: React.FC<PageProps> = ({ params }) => {
       )
 
       if (targetAgent) {
-        router.push(`/apps/agents/default/${targetAgent.id}/workflow`)
+        router.push(`/admin/agents/${targetAgent.id}/workflow`)
       } else {
         if (currentProjectAgents.length > 0) {
-          router.push(
-            `/apps/agents/default/${currentProjectAgents[0].id}/workflow`
-          )
+          router.push(`/admin/agents/${currentProjectAgents[0].id}/workflow`)
         } else {
-          router.push('/apps/agents/default')
+          router.push('/admin/agents')
         }
       }
     }
@@ -87,7 +87,7 @@ const WorkflowPage: React.FC<PageProps> = ({ params }) => {
   if (!currentProject) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center hidden">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             No Project Selected
           </h1>
@@ -118,7 +118,7 @@ const WorkflowPage: React.FC<PageProps> = ({ params }) => {
     )
   }
 
-  if (agentError || !agent || agent.project?.id !== currentProject.id) {
+  if (agentError || !agent) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -128,11 +128,9 @@ const WorkflowPage: React.FC<PageProps> = ({ params }) => {
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             {agentError
               ? `Error loading agent: ${agentError.message}`
-              : !agent
-                ? "The agent you're looking for doesn't exist or you don't have access to it."
-                : 'Agent not found or does not belong to the current project.'}
+              : "The agent you're looking for doesn't exist or you don't have access to it."}
           </p>
-          <Link href="/apps/agents/default" className="btn btn-primary">
+          <Link href="/admin/agents" className="btn btn-primary">
             Back to Agents
           </Link>
         </div>
@@ -142,7 +140,7 @@ const WorkflowPage: React.FC<PageProps> = ({ params }) => {
 
   return (
     <WorkflowProvider agentId={id} workflowId={id}>
-      <WorkflowsPage canManageAgents={canManageAgents} />
+      <WorkflowsPage />
     </WorkflowProvider>
   )
 }

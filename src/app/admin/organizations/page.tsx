@@ -56,6 +56,7 @@ const organizationSchema = z.object({
     )
     .min(1, 'At least one administrator is required'),
   allowedPages: z.array(z.string()).optional(),
+  assignedAgentIds: z.array(z.string()).optional(), // IDs of specific agents (isGlobal=false)
 })
 
 type OrganizationFormData = z.infer<typeof organizationSchema>
@@ -112,6 +113,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
         },
       ],
       allowedPages: [],
+      assignedAgentIds: [],
     },
   })
 
@@ -119,6 +121,12 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
     control,
     name: 'administrators',
   })
+
+  // Query to get all agents (both global and specific) for assignment
+  const { data: allAgents = [] } = api.projectAgent.getAll.useQuery(
+    {}, // Get all agents without filtering
+    { enabled: status === 'authenticated' && session?.user?.role === 'SUPERADMIN' }
+  )
 
   // Query to get all organizations (superadmin only)
   const {
@@ -269,6 +277,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
     setLogoPreview(null)
     setSlugValue('')
     setLogoFile(null)
+    // Pre-select all global agents
+    const globalAgentIds = allAgents.filter(a => a.isGlobal).map(a => a.id)
     reset({
       name: '',
       description: '',
@@ -284,6 +294,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
         },
       ],
       allowedPages: [],
+      assignedAgentIds: globalAgentIds, // Pre-select global agents
     })
     setShowModal(true)
   }
@@ -310,12 +321,19 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
         password: '', // Empty for existing users
       })) || []
 
+    // Load assigned agent IDs from cloned agents' sourceAgentId
+    // Note: In edit mode, we need to fetch the cloned agents to get their sourceAgentId
+    // For now, we'll use the assignedAgents relation (will be updated when we load the data)
+    const assignedAgentIds =
+      organization.assignedAgents?.map((a: any) => a.agentId) || []
+
     reset({
       name: organization.name,
       description: organization.description || '',
       logoUrl: organization.logoUrl || '',
       slug: organization.slug,
       allowedPages: organization.allowedPages || [],
+      assignedAgentIds,
       administrators: existingAdmins,
     })
     setShowModal(true)
@@ -367,6 +385,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           logoUrl,
           slug: data.slug,
           allowedPages: data.allowedPages,
+          assignedAgentIds: data.assignedAgentIds,
           administratorsToAdd:
             administratorsToAdd.length > 0 ? administratorsToAdd : undefined,
           administratorsToRemove:
@@ -380,6 +399,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           name: data.name,
           slug: data.slug,
           allowedPages: data.allowedPages || [],
+          assignedAgentIds: data.assignedAgentIds || [],
           custom: true,
           administrators: data.administrators.map((admin) => ({
             firstName: admin.firstName,
@@ -747,6 +767,64 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       )
                     })}
                   </div>
+                </div>
+
+                {/* Agent Restrictions */}
+                <div className="mb-6">
+                  <label className="block mb-3 text-sm font-medium">
+                    Agent Restrictions
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Global agents are pre-selected by default. You can select or deselect any agents for this organization.
+                  </p>
+                  {allAgents.length === 0 ? (
+                    <p className="text-sm text-gray-500 italic">
+                      No agents available. Create agents from the Agents page first.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      {allAgents.map((agent) => {
+                        const assignedAgentIds = watch('assignedAgentIds') || []
+                        const isChecked = assignedAgentIds.includes(agent.id)
+
+                        return (
+                          <label
+                            key={agent.id}
+                            className="switch-group [&_.switch-wrapper]:h-5 [&_.switch-wrapper]:w-9 [&_.switch-dot]:h-4 [&_.switch-dot]:w-4 [&_.switch-dot]:top-[2px] [&_.switch-dot]:start-[2px]">
+                            <div className="relative">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  const currentAgents = watch('assignedAgentIds') || []
+                                  if (e.target.checked) {
+                                    setValue('assignedAgentIds', [
+                                      ...currentAgents,
+                                      agent.id,
+                                    ])
+                                  } else {
+                                    setValue(
+                                      'assignedAgentIds',
+                                      currentAgents.filter((id) => id !== agent.id)
+                                    )
+                                  }
+                                }}
+                                className="sr-only peer"
+                              />
+                              <div className="switch-wrapper peer-checked:bg-primary-500 peer-checked:border-primary-500"></div>
+                              <div className="switch-dot peer-checked:translate-x-full rtl:peer-checked:-translate-x-full"></div>
+                            </div>
+                            <span className="ml-1 text-sm">
+                              {agent.name}
+                              {agent.isGlobal && (
+                                <span className="ml-1 text-xs text-green-600 font-medium">(Global)</span>
+                              )}
+                            </span>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Administrators */}
@@ -1120,6 +1198,64 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                   <p className="text-xs text-gray-500 mb-3">
                     Add or manage administrators for this organization
                   </p>
+
+                  {/* Agent Restrictions - MOVED BEFORE ADMINISTRATORS */}
+                  <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <label className="block mb-3 text-sm font-medium">
+                      Agent Restrictions
+                    </label>
+                    <p className="text-xs text-gray-500 mb-3">
+                      Global agents are pre-selected by default. You can select or deselect any agents for this organization.
+                    </p>
+                    {allAgents.length === 0 ? (
+                      <p className="text-sm text-gray-500 italic">
+                        No agents available. Create agents from the Agents page first.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2">
+                        {allAgents.map((agent) => {
+                          const assignedAgentIds = watch('assignedAgentIds') || []
+                          const isChecked = assignedAgentIds.includes(agent.id)
+
+                          return (
+                            <label
+                              key={agent.id}
+                              className="switch-group [&_.switch-wrapper]:h-5 [&_.switch-wrapper]:w-9 [&_.switch-dot]:h-4 [&_.switch-dot]:w-4 [&_.switch-dot]:top-[2px] [&_.switch-dot]:start-[2px]">
+                              <div className="relative">
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={(e) => {
+                                    const currentAgents = watch('assignedAgentIds') || []
+                                    if (e.target.checked) {
+                                      setValue('assignedAgentIds', [
+                                        ...currentAgents,
+                                        agent.id,
+                                      ])
+                                    } else {
+                                      setValue(
+                                        'assignedAgentIds',
+                                        currentAgents.filter((id) => id !== agent.id)
+                                      )
+                                    }
+                                  }}
+                                  className="sr-only peer"
+                                />
+                                <div className="switch-wrapper peer-checked:bg-primary-500 peer-checked:border-primary-500"></div>
+                                <div className="switch-dot peer-checked:translate-x-full rtl:peer-checked:-translate-x-full"></div>
+                              </div>
+                              <span className="ml-1 text-sm">
+                                {agent.name}
+                                {agent.isGlobal && (
+                                  <span className="ml-1 text-xs text-green-600 font-medium">(Global)</span>
+                                )}
+                              </span>
+                            </label>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
 
                   {fields.map((field: any, index) => {
                     const admin = watch(`administrators.${index}`)

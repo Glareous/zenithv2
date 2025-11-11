@@ -69,7 +69,7 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
     refetch,
   } = api.projectAgentActions.getByAgentId.useQuery(
     { agentId: id },
-    { enabled: !!id && !!agent && agent.project.id === currentProject?.id }
+    { enabled: !!id && !!agent && agent.project?.id === currentProject?.id }
   )
 
   const {
@@ -78,7 +78,7 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
     refetch: refetchTriggers,
   } = api.projectAgentTrigger.getByAgentId.useQuery(
     { agentId: id },
-    { enabled: !!id && !!agent && agent.project.id === currentProject?.id }
+    { enabled: !!id && !!agent && agent.project?.id === currentProject?.id }
   )
 
   const triggers = allTriggers.filter((trigger) => trigger.isActive)
@@ -98,7 +98,7 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
     )
       return
 
-    if (agent.project.id !== currentProject.id) {
+    if (agent.project?.id !== currentProject.id) {
       if (currentProjectAgents.length === 0) {
         return
       }
@@ -1165,7 +1165,7 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
     )
   }
 
-  if (agentError || !agent || agent.project.id !== currentProject.id) {
+  if (agentError || !agent || agent.project?.id !== currentProject.id) {
     return (
       <div className="m-6">
         <h1 className="pb-4 text-xl">Actions</h1>

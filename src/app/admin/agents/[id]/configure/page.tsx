@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import DeleteModal from '@src/components/common/DeleteModal'
-import { usePermissions } from '@src/hooks/usePermissions'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -50,7 +49,6 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
   const { id } = React.use(params)
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { canManageAgents } = usePermissions()
 
   const { currentProject } = useSelector((state: RootState) => state.Project)
   const [isNavigating, setIsNavigating] = useState(false)
@@ -61,21 +59,24 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
   const [activeTab, setActiveTab] = useState('general')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
+  // For admin pages, we don't need to fetch project-specific data
+  const isAdminRoute =
+    typeof window !== 'undefined' &&
+    window.location.pathname.startsWith('/admin/agents')
+
   const {
     data: currentProjectAgents = [],
     isLoading: isCurrentProjectAgentsLoading,
   } = api.projectAgent.getByProject.useQuery(
     { projectId: currentProject?.id || '' },
-    { enabled: !!currentProject?.id }
+    { enabled: !isAdminRoute && !!currentProject?.id }
   )
 
-  const {
-    data: projectModels = [],
-    isLoading: isModelsLoading,
-  } = api.projectModel.getByProject.useQuery(
-    { projectId: currentProject?.id || '' },
-    { enabled: !!currentProject?.id }
-  )
+  const { data: projectModels = [], isLoading: isModelsLoading } =
+    api.projectModel.getByProject.useQuery(
+      { projectId: currentProject?.id || '' },
+      { enabled: !isAdminRoute && !!currentProject?.id }
+    )
 
   const {
     register,
@@ -128,7 +129,7 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
       await queryClient.invalidateQueries({
         queryKey: [['projectAgent', 'getByProject']],
       })
-      router.push('/apps/agents/default')
+      router.push('/admin/agents')
     },
     onError: (error) => {
       toast.error(error.message || 'Failed to delete agent')
@@ -166,6 +167,10 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
   }, [agent, reset])
 
   useEffect(() => {
+    // Skip project validation for admin pages - agents don't need to belong to a project
+    const isAdminPage = window.location.pathname.startsWith('/admin/agents')
+    if (isAdminPage) return
+
     if (
       !currentProject ||
       !agent ||
@@ -186,14 +191,12 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
       )
 
       if (targetAgent) {
-        router.push(`/apps/agents/default/${targetAgent.id}/configure`)
+        router.push(`/admin/agents/${targetAgent.id}/configure`)
       } else {
         if (currentProjectAgents.length > 0) {
-          router.push(
-            `/apps/agents/default/${currentProjectAgents[0].id}/configure`
-          )
+          router.push(`/admin/agents/${currentProjectAgents[0].id}/configure`)
         } else {
-          router.push('/apps/agents/default')
+          router.push('/admin/agents')
         }
       }
     }
@@ -327,10 +330,15 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
-  if (!currentProject) {
+  // Skip currentProject validation for admin pages
+  const isAdminPage =
+    typeof window !== 'undefined' &&
+    window.location.pathname.startsWith('/admin/agents')
+
+  if (!isAdminPage && !currentProject) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center hidden">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             No Project Selected
           </h1>
@@ -345,7 +353,7 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
     )
   }
 
-  if (isNavigating || isCurrentProjectAgentsLoading) {
+  if (!isAdminPage && (isNavigating || isCurrentProjectAgentsLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500"></div>
@@ -361,7 +369,7 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
     )
   }
 
-  if (agentError || !agent || agent.project?.id !== currentProject.id) {
+  if (agentError || !agent) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -371,11 +379,9 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             {agentError
               ? `Error loading agent: ${agentError.message}`
-              : !agent
-                ? "The agent you're looking for doesn't exist or you don't have access to it."
-                : 'Agent not found or does not belong to the current project.'}
+              : "The agent you're looking for doesn't exist or you don't have access to it."}
           </p>
-          <Link href="/apps/agents/default" className="btn btn-primary">
+          <Link href="/admin/agents" className="btn btn-primary">
             Back to Agents
           </Link>
         </div>
@@ -393,7 +399,6 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
         </div>
         <div className="w-xs">
           <Select
-            isDisabled={!canManageAgents}
             value={{
               value: watch('type'),
               label:
@@ -444,7 +449,6 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
             {...register('name')}
             type="text"
             id="name"
-            disabled={!canManageAgents}
             className={`form-input ${
               errors.name ? 'border-red-500 focus:ring-red-500' : ''
             }`}
@@ -468,7 +472,6 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
         </div>
         <div className="w-xs">
           <Select
-            isDisabled={!canManageAgents}
             value={
               watch('isActive')
                 ? { value: true, label: 'Active' }
@@ -496,7 +499,6 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
             {...register('systemInstructions')}
             id="systemInstructions"
             rows={6}
-            disabled={!canManageAgents}
             className="form-input h-32 max-h-40 max-w-[500px]"
             placeholder="Enter system instructions for the agent..."
           />
@@ -524,24 +526,28 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
           ) : projectModels.length === 0 ? (
             <div>
               <div className="form-input bg-gray-50 dark:bg-gray-700 cursor-not-allowed opacity-75">
-                <span className="text-sm text-gray-500">No models available</span>
+                <span className="text-sm text-gray-500">
+                  No models available
+                </span>
               </div>
-              {canManageAgents && (
-                <p className="mt-2 text-xs text-gray-400">
-                  <Link href="/apps/models" className="text-primary-600 hover:text-primary-500">
-                    Create a model
-                  </Link> to assign to this agent.
-                </p>
-              )}
+              <p className="mt-2 text-xs text-gray-400">
+                <Link
+                  href="/admin/models"
+                  className="text-primary-600 hover:text-primary-500">
+                  Create a model
+                </Link>{' '}
+                to assign to this agent.
+              </p>
             </div>
           ) : (
             <Select
-              isDisabled={!canManageAgents}
               value={
                 watch('modelId')
                   ? {
                       value: watch('modelId'),
-                      label: projectModels.find((m) => m.id === watch('modelId'))?.name || 'Select model',
+                      label:
+                        projectModels.find((m) => m.id === watch('modelId'))
+                          ?.name || 'Select model',
                     }
                   : null
               }
@@ -560,7 +566,9 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
           {!isModelsLoading && projectModels.length > 0 && (
             <p className="mt-2 text-xs text-gray-400">
               Manage models in{' '}
-              <Link href="/apps/models" className="text-primary-600 hover:text-primary-500">
+              <Link
+                href="/admin/models"
+                className="text-primary-600 hover:text-primary-500">
                 Models page
               </Link>
               .
@@ -579,36 +587,34 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
         </div>
 
         <div className="space-y-6">
-          {/* File Upload Area - Only for SUPERADMIN */}
-          {canManageAgents && (
-            <div
-              className={`border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
-                dragActive
-                  ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/10'
-                  : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-              }`}
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}>
-              <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-              <div className="space-y-2">
-                <label
-                  htmlFor="file-upload"
-                  className="cursor-pointer text-primary-600 hover:text-primary-500 font-medium">
-                  Click to upload files
-                  <input
-                    id="file-upload"
-                    name="file-upload"
-                    type="file"
-                    multiple
-                    className="sr-only"
-                    onChange={handleFileSelect}
-                    accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.txt"
-                  />
-                </label>
-              </div>
+          {/* File Upload Area */}
+          <div
+            className={`border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
+              dragActive
+                ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/10'
+                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+            }`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}>
+            <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+            <div className="space-y-2">
+              <label
+                htmlFor="file-upload"
+                className="cursor-pointer text-primary-600 hover:text-primary-500 font-medium">
+                Click to upload files
+                <input
+                  id="file-upload"
+                  name="file-upload"
+                  type="file"
+                  multiple
+                  className="sr-only"
+                  onChange={handleFileSelect}
+                  accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.txt"
+                />
+              </label>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -668,15 +674,13 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
                     </p>
                   </div>
                 </div>
-                {canManageAgents && (
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteFile(file.id)}
-                    className="text-red-500 hover:text-red-700 p-1"
-                    disabled={deleteFileMutation.isPending}>
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => handleDeleteFile(file.id)}
+                  className="text-red-500 hover:text-red-700 p-1"
+                  disabled={deleteFileMutation.isPending}>
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
             ))}
           </div>
@@ -751,33 +755,29 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
 
         {/* Form Actions */}
         <div className="flex justify-between card-body">
-          {/* Delete Agent Button - Only for SUPERADMIN */}
+          {/* Delete Agent Button */}
           <div>
-            {canManageAgents && (
-              <button
-                type="button"
-                onClick={() => setShowDeleteModal(true)}
-                disabled={deleteAgentMutation.isPending}
-                className="btn btn-red flex items-center gap-2">
-                <Trash2 className="h-4 w-4" />
-                {deleteAgentMutation.isPending ? 'Deleting...' : 'Delete Agent'}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowDeleteModal(true)}
+              disabled={deleteAgentMutation.isPending}
+              className="btn btn-red flex items-center gap-2">
+              <Trash2 className="h-4 w-4" />
+              {deleteAgentMutation.isPending ? 'Deleting...' : 'Delete Agent'}
+            </button>
           </div>
 
           {/* Save/Cancel Buttons */}
           <div className="flex space-x-4">
-            <Link href="/apps/agents/default" className="btn btn-red">
-              {canManageAgents ? 'Cancel' : 'Back'}
+            <Link href="/admin/agents" className="btn btn-red">
+              Cancel
             </Link>
-            {canManageAgents && (
-              <button
-                type="submit"
-                disabled={isSubmitting || uploadingFiles}
-                className="btn btn-primary">
-                {isSubmitting || uploadingFiles ? 'Saving...' : 'Save Changes'}
-              </button>
-            )}
+            <button
+              type="submit"
+              disabled={isSubmitting || uploadingFiles}
+              className="btn btn-primary">
+              {isSubmitting || uploadingFiles ? 'Saving...' : 'Save Changes'}
+            </button>
           </div>
         </div>
       </form>

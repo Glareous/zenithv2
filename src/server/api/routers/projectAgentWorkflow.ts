@@ -140,7 +140,65 @@ export const projectAgentWorkflowRouter = createTRPCRouter({
   getByAgentId: protectedProcedure
     .input(z.object({ agentId: z.string() }))
     .query(async ({ ctx, input }) => {
-      // First get the agent to verify access and get project ID
+      // SUPERADMIN can access any agent
+      if (ctx.session.user.role === 'SUPERADMIN') {
+        const agent = await ctx.db.projectAgent.findUnique({
+          where: { id: input.agentId },
+          select: {
+            id: true,
+            projectId: true,
+            name: true,
+          },
+        })
+
+        if (!agent) {
+          throw new Error('Agent not found')
+        }
+
+        const workflow = await ctx.db.projectAgentWorkflow.findUnique({
+          where: { agentId: input.agentId },
+        })
+
+        if (!workflow) {
+          return {
+            id: null,
+            agentId: input.agentId,
+            projectId: agent.projectId,
+            name: null,
+            description: null,
+            instructions: null,
+            globalActions: [],
+            globalFaqs: [],
+            globalObjections: [],
+            nodes: [],
+            edges: [],
+            positionX: 250,
+            positionY: 25,
+            createdAt: null,
+            updatedAt: null,
+          }
+        }
+
+        return {
+          id: workflow.id,
+          agentId: workflow.agentId,
+          projectId: agent.projectId,
+          name: workflow.name,
+          description: workflow.description,
+          instructions: workflow.instructions,
+          globalActions: workflow.globalActions,
+          globalFaqs: workflow.globalFaqs,
+          globalObjections: workflow.globalObjections,
+          nodes: workflow.nodes,
+          edges: workflow.edges,
+          positionX: workflow.positionX,
+          positionY: workflow.positionY,
+          createdAt: workflow.createdAt,
+          updatedAt: workflow.updatedAt,
+        }
+      }
+
+      // Regular users - verify access through project membership
       const agent = await ctx.db.projectAgent.findFirst({
         where: {
           id: input.agentId,
@@ -219,27 +277,38 @@ export const projectAgentWorkflowRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { agentId, workflow } = input
 
-      // Verify that the agent exists and user has access to it
-      const agent = await ctx.db.projectAgent.findFirst({
-        where: {
-          id: agentId,
-          project: {
-            OR: [
-              { createdById: ctx.session.user.id },
-              {
-                members: {
-                  some: {
-                    userId: ctx.session.user.id,
+      // SUPERADMIN can access any agent
+      if (ctx.session.user.role === 'SUPERADMIN') {
+        const agent = await ctx.db.projectAgent.findUnique({
+          where: { id: agentId },
+        })
+
+        if (!agent) {
+          throw new Error('Agent not found')
+        }
+      } else {
+        // Regular users - verify access through project membership
+        const agent = await ctx.db.projectAgent.findFirst({
+          where: {
+            id: agentId,
+            project: {
+              OR: [
+                { createdById: ctx.session.user.id },
+                {
+                  members: {
+                    some: {
+                      userId: ctx.session.user.id,
+                    },
                   },
                 },
-              },
-            ],
+              ],
+            },
           },
-        },
-      })
+        })
 
-      if (!agent) {
-        throw new Error('Agent not found or access denied')
+        if (!agent) {
+          throw new Error('Agent not found or access denied')
+        }
       }
 
       const upsertedWorkflow = await ctx.db.projectAgentWorkflow.upsert({

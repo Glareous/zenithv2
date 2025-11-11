@@ -39,11 +39,13 @@ export interface CardStepProps {
     faqs?: WorkflowFaq[]
     objections?: WorkflowObjection[]
     onDeleteRequest?: (nodeId: string, nodeLabel: string) => void
+    canManageAgents?: boolean
   }
   selected?: boolean
   dragging?: boolean
   onDoubleClick?: (nodeId: string) => void
   onDeleteRequest?: (nodeId: string, nodeLabel: string) => void
+  canManageAgents?: boolean
 }
 
 const CardStep: React.FC<CardStepProps> = ({
@@ -53,11 +55,15 @@ const CardStep: React.FC<CardStepProps> = ({
   dragging,
   onDoubleClick,
   onDeleteRequest,
+  canManageAgents = true,
 }) => {
   const [isCardHovered, setIsCardHovered] = React.useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false)
   const dropdownRef = React.useRef<HTMLDivElement>(null)
   const { deleteNode, layout } = useWorkflow()
+
+  // Use canManageAgents from props or data
+  const hasPermission = canManageAgents ?? data.canManageAgents ?? true
 
   // Check if this node is at the end of the workflow (has no children)
   const isEndOfWorkflow = React.useMemo(() => {
@@ -174,14 +180,15 @@ const CardStep: React.FC<CardStepProps> = ({
       )}
 
       {/* Delete Button - Shows on hover */}
-      <div
-        className={`
+      {hasPermission && (
+        <div
+          className={`
           absolute -top-2 -right-2 z-20 transition-all duration-200 ease-in-out
           ${isCardHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}
         `}>
-        <button
-          onClick={handleDeleteNode}
-          className="
+          <button
+            onClick={handleDeleteNode}
+            className="
             flex items-center justify-center w-6 h-6
             bg-white/90 backdrop-blur-sm border border-red-200 rounded-full shadow-sm
             text-red-500 hover:text-red-600 hover:border-red-300 hover:bg-red-50/90
@@ -189,11 +196,12 @@ const CardStep: React.FC<CardStepProps> = ({
             transition-all duration-150 cursor-pointer
             focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1
           "
-          title={`Delete "${data.label}"`}
-          aria-label={`Delete step ${data.label}`}>
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
-      </div>
+            title={`Delete "${data.label}"`}
+            aria-label={`Delete step ${data.label}`}>
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <div
@@ -368,7 +376,7 @@ const CardStep: React.FC<CardStepProps> = ({
       </div>
 
       {/* Add Step Button - only show for non-end variants */}
-      {!['jump', 'end'].includes(data.variant) && (
+      {hasPermission && !['jump', 'end'].includes(data.variant) && (
         <div className="absolute -bottom-7 left-1/2 transform -translate-x-1/2">
           <div className="relative" ref={dropdownRef}>
             <button

@@ -4,8 +4,6 @@ import React, { useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import PermissionAlert from '@src/components/common/PermissionAlert'
-import { usePermissions } from '@src/hooks/usePermissions'
 import { RootState } from '@src/slices/reducer'
 import {
   Bot,
@@ -44,15 +42,12 @@ interface ActionPageProps {
   params: Promise<{ id: string }>
 }
 
-const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
+const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
   const { id } = React.use(params)
   const router = useRouter()
 
   const { currentProject } = useSelector((state: RootState) => state.Project)
   const [isNavigating, setIsNavigating] = useState(false)
-
-  // Get permissions
-  const { canManageAgents, isLoadingPermissions } = usePermissions()
 
   const {
     data: currentProjectAgents = [],
@@ -68,13 +63,22 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
     error: agentError,
   } = api.projectAgent.getById.useQuery({ id: id }, { enabled: !!id })
 
+  const isAdminRoute =
+    typeof window !== 'undefined' &&
+    window.location.pathname.startsWith('/admin/agents')
+
   const {
     data: agentActions,
     isLoading,
     refetch,
   } = api.projectAgentActions.getByAgentId.useQuery(
     { agentId: id },
-    { enabled: !!id && !!agent && agent.project.id === currentProject?.id }
+    {
+      enabled:
+        !!id &&
+        !!agent &&
+        (isAdminRoute || agent.project?.id === currentProject?.id),
+    }
   )
 
   const {
@@ -83,7 +87,12 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
     refetch: refetchTriggers,
   } = api.projectAgentTrigger.getByAgentId.useQuery(
     { agentId: id },
-    { enabled: !!id && !!agent && agent.project.id === currentProject?.id }
+    {
+      enabled:
+        !!id &&
+        !!agent &&
+        (isAdminRoute || agent.project?.id === currentProject?.id),
+    }
   )
 
   const triggers = allTriggers.filter((trigger) => trigger.isActive)
@@ -95,6 +104,9 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
     )
 
   useEffect(() => {
+    // Skip project validation for admin pages - agents don't need to belong to a project
+    if (isAdminRoute) return
+
     if (
       !currentProject ||
       !agent ||
@@ -103,7 +115,7 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
     )
       return
 
-    if (agent.project.id !== currentProject.id) {
+    if (agent.project?.id !== currentProject.id) {
       if (currentProjectAgents.length === 0) {
         return
       }
@@ -115,14 +127,12 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
       )
 
       if (targetAgent) {
-        router.push(`/apps/pqr/pqr-agent/${targetAgent.id}/action`)
+        router.push(`/admin/agents/${targetAgent.id}/action`)
       } else {
         if (currentProjectAgents.length > 0) {
-          router.push(
-            `/apps/pqr/pqr-agent/${currentProjectAgents[0].id}/action`
-          )
+          router.push(`/admin/agents/${currentProjectAgents[0].id}/action`)
         } else {
-          router.push('/apps/pqr/pqr-agent')
+          router.push('/admin/agents')
         }
       }
     }
@@ -647,9 +657,7 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
         </div>
         <div>
           <Dropdown position="right">
-            <DropdownButton
-              colorClass="btn btn-gray flex items-center"
-              disabled={!canManageAgents}>
+            <DropdownButton colorClass="btn btn-gray flex items-center">
               <Plus className="w-4 h-4 mr-1" />
               Add Trigger
             </DropdownButton>
@@ -657,9 +665,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
               <ul className="py-2 space-y-1 font-light text-xs ">
                 <li className="hover:bg-blue-50/50">
                   <button
-                    className="dropdown-item w-full text-left flex items-center px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => handleAddTrigger('WHATSAPP_MESSAGE')}
-                    disabled={!canManageAgents}>
+                    className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                    onClick={() => handleAddTrigger('WHATSAPP_MESSAGE')}>
                     <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
                       <WhatsAppIcon className="w-5 h-5 text-gray-400" />
                     </div>
@@ -668,9 +675,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
                 </li>
                 <li className="hover:bg-blue-50/50">
                   <button
-                    className="dropdown-item w-full text-left flex items-center px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => handleAddTrigger('WHATSAPP_CALL')}
-                    disabled={!canManageAgents}>
+                    className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                    onClick={() => handleAddTrigger('WHATSAPP_CALL')}>
                     <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
                       <WhatsAppIcon className="w-5 h-5 text-gray-400" />
                     </div>
@@ -679,9 +685,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
                 </li>
                 <li className="hover:bg-blue-50/50">
                   <button
-                    className="dropdown-item w-full text-left flex items-center px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => handleAddTrigger('PHONE_CALL')}
-                    disabled={!canManageAgents}>
+                    className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                    onClick={() => handleAddTrigger('PHONE_CALL')}>
                     <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
                       <Phone className="w-5 h-5 text-gray-400" />
                     </div>
@@ -690,9 +695,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
                 </li>
                 <li className="hover:bg-blue-50/50">
                   <button
-                    className="dropdown-item w-full text-left flex items-center px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => handleAddTrigger('WEBHOOK')}
-                    disabled={!canManageAgents}>
+                    className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                    onClick={() => handleAddTrigger('WEBHOOK')}>
                     <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
                       <FileSearch2 className="w-5 h-5 text-gray-400" />
                     </div>
@@ -701,9 +705,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
                 </li>
                 <li className="hover:bg-blue-50/50">
                   <button
-                    className="dropdown-item w-full text-left flex items-center px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => handleAddTrigger('CRON_JOB')}
-                    disabled={!canManageAgents}>
+                    className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                    onClick={() => handleAddTrigger('CRON_JOB')}>
                     <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
                       <ClockFading className="w-5 h-5 text-gray-400" />
                     </div>
@@ -712,9 +715,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
                 </li>
                 <li className="hover:bg-blue-50/50">
                   <button
-                    className="dropdown-item w-full text-left flex items-center px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => handleAddTrigger('MCP_PROTOCOL')}
-                    disabled={!canManageAgents}>
+                    className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                    onClick={() => handleAddTrigger('MCP_PROTOCOL')}>
                     <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
                       <Bot className="w-5 h-5 text-gray-400" />
                     </div>
@@ -830,12 +832,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
             return (
               <div
                 key={trigger.id}
-                className={`p-2 border rounded-md border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 group relative transition-colors duration-200 w-53 ${
-                  canManageAgents
-                    ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800'
-                    : 'cursor-not-allowed opacity-75'
-                }`}
-                onClick={() => canManageAgents && handleAddTrigger(trigger.type)}>
+                className="p-2 border rounded-md border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 group relative cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 w-53"
+                onClick={() => handleAddTrigger(trigger.type)}>
                 <div className="flex">
                   <div className="flex items-center w-full">
                     {getTriggerIcon()}
@@ -879,7 +877,7 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
                     onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => handleDeleteTrigger(trigger.type)}
-                      disabled={!canManageAgents || deleteTriggerMutation.isPending}
+                      disabled={deleteTriggerMutation.isPending}
                       className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Remove trigger">
                       <X className="w-4 h-4" />
@@ -949,9 +947,7 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
           </div>
           <div>
             <Dropdown position="right">
-              <DropdownButton
-                colorClass="btn btn-gray flex items-center"
-                disabled={!canManageAgents}>
+              <DropdownButton colorClass="btn btn-gray flex items-center">
                 <Plus className="w-4 h-4 mr-1" />
                 Add Actions
               </DropdownButton>
@@ -959,9 +955,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
                 <ul className="py-2 space-y-1 font-light text-xs ">
                   <li className="hover:bg-blue-50/50">
                     <button
-                      className="dropdown-item w-full text-left flex items-center px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => handleAddAction('information-extractor')}
-                      disabled={!canManageAgents}>
+                      className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                      onClick={() => handleAddAction('information-extractor')}>
                       <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
                         <FileSearch2 className="w-5 h-5 text-gray-400" />
                       </div>
@@ -975,9 +970,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
                   </li>
                   <li className="hover:bg-blue-50/50">
                     <button
-                      className="dropdown-item w-full text-left flex items-center px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => handleAddAction('custom-evaluation')}
-                      disabled={!canManageAgents}>
+                      className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                      onClick={() => handleAddAction('custom-evaluation')}>
                       <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
                         <FileSearch2 className="w-5 h-5 text-gray-400" />
                       </div>
@@ -1084,12 +1078,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
               return (
                 <div
                   key={action.id}
-                  className={`p-3 border rounded-md border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 group relative transition-colors duration-200 w-53 ${
-                    canManageAgents
-                      ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800'
-                      : 'cursor-not-allowed opacity-75'
-                  }`}
-                  onClick={() => canManageAgents && handleEditAction()}>
+                  className="p-3 border rounded-md border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 group relative cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 w-53"
+                  onClick={handleEditAction}>
                   <div className="flex">
                     <div className="space-y-2 truncate">
                       <p className="text-[11px] text-gray-400 mt-1 font-normal badge badge-green flex items-center w-36">
@@ -1111,7 +1101,7 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
                       {/* Remove button - only visible on hover */}
                       <button
                         onClick={handleRemoveAction}
-                        disabled={!canManageAgents || updateAfterCallActionsMutation.isPending}
+                        disabled={updateAfterCallActionsMutation.isPending}
                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Remove action">
                         <X className="w-4 h-4" />
@@ -1138,10 +1128,11 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
 
   if (!currentProject) {
     return (
-      <div>
+      <div className="m-6">
+        <h1 className="pb-4 text-xl">Actions</h1>
         <div className="card">
           <div className="card-body">
-            <div className="text-center text-gray-500 dark:text-dark-500">
+            <div className="text-center text-gray-500 dark:text-dark-500 hidden">
               <p>No project selected. Please select a project first.</p>
               <p className="mt-2 text-sm">
                 Go to{' '}
@@ -1161,7 +1152,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
 
   if (isNavigating || isCurrentProjectAgentsLoading) {
     return (
-      <div>
+      <div className="m-6">
+        <h1 className="pb-4 text-xl">Actions</h1>
         <div className="card">
           <div className="card-body">
             <div className="flex justify-center items-center py-12">
@@ -1175,7 +1167,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
 
   if (isAgentLoading) {
     return (
-      <div>
+      <div className="m-6">
+        <h1 className="pb-4 text-xl">Actions</h1>
         <div className="card">
           <div className="card-body">
             <div className="flex justify-center items-center py-12">
@@ -1187,16 +1180,17 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
     )
   }
 
-  if (agentError || !agent || agent.project.id !== currentProject.id) {
+  if (agentError || !agent) {
     return (
-      <div>
+      <div className="m-6">
+        <h1 className="pb-4 text-xl">Actions</h1>
         <div className="card">
           <div className="card-body">
             <div className="text-center text-red-500">
               <p>
                 {agentError
                   ? `Error loading agent: ${agentError.message}`
-                  : 'Agent not found or does not belong to the current project.'}
+                  : "Agent not found or you don't have access to it."}
               </p>
               <p className="mt-2 text-sm text-gray-500">
                 Please verify the agent exists and belongs to your current
@@ -1210,10 +1204,8 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
   }
 
   return (
-    <div>
-      {/* Permission Alert */}
-      <PermissionAlert show={!canManageAgents && !isLoadingPermissions} />
-
+    <div className="m-6">
+      <h1 className="pb-4 text-xl">Actions</h1>
       <div className="card">
         {/* Tabs Navigation */}
         <div className="border-b border-gray-200 dark:border-gray-700">
@@ -1586,4 +1578,4 @@ const PQRActionPage: React.FC<ActionPageProps> = ({ params }) => {
   )
 }
 
-export default PQRActionPage
+export default ActionPage

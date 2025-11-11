@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import BreadCrumb from '@src/components/common/BreadCrumb'
 import AgentEditModal from '@src/components/molecules/AgentEditModal'
+import { usePermissions } from '@src/hooks/usePermissions'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
 import {
@@ -58,6 +59,7 @@ const getAgentTypeName = (type: string) => {
 
 const Agents: React.FC = () => {
   const router = useRouter()
+  const { canManageAgents } = usePermissions()
 
   const { currentProject } = useSelector((state: RootState) => state.Project)
 
@@ -163,38 +165,40 @@ const Agents: React.FC = () => {
     <React.Fragment>
       <BreadCrumb title="List View" subTitle="Agents" />
       <div className="grid grid-cols-12 gap-x-space">
-        {/* Add New Agent Card */}
-        <div
-          className={`col-span-12 md:col-span-3 card transition-shadow duration-200 border-2 border-dashed border-gray-300 dark:border-gray-700 ${
-            !createAgentMutation.isPending
-              ? 'cursor-pointer hover:shadow-lg'
-              : 'opacity-75 cursor-not-allowed'
-          }`}
-          onClick={
-            createAgentMutation.isPending ? undefined : handleCreateAgent
-          }>
-          <div className="card-body flex items-center justify-center min-h-[200px]">
-            <div className="text-center">
-              <div className="flex items-center border justify-center rounded-full size-12 mx-auto text-purple-500 fill-purple-500/20 border-purple-500/20 bg-purple-500/10">
-                {createAgentMutation.isPending ? (
-                  <Loader2 className="size-5 text-purple-500 animate-spin" />
-                ) : (
-                  <Plus className="size-5 text-purple-500" />
-                )}
-              </div>
-              <div className="mt-4">
-                <h6 className="mb-2 text-gray-700 dark:text-gray-300">
-                  {createAgentMutation.isPending
-                    ? 'Creating...'
-                    : 'Add New Agent'}
-                </h6>
-                <p className="text-gray-500 dark:text-dark-500 text-sm">
-                  Create a new agent default INBOUND
-                </p>
+        {/* Add New Agent Card - Only for SUPERADMIN */}
+        {canManageAgents && (
+          <div
+            className={`col-span-12 md:col-span-3 card transition-shadow duration-200 border-2 border-dashed border-gray-300 dark:border-gray-700 ${
+              !createAgentMutation.isPending
+                ? 'cursor-pointer hover:shadow-lg'
+                : 'opacity-75 cursor-not-allowed'
+            }`}
+            onClick={
+              createAgentMutation.isPending ? undefined : handleCreateAgent
+            }>
+            <div className="card-body flex items-center justify-center min-h-[200px]">
+              <div className="text-center">
+                <div className="flex items-center border justify-center rounded-full size-12 mx-auto text-purple-500 fill-purple-500/20 border-purple-500/20 bg-purple-500/10">
+                  {createAgentMutation.isPending ? (
+                    <Loader2 className="size-5 text-purple-500 animate-spin" />
+                  ) : (
+                    <Plus className="size-5 text-purple-500" />
+                  )}
+                </div>
+                <div className="mt-4">
+                  <h6 className="mb-2 text-gray-700 dark:text-gray-300">
+                    {createAgentMutation.isPending
+                      ? 'Creating...'
+                      : 'Add New Agent'}
+                  </h6>
+                  <p className="text-gray-500 dark:text-dark-500 text-sm">
+                    Create a new agent default INBOUND
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
         {agents.map((agent, index) => {
           const agentColor = getAgentColor(agent.type)
           const [iconColor, divColor] = agentColor.split(' ')

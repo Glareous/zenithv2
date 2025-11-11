@@ -153,12 +153,17 @@ export const authConfig = {
         })
         session.user.role = dbUser?.role || undefined
 
-        // Fetch default organization (where user is owner)
-        const organization = await db.organization.findFirst({
-          where: { ownerId: token.id as string },
-          select: { id: true, name: true },
+        // Fetch default organization (first organization where user is a member)
+        const membership = await db.organizationMember.findFirst({
+          where: { userId: token.id as string },
+          orderBy: { joinedAt: 'asc' }, // Get the first organization they joined
+          include: {
+            organization: {
+              select: { id: true, name: true },
+            },
+          },
         })
-        session.user.defaultOrganization = organization || undefined
+        session.user.defaultOrganization = membership?.organization || undefined
       }
       return session
     },

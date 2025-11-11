@@ -5,6 +5,8 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
+import PermissionAlert from '@src/components/common/PermissionAlert'
+import { usePermissions } from '@src/hooks/usePermissions'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
 import { useSelector } from 'react-redux'
@@ -22,6 +24,9 @@ const PQRWorkflowPage: React.FC<PageProps> = ({ params }) => {
 
   const { currentProject } = useSelector((state: RootState) => state.Project)
   const [isNavigating, setIsNavigating] = useState(false)
+
+  // Get permissions
+  const { canManageAgents, isLoadingPermissions } = usePermissions()
 
   const {
     data: currentProjectAgents = [],
@@ -139,9 +144,14 @@ const PQRWorkflowPage: React.FC<PageProps> = ({ params }) => {
   }
 
   return (
-    <WorkflowProvider agentId={id} workflowId={id}>
-      <WorkflowsPage />
-    </WorkflowProvider>
+    <div>
+      {/* Permission Alert */}
+      <PermissionAlert show={!canManageAgents && !isLoadingPermissions} />
+
+      <WorkflowProvider agentId={id} workflowId={id}>
+        <WorkflowsPage canManageAgents={canManageAgents} />
+      </WorkflowProvider>
+    </div>
   )
 }
 

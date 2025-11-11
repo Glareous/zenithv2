@@ -5,6 +5,8 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import BreadCrumb from '@src/components/common/BreadCrumb'
+import PermissionAlert from '@src/components/common/PermissionAlert'
+import { usePermissions } from '@src/hooks/usePermissions'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
 import {
@@ -60,6 +62,9 @@ const PQRAgents: React.FC = () => {
 
   const { currentProject } = useSelector((state: RootState) => state.Project)
 
+  // Get permissions
+  const { canManageAgents, isLoadingPermissions } = usePermissions()
+
   const {
     data: agents = [],
     isLoading,
@@ -86,6 +91,12 @@ const PQRAgents: React.FC = () => {
 
   const handleCreateAgent = () => {
     if (!currentProject?.id) return
+
+    // Check permissions before creating
+    if (!canManageAgents) {
+      toast.error('You do not have permission to create agents')
+      return
+    }
 
     createAgentMutation.mutate({
       name: 'PQR Inbound Agent',
@@ -161,39 +172,45 @@ const PQRAgents: React.FC = () => {
   return (
     <React.Fragment>
       <BreadCrumb title="PQR Agents" subTitle="PQR" />
+
+      {/* Permission Alert */}
+      <PermissionAlert show={!canManageAgents && !isLoadingPermissions} />
+
       <div className="grid grid-cols-12 gap-x-space">
         {/* Add New Agent Card */}
-        <div
-          className={`col-span-12 md:col-span-3 card transition-shadow duration-200 border-2 border-dashed border-gray-300 dark:border-gray-700 ${
-            !createAgentMutation.isPending
-              ? 'cursor-pointer hover:shadow-lg'
-              : 'opacity-75 cursor-not-allowed'
-          }`}
-          onClick={
-            createAgentMutation.isPending ? undefined : handleCreateAgent
-          }>
-          <div className="card-body flex items-center justify-center min-h-[200px]">
-            <div className="text-center">
-              <div className="flex items-center border justify-center rounded-full size-12 mx-auto text-purple-500 fill-purple-500/20 border-purple-500/20 bg-purple-500/10">
-                {createAgentMutation.isPending ? (
-                  <Loader2 className="size-5 text-purple-500 animate-spin" />
-                ) : (
-                  <Plus className="size-5 text-purple-500" />
-                )}
-              </div>
-              <div className="mt-4">
-                <h6 className="mb-2 text-gray-700 dark:text-gray-300">
-                  {createAgentMutation.isPending
-                    ? 'Creating...'
-                    : 'Add New PQR Agent'}
-                </h6>
-                <p className="text-gray-500 dark:text-dark-500 text-sm">
-                  Create a new PQR agent (default INBOUND)
-                </p>
+        {canManageAgents && (
+          <div
+            className={`col-span-12 md:col-span-3 card transition-shadow duration-200 border-2 border-dashed border-gray-300 dark:border-gray-700 ${
+              !createAgentMutation.isPending
+                ? 'cursor-pointer hover:shadow-lg'
+                : 'opacity-75 cursor-not-allowed'
+            }`}
+            onClick={
+              createAgentMutation.isPending ? undefined : handleCreateAgent
+            }>
+            <div className="card-body flex items-center justify-center min-h-[200px]">
+              <div className="text-center">
+                <div className="flex items-center border justify-center rounded-full size-12 mx-auto text-purple-500 fill-purple-500/20 border-purple-500/20 bg-purple-500/10">
+                  {createAgentMutation.isPending ? (
+                    <Loader2 className="size-5 text-purple-500 animate-spin" />
+                  ) : (
+                    <Plus className="size-5 text-purple-500" />
+                  )}
+                </div>
+                <div className="mt-4">
+                  <h6 className="mb-2 text-gray-700 dark:text-gray-300">
+                    {createAgentMutation.isPending
+                      ? 'Creating...'
+                      : 'Add New PQR Agent'}
+                  </h6>
+                  <p className="text-gray-500 dark:text-dark-500 text-sm">
+                    Create a new PQR agent (default INBOUND)
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
         {agents.map((agent, index) => {
           const agentColor = getAgentColor(agent.type)
           const [iconColor, divColor] = agentColor.split(' ')

@@ -4,8 +4,16 @@ import React from 'react'
 
 import Link from 'next/link'
 
-const Footer = () => {
-  const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || 'Brand'
+interface FooterProps {
+  organization?: {
+    id: string
+    name: string
+    logoUrl: string | null
+  } | null
+}
+
+const Footer: React.FC<FooterProps> = ({ organization }) => {
+  const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || 'AgenticWeb'
 
   return (
     <React.Fragment>
@@ -38,7 +46,7 @@ const Footer = () => {
               </ul>
             </div>
             <div className="text-center text-gray-500 dark:text-dark-500 ltr:lg:text-right rtl:lg:text-left">
-              <div>&copy; {new Date().getFullYear()} AgenticWeb.</div>
+              <div>&copy; {new Date().getFullYear()} {organization?.name || brandName}.</div>
             </div>
           </div>
         </div>

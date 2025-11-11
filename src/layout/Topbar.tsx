@@ -193,7 +193,7 @@ const Topbar: React.FC<TopBarProps> = ({
               <input
                 type="search"
                 className="border-0 w-72 ltr:pl-8 rtl:pr-8 form-input focus:outline-hidden group-data-[nav-type=pattern]:bg-transparent group-data-[nav-type=pattern]:placeholder:text-white/50 group-data-[nav-type=pattern]:text-white"
-                placeholder="Search for AgenticWeb"
+                placeholder={`Search for ${organization?.name || 'AgenticWeb'}`}
                 value={searchText}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   searchMenu(e.target.value)
