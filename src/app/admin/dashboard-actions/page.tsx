@@ -90,19 +90,24 @@ const DashboardActionsContent: React.FC = () => {
     refetch: refetchActions,
   } = api.projectAction.getAll.useQuery(
     {
-      projectId: currentProject?.id || '',
+      projectId: isAdminRoute ? undefined : currentProject?.id || '',
       page: currentPage,
       limit: itemsPerPage,
     },
     {
-      enabled: Boolean(currentProject?.id),
+      enabled: isAdminRoute || Boolean(currentProject?.id),
       retry: false,
     }
   )
 
   const { data: agents = [] } = api.projectAgent.getByProject.useQuery(
     { projectId: currentProject?.id || '' },
-    { enabled: Boolean(currentProject?.id) }
+    { enabled: !isAdminRoute && Boolean(currentProject?.id) }
+  )
+
+  const { data: globalAgents = [] } = api.projectAgent.getAll.useQuery(
+    {},
+    { enabled: isAdminRoute }
   )
 
   const createAction = api.projectAction.create.useMutation({
@@ -117,7 +122,7 @@ const DashboardActionsContent: React.FC = () => {
   })
 
   const handleCreateCustomAction = () => {
-    if (!currentProject?.id) {
+    if (!isAdminRoute && !currentProject?.id) {
       toast.error('Please select a project first before creating an action')
       return
     }
@@ -126,13 +131,14 @@ const DashboardActionsContent: React.FC = () => {
       name: 'new_custom_action_' + Date.now(),
       description: 'New custom action - please configure',
       apiUrl: 'POST',
-      projectId: currentProject.id,
+      projectId: isAdminRoute ? undefined : currentProject?.id,
       actionType: 'CUSTOM',
+      isGlobal: isAdminRoute,
     })
   }
 
   const handleCreateMCPAction = () => {
-    if (!currentProject?.id) {
+    if (!isAdminRoute && !currentProject?.id) {
       toast.error('Please select a project first before creating an action')
       return
     }
@@ -151,7 +157,7 @@ const DashboardActionsContent: React.FC = () => {
   }
 
   const handleSelectAgent = (agentId: string) => {
-    if (!currentProject?.id) {
+    if (!isAdminRoute && !currentProject?.id) {
       toast.error('Please select a project first before creating an action')
       return
     }
@@ -160,9 +166,10 @@ const DashboardActionsContent: React.FC = () => {
       name: 'new_agent_action_' + Date.now(),
       description: 'New agent action - please configure',
       apiUrl: 'POST',
-      projectId: currentProject.id,
+      projectId: isAdminRoute ? undefined : currentProject?.id,
       actionType: 'AGENT',
       agentId: agentId,
+      isGlobal: isAdminRoute,
     })
   }
 
@@ -362,7 +369,7 @@ const DashboardActionsContent: React.FC = () => {
               <HelpCircle className="size-4 text-gray-400" />
             </div>
 
-            {!currentProject?.id || createAction.isPending ? (
+            {(!isAdminRoute && !currentProject?.id) || createAction.isPending ? (
               <button
                 className="btn btn-primary flex items-center gap-2"
                 disabled>
@@ -512,7 +519,7 @@ const DashboardActionsContent: React.FC = () => {
       <ModalSelectAgent
         isOpen={isAgentModalOpen}
         onClose={() => setIsAgentModalOpen(false)}
-        agents={agents}
+        agents={isAdminRoute ? globalAgents : agents}
         onSelect={handleSelectAgent}
         isLoading={createAction.isPending}
       />

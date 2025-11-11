@@ -7,11 +7,12 @@ const createActionSchema = z.object({
   name: z.string().min(1, 'Action name is required'),
   description: z.string().optional(),
   apiUrl: z.string().min(1, 'API URL is required'),
-  projectId: z.string().min(1, 'Project ID is required'),
+  projectId: z.string().optional(),
   actionType: z
     .enum(['CUSTOM', 'AGENT', 'MCP', 'DATABASE', 'WEBHOOK'])
     .default('CUSTOM'),
   agentId: z.string().optional(),
+  isGlobal: z.boolean().default(false),
 })
 
 const updateActionSchema = z.object({
@@ -102,32 +103,45 @@ export const projectActionRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createActionSchema)
     .mutation(async ({ ctx, input }) => {
-      const membership = await ctx.db.projectMember.findFirst({
-        where: {
-          userId: ctx.session.user.id,
-          projectId: input.projectId,
-        },
-      })
-
-      if (!membership) {
+      // For global actions, only SUPERADMIN can create
+      if (input.isGlobal && ctx.session.user.role !== 'SUPERADMIN') {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message:
-            'You do not have permission to create actions in this project',
+          message: 'Only SUPERADMIN can create global actions',
         })
+      }
+
+      // For project-specific actions, check membership
+      if (!input.isGlobal && input.projectId) {
+        const membership = await ctx.db.projectMember.findFirst({
+          where: {
+            userId: ctx.session.user.id,
+            projectId: input.projectId,
+          },
+        })
+
+        if (!membership) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message:
+              'You do not have permission to create actions in this project',
+          })
+        }
       }
 
       const existingAction = await ctx.db.projectAction.findFirst({
         where: {
           name: input.name,
-          projectId: input.projectId,
+          ...(input.isGlobal ? { isGlobal: true } : { projectId: input.projectId }),
         },
       })
 
       if (existingAction) {
         throw new TRPCError({
           code: 'CONFLICT',
-          message: 'An action with this name already exists in this project',
+          message: input.isGlobal
+            ? 'A global action with this name already exists'
+            : 'An action with this name already exists in this project',
         })
       }
 
@@ -136,7 +150,8 @@ export const projectActionRouter = createTRPCRouter({
           name: input.name,
           description: input.description,
           apiUrl: input.apiUrl,
-          projectId: input.projectId,
+          projectId: input.isGlobal ? null : input.projectId,
+          isGlobal: input.isGlobal,
           createdById: ctx.session.user.id,
           actionType: input.actionType,
           ...(input.agentId && { agentId: input.agentId }),
@@ -166,7 +181,7 @@ export const projectActionRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(
       z.object({
-        projectId: z.string().min(1, 'Project ID is required'),
+        projectId: z.string().optional(),
         page: z.number().min(1).default(1),
         limit: z.number().min(1).max(100).default(10),
         search: z.string().optional(),
@@ -176,27 +191,53 @@ export const projectActionRouter = createTRPCRouter({
       const { projectId, page, limit, search } = input
       const skip = (page - 1) * limit
 
-      const membership = await ctx.db.projectMember.findFirst({
-        where: {
-          userId: ctx.session.user.id,
-          projectId,
-        },
-      })
-
-      if (!membership) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'You do not have permission to view actions in this project',
+      // If projectId is provided, check membership
+      if (projectId) {
+        const membership = await ctx.db.projectMember.findFirst({
+          where: {
+            userId: ctx.session.user.id,
+            projectId,
+          },
         })
+
+        if (!membership && ctx.session.user.role !== 'SUPERADMIN') {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'You do not have permission to view actions in this project',
+          })
+        }
       }
 
-      const where: any = { projectId }
+      // Build where clause
+      const where: any = {}
+
+      // If no projectId and user is SUPERADMIN, show only global actions
+      // If projectId provided, show actions for that project
+      if (!projectId && ctx.session.user.role === 'SUPERADMIN') {
+        where.isGlobal = true
+      } else if (projectId) {
+        where.OR = [
+          { projectId },
+          { isGlobal: true },
+        ]
+      }
 
       if (search) {
-        where.OR = [
+        const searchConditions = [
           { name: { contains: search, mode: 'insensitive' } },
           { description: { contains: search, mode: 'insensitive' } },
         ]
+
+        if (where.OR) {
+          // Combine existing OR with search OR
+          where.AND = [
+            { OR: where.OR },
+            { OR: searchConditions },
+          ]
+          delete where.OR
+        } else {
+          where.OR = searchConditions
+        }
       }
 
       const [actions, totalCount] = await Promise.all([
@@ -392,26 +433,43 @@ export const projectActionRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const action = await ctx.db.projectAction.findFirst({
-        where: {
-          id: input.id,
-          project: {
-            members: {
-              some: {
-                userId: ctx.session.user.id,
-                role: { in: ['ADMIN'] },
-              },
-            },
-          },
-        },
+      // First, find the action
+      const action = await ctx.db.projectAction.findUnique({
+        where: { id: input.id },
       })
 
       if (!action) {
         throw new TRPCError({
-          code: 'FORBIDDEN',
-          message:
-            'Action not found or you do not have permission to delete it',
+          code: 'NOT_FOUND',
+          message: 'Action not found',
         })
+      }
+
+      // Check permissions
+      // If it's a global action, only SUPERADMIN can delete
+      if (action.isGlobal) {
+        if (ctx.session.user.role !== 'SUPERADMIN') {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Only SUPERADMIN can delete global actions',
+          })
+        }
+      } else {
+        // For project actions, check if user is ADMIN of the project
+        const membership = await ctx.db.projectMember.findFirst({
+          where: {
+            userId: ctx.session.user.id,
+            projectId: action.projectId!,
+            role: { in: ['ADMIN'] },
+          },
+        })
+
+        if (!membership) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'You do not have permission to delete this action',
+          })
+        }
       }
 
       await ctx.db.projectAction.delete({

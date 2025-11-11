@@ -537,37 +537,44 @@ export const projectAgentFileRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       console.log('🗑️ delete file called with:', { fileId: input.id })
 
-      const file = await ctx.db.projectAgentFile.findFirst({
-        where: {
-          id: input.id,
-          agent: {
-            project: {
-              OR: [
-                // User is a project member with admin role
-                {
-                  members: {
-                    some: {
-                      userId: ctx.session.user.id,
-                      role: 'ADMIN',
-                    },
-                  },
-                },
-                // User is organization owner/admin
-                {
-                  organization: {
-                    members: {
-                      some: {
-                        userId: ctx.session.user.id,
-                        role: { in: ['OWNER', 'ADMIN'] },
+      // SUPERADMIN has access to all files (including those from global agents)
+      const isSuperAdmin = ctx.session.user.role === 'SUPERADMIN'
+
+      const file = isSuperAdmin
+        ? await ctx.db.projectAgentFile.findUnique({
+            where: { id: input.id },
+          })
+        : await ctx.db.projectAgentFile.findFirst({
+            where: {
+              id: input.id,
+              agent: {
+                project: {
+                  OR: [
+                    // User is a project member with admin role
+                    {
+                      members: {
+                        some: {
+                          userId: ctx.session.user.id,
+                          role: 'ADMIN',
+                        },
                       },
                     },
-                  },
+                    // User is organization owner/admin
+                    {
+                      organization: {
+                        members: {
+                          some: {
+                            userId: ctx.session.user.id,
+                            role: { in: ['OWNER', 'ADMIN'] },
+                          },
+                        },
+                      },
+                    },
+                  ],
                 },
-              ],
+              },
             },
-          },
-        },
-      })
+          })
 
       if (!file) {
         throw new TRPCError({
