@@ -30,20 +30,20 @@ export const AgentSidebar = ({
   const baseRoute = isPQRAgent
     ? '/apps/pqr/pqr-agent'
     : isAdminAgent
-    ? '/admin/agents'
-    : '/apps/agents/default'
+      ? '/admin/agents'
+      : '/apps/agents/default'
 
   const backRoute = isPQRAgent
     ? '/apps/pqr/pqr-agent'
     : isAdminAgent
-    ? '/admin/agents'
-    : '/apps/agents/default'
+      ? '/admin/agents'
+      : '/apps/agents/default'
 
   const backText = isPQRAgent
     ? 'Back to PQR Agents'
     : isAdminAgent
-    ? 'Back to Agents'
-    : 'Back to Agents'
+      ? 'Back to Agents'
+      : 'Back to Agents'
 
   const navigationItems = [
     {
@@ -98,8 +98,7 @@ export const AgentSidebar = ({
             </p>
             <button
               onClick={() => setIsTestModalOpen(true)}
-              className="btn btn-gray flex items-center justify-center gap-3 w-full"
-            >
+              className="btn btn-gray flex items-center justify-center gap-3 w-full">
               <Phone className="w-4 h-4" />
               Test Agent
             </button>
@@ -166,8 +165,8 @@ export const AgentMobileDrawer = ({
   const baseRoute = isPQRAgent
     ? '/apps/pqr/pqr-agent'
     : isAdminAgent
-    ? '/admin/agents'
-    : '/apps/agents/default'
+      ? '/admin/agents'
+      : '/apps/agents/default'
 
   const navigationItems = [
     {

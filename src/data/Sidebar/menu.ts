@@ -104,29 +104,7 @@ const menu: MegaMenu[] = [
       },
     ],
   },
-  {
-    title: 'Rrhh',
-    lang: 'pe-rrhh',
-    icon: 'users-round',
-    link: '/apps/rrhh/',
-    separator: false,
-    children: [
-      {
-        title: 'List',
-        lang: 'List',
-        link: '/apps/rrhh/rrhh-list',
-        dropdownPosition: null,
-        children: [],
-      },
-      {
-        title: 'Admission Form',
-        lang: 'pe-admission-form',
-        link: '/apps/rrhh/rrhh-admission',
-        dropdownPosition: null,
-        children: [],
-      },
-    ],
-  },
+
   {
     title: 'Orders',
     lang: 'orders',
@@ -204,9 +182,9 @@ const menu: MegaMenu[] = [
     separator: false,
     children: [
       {
-        title: 'Create-view Pqr',
+        title: 'Create-view',
         link: '/apps/pqr/pqr-list',
-        lang: 'Create-view Pqr',
+        lang: 'Create-view',
       },
       {
         title: 'Landing',
@@ -218,14 +196,70 @@ const menu: MegaMenu[] = [
         link: '/apps/pqr/documentation',
         lang: 'Documentation',
       },
+      {
+        title: 'Pqr Agent',
+        link: '/apps/pqr/pqr-agent/cmhuuat6w000d5a58fnw78cdt',
+        lang: 'Pqr Agent',
+      },
     ],
   },
   {
     title: 'FORECASTING',
     lang: 'pe-forecasting',
     icon: 'table-2',
-    link: '/apps/forecasting/forecasting-list',
+    link: '/apps/forecasting',
     separator: false,
+    children: [
+      {
+        title: 'Create-view',
+        link: '/apps/forecasting/forecasting-list',
+        lang: 'Create-view',
+      },
+      {
+        title: 'Landing',
+        link: '/apps/forecasting/forecasting-landing',
+        lang: 'Landing',
+      },
+      {
+        title: 'Documentation',
+        link: '/apps/forecasting/documentation',
+        lang: 'Documentation',
+      },
+    ],
+  },
+  {
+    title: 'Rrhh',
+    lang: 'pe-rrhh',
+    icon: 'users-round',
+    link: '/apps/rrhh/',
+    separator: false,
+    children: [
+      {
+        title: 'Create-view',
+        lang: 'Create-view',
+        link: '/apps/rrhh/rrhh-list',
+      },
+      {
+        title: 'Landing',
+        link: '/apps/rrhh/landing',
+        lang: 'Landing',
+      },
+      {
+        title: 'Documentation',
+        link: '/apps/rrhh/documentation',
+        lang: 'Documentation',
+      },
+      {
+        title: 'RRHH Agent',
+        link: '/apps/rrhh/rrhh-agent/cmhuuaujv000l5a58e1ly9iii',
+        lang: 'RRHH Agent',
+      },
+      {
+        title: 'Chat',
+        link: '/apps/rrhh/rrhh-agent',
+        lang: 'Chat',
+      },
+    ],
   },
   {
     title: 'API Keys',

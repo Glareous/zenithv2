@@ -66,14 +66,14 @@ const PQRWorkflowPage: React.FC<PageProps> = ({ params }) => {
       )
 
       if (targetAgent) {
-        router.push(`/apps/pqr/pqr-agent/${targetAgent.id}/workflow`)
+        router.push(`/apps/rrhh/rrhh-agent/${targetAgent.id}/workflow`)
       } else {
         if (currentProjectAgents.length > 0) {
           router.push(
-            `/apps/pqr/pqr-agent/${currentProjectAgents[0].id}/workflow`
+            `/apps/rrhh/rrhh-agent/${currentProjectAgents[0].id}/workflow`
           )
         } else {
-          router.push('/apps/pqr/pqr-agent')
+          router.push('/apps/rrhh/rrhh-agent')
         }
       }
     }
@@ -135,8 +135,8 @@ const PQRWorkflowPage: React.FC<PageProps> = ({ params }) => {
                 ? "The agent you're looking for doesn't exist or you don't have access to it."
                 : 'Agent not found or does not belong to the current project.'}
           </p>
-          <Link href="/apps/pqr/pqr-agent" className="btn btn-primary hidden">
-            Back to PQR Agents
+          <Link href="/apps/rrhh/rrhh-agent" className="btn btn-primary">
+            Back to RRHH Agents
           </Link>
         </div>
       </div>

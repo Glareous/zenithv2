@@ -67,11 +67,14 @@ export default function Layout({
   const isAgentPage =
     (pathname?.includes('/apps/agents/default/') ||
       pathname?.includes('/apps/pqr/pqr-agent/') ||
+      pathname?.includes('/apps/rrhh/rrhh-agent/') ||
       pathname?.includes('/admin/agents/')) &&
     Boolean(pathname?.match(/\/[^/]+\/[^/]*$/))
   const agentId = isAgentPage
     ? pathname?.includes('/apps/pqr/pqr-agent/')
       ? pathname?.split('/')[4]  // For PQR agent routes
+      : pathname?.includes('/apps/rrhh/rrhh-agent/')
+      ? pathname?.split('/')[4]  // For RRHH agent routes
       : pathname?.includes('/admin/agents/')
       ? pathname?.split('/')[3]  // For admin agent routes
       : pathname?.split('/')[4]   // For regular agent routes

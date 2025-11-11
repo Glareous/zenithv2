@@ -72,11 +72,13 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
     { enabled: !!currentProject?.id }
   )
 
-  const { data: projectModels = [], isLoading: isModelsLoading } =
-    api.projectModel.getByProject.useQuery(
-      { projectId: currentProject?.id || '' },
-      { enabled: !!currentProject?.id }
-    )
+  const {
+    data: projectModels = [],
+    isLoading: isModelsLoading,
+  } = api.projectModel.getByProject.useQuery(
+    { projectId: currentProject?.id || '' },
+    { enabled: !!currentProject?.id }
+  )
 
   const {
     register,
@@ -111,7 +113,7 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
 
   const updateAgentMutation = api.projectAgent.update.useMutation({
     onSuccess: async () => {
-      toast.success('PQR Agent updated successfully!')
+      toast.success('RRHH Agent updated successfully!')
 
       await queryClient.invalidateQueries({
         queryKey: [['projectAgent', 'getByProject']],
@@ -119,20 +121,20 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
       refetchProjectAgent()
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to update PQR agent')
+      toast.error(error.message || 'Failed to update RRHH agent')
     },
   })
 
   const deleteAgentMutation = api.projectAgent.delete.useMutation({
     onSuccess: async () => {
-      toast.success('PQR Agent deleted successfully!')
+      toast.success('RRHH Agent deleted successfully!')
       await queryClient.invalidateQueries({
         queryKey: [['projectAgent', 'getByProject']],
       })
-      router.push('/apps/pqr/pqr-agent')
+      router.push('/apps/rrhh/rrhh-agent')
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to delete PQR agent')
+      toast.error(error.message || 'Failed to delete RRHH agent')
     },
   })
 
@@ -187,14 +189,14 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
       )
 
       if (targetAgent) {
-        router.push(`/apps/pqr/pqr-agent/${targetAgent.id}/configure`)
+        router.push(`/apps/rrhh/rrhh-agent/${targetAgent.id}/configure`)
       } else {
         if (currentProjectAgents.length > 0) {
           router.push(
-            `/apps/pqr/pqr-agent/${currentProjectAgents[0].id}/configure`
+            `/apps/rrhh/rrhh-agent/${currentProjectAgents[0].id}/configure`
           )
         } else {
-          router.push('/apps/pqr/pqr-agent')
+          router.push('/apps/rrhh/rrhh-agent')
         }
       }
     }
@@ -376,8 +378,8 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
                 ? "The agent you're looking for doesn't exist or you don't have access to it."
                 : 'Agent not found or does not belong to the current project.'}
           </p>
-          <Link href="/apps/pqr/pqr-agent" className="btn btn-primary hidden">
-            Back to PQR Agents
+          <Link href="/apps/rrhh/rrhh-agent" className="btn btn-primary">
+            Back to RRHH Agents
           </Link>
         </div>
       </div>
@@ -524,18 +526,13 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
             </div>
           ) : projectModels.length === 0 ? (
             <div>
-              <div className="form-input bg-gray-50 dark:bg-gray-700 cursor-not-allowed opacity-75 hidden">
-                <span className="text-sm text-gray-500">
-                  No models available
-                </span>
+              <div className="form-input bg-gray-50 dark:bg-gray-700 cursor-not-allowed opacity-75">
+                <span className="text-sm text-gray-500">No models available</span>
               </div>
               <p className="mt-2 text-xs text-gray-400">
-                <Link
-                  href="/apps/models"
-                  className="text-primary-600 hover:text-primary-500 hidden">
+                <Link href="/apps/models" className="text-primary-600 hover:text-primary-500">
                   Create a model
-                </Link>{' '}
-                to assign to this agent.
+                </Link> to assign to this agent.
               </p>
             </div>
           ) : (
@@ -545,9 +542,7 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
                 watch('modelId')
                   ? {
                       value: watch('modelId'),
-                      label:
-                        projectModels.find((m) => m.id === watch('modelId'))
-                          ?.name || 'Select model',
+                      label: projectModels.find((m) => m.id === watch('modelId'))?.name || 'Select model',
                     }
                   : null
               }
@@ -566,9 +561,7 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
           {!isModelsLoading && projectModels.length > 0 && (
             <p className="mt-2 text-xs text-gray-400">
               Manage models in{' '}
-              <Link
-                href="/apps/models"
-                className="text-primary-600 hover:text-primary-500">
+              <Link href="/apps/models" className="text-primary-600 hover:text-primary-500">
                 Models page
               </Link>
               .
@@ -604,9 +597,7 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
               <label
                 htmlFor="file-upload"
                 className={`${canManageAgents ? 'cursor-pointer text-primary-600 hover:text-primary-500' : 'cursor-not-allowed text-gray-400'} font-medium`}>
-                {canManageAgents
-                  ? 'Click to upload files'
-                  : 'File upload disabled'}
+                {canManageAgents ? 'Click to upload files' : 'File upload disabled'}
                 <input
                   id="file-upload"
                   name="file-upload"
@@ -776,7 +767,7 @@ const PQRAgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
 
           {/* Save/Cancel Buttons */}
           <div className="flex space-x-4">
-            <Link href="/apps/pqr/pqr-agent" className="btn btn-red">
+            <Link href="/apps/rrhh/rrhh-agent" className="btn btn-red">
               Cancel
             </Link>
             <button
