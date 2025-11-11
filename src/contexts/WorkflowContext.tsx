@@ -181,6 +181,7 @@ export interface WorkflowProviderProps {
   children: ReactNode
   workflowId: string
   agentId: string
+  canManageAgents?: boolean
 }
 
 const WorkflowContext = createContext<WorkflowContextValue | undefined>(
@@ -191,6 +192,7 @@ export function WorkflowProvider({
   children,
   workflowId,
   agentId,
+  canManageAgents = false,
 }: WorkflowProviderProps) {
   const [layout, setLayout] = useState<Layout>({
     nodes: [],
@@ -1253,6 +1255,12 @@ export function WorkflowProvider({
   }, [])
 
   const handleSave = useCallback(async (): Promise<void> => {
+    // Don't save if user doesn't have permission
+    if (!canManageAgents) {
+      console.log('⚠️ Save blocked: User does not have permission to save workflow')
+      return
+    }
+
     if (!hasUnsavedChanges || isSaving) return
 
     setIsSaving(true)
@@ -1319,6 +1327,7 @@ export function WorkflowProvider({
       setIsSaving(false)
     }
   }, [
+    canManageAgents,
     hasUnsavedChanges,
     isSaving,
     saveWorkflowMutation,

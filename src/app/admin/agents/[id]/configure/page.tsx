@@ -72,11 +72,20 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
     { enabled: !isAdminRoute && !!currentProject?.id }
   )
 
-  const { data: projectModels = [], isLoading: isModelsLoading } =
+  // For admin route, get all models; for regular route, get project models
+  const { data: projectModels = [], isLoading: isProjectModelsLoading } =
     api.projectModel.getByProject.useQuery(
       { projectId: currentProject?.id || '' },
       { enabled: !isAdminRoute && !!currentProject?.id }
     )
+
+  const { data: allModels = [], isLoading: isAllModelsLoading } =
+    api.projectModel.getAll.useQuery(undefined, {
+      enabled: isAdminRoute,
+    })
+
+  const models = isAdminRoute ? allModels : projectModels
+  const isLoadingModels = isAdminRoute ? isAllModelsLoading : isProjectModelsLoading
 
   const {
     register,
@@ -236,12 +245,16 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
 
     try {
       for (const file of selectedFiles) {
+        console.log('📤 Uploading file:', file.name)
+
         const uploadResult = await getUploadUrlMutation.mutateAsync({
           fileName: file.name,
           fileType: file.type,
           fileSize: file.size,
           agentId: agent.id,
         })
+
+        console.log('✅ Got upload URL:', uploadResult)
 
         const uploadResponse = await fetch(uploadResult.uploadUrl, {
           method: 'PUT',
@@ -251,8 +264,12 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
           },
         })
 
+        console.log('📡 Upload response status:', uploadResponse.status)
+
         if (!uploadResponse.ok) {
-          throw new Error(`Failed to upload ${file.name}`)
+          const errorText = await uploadResponse.text()
+          console.error('❌ Upload failed:', errorText)
+          throw new Error(`Failed to upload ${file.name}: ${errorText}`)
         }
 
         const fileType = file.type.startsWith('image/')
@@ -278,7 +295,8 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
 
       toast.success(`Successfully uploaded ${selectedFiles.length} file(s)!`)
     } catch (error) {
-      toast.error('Failed to upload some files')
+      console.error('❌ Upload error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to upload some files')
     } finally {
       setUploadingFiles(false)
     }
@@ -519,11 +537,11 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
           </p>
         </div>
         <div className="w-xs">
-          {isModelsLoading ? (
+          {isLoadingModels ? (
             <div className="form-input flex items-center justify-center">
               <span className="text-sm text-gray-500">Loading models...</span>
             </div>
-          ) : projectModels.length === 0 ? (
+          ) : models.length === 0 ? (
             <div>
               <div className="form-input bg-gray-50 dark:bg-gray-700 cursor-not-allowed opacity-75">
                 <span className="text-sm text-gray-500">
@@ -546,13 +564,13 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
                   ? {
                       value: watch('modelId'),
                       label:
-                        projectModels.find((m) => m.id === watch('modelId'))
+                        models.find((m) => m.id === watch('modelId'))
                           ?.name || 'Select model',
                     }
                   : null
               }
               onChange={(option) => setValue('modelId', option?.value || null)}
-              options={projectModels
+              options={models
                 .filter((model) => model.isActive)
                 .map((model) => ({
                   value: model.id,
@@ -563,7 +581,7 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
               classNamePrefix="select"
             />
           )}
-          {!isModelsLoading && projectModels.length > 0 && (
+          {!isLoadingModels && models.length > 0 && (
             <p className="mt-2 text-xs text-gray-400">
               Manage models in{' '}
               <Link

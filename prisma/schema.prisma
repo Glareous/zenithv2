@@ -1593,12 +1593,13 @@ model ProjectModel {
     type        String   @default("GENERATIVE_MODEL") // Model type: GENERATIVE_MODEL, OTHERS
     isActive    Boolean  @default(true)
     isDefault   Boolean  @default(false)
+    isGlobal    Boolean  @default(false) // Global models are accessible by all organizations
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
 
     // Relations
-    project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-    projectId   String
+    project     Project? @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    projectId   String?  // Null for global models created by SUPERADMIN
     createdBy   User    @relation("ProjectModelsCreated", fields: [createdById], references: [id])
     createdById String
     agents      ProjectAgent[]
@@ -1607,6 +1608,7 @@ model ProjectModel {
     @@index([projectId])
     @@index([createdById])
     @@index([isActive])
+    @@index([isGlobal])
 }
 
 // ProjectModelFile model - for storing model icons in AWS S3

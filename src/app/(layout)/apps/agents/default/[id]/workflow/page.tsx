@@ -20,7 +20,13 @@ interface PageProps {
 const WorkflowPage: React.FC<PageProps> = ({ params }) => {
   const { id } = React.use(params)
   const router = useRouter()
-  const { canManageAgents } = usePermissions()
+  const {
+    canManageAgents,
+    isLoadingPermissions,
+    isSuperAdmin,
+    isOwner,
+    orgRole,
+  } = usePermissions()
 
   const { currentProject } = useSelector((state: RootState) => state.Project)
   const [isNavigating, setIsNavigating] = useState(false)
@@ -102,7 +108,7 @@ const WorkflowPage: React.FC<PageProps> = ({ params }) => {
     )
   }
 
-  if (isNavigating || isCurrentProjectAgentsLoading) {
+  if (isNavigating || isCurrentProjectAgentsLoading || isLoadingPermissions) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500"></div>
@@ -141,7 +147,7 @@ const WorkflowPage: React.FC<PageProps> = ({ params }) => {
   }
 
   return (
-    <WorkflowProvider agentId={id} workflowId={id}>
+    <WorkflowProvider agentId={id} workflowId={id} canManageAgents={canManageAgents}>
       <WorkflowsPage canManageAgents={canManageAgents} />
     </WorkflowProvider>
   )

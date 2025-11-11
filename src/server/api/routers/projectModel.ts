@@ -46,10 +46,40 @@ export const projectModelRouter = createTRPCRouter({
         type: z.string().default('GENERATIVE_MODEL'),
         isActive: z.boolean().default(true),
         isDefault: z.boolean().default(false),
-        projectId: z.string(),
+        isGlobal: z.boolean().default(false),
+        projectId: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // SUPERADMIN can create global models (without projectId)
+      if (input.isGlobal && ctx.session.user.role === 'SUPERADMIN') {
+        const model = await ctx.db.projectModel.create({
+          data: {
+            name: input.name,
+            provider: input.provider,
+            modelName: input.modelName,
+            apiKey: input.apiKey, // TODO: Encrypt this before storing
+            url: input.url || undefined,
+            type: input.type,
+            isActive: input.isActive,
+            isDefault: false, // Global models cannot be default
+            isGlobal: true,
+            projectId: null,
+            createdById: ctx.session.user.id,
+          },
+        })
+
+        return model
+      }
+
+      // Regular users create project-specific models
+      if (!input.projectId) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'projectId is required for non-global models',
+        })
+      }
+
       // Check if user has permission to create models in this project
       const projectMember = await ctx.db.projectMember.findFirst({
         where: {
@@ -90,6 +120,7 @@ export const projectModelRouter = createTRPCRouter({
           type: input.type,
           isActive: input.isActive,
           isDefault: input.isDefault,
+          isGlobal: false,
           projectId: input.projectId,
           createdById: ctx.session.user.id,
         },
@@ -121,9 +152,15 @@ export const projectModelRouter = createTRPCRouter({
         })
       }
 
+      // Get models for this project AND global models
       const models = await ctx.db.projectModel.findMany({
         where: {
-          projectId: input.projectId,
+          OR: [
+            // Models that belong to this project
+            { projectId: input.projectId },
+            // Global models (accessible by all organizations)
+            { isGlobal: true },
+          ],
         },
         include: {
           files: {
@@ -172,10 +209,15 @@ export const projectModelRouter = createTRPCRouter({
         })
       }
 
-      // Check if user has access to this project
+      // Global models are accessible by everyone
+      if (model.isGlobal) {
+        return model
+      }
+
+      // For non-global models, check if user has access to this project
       const projectMember = await ctx.db.projectMember.findFirst({
         where: {
-          projectId: model.projectId,
+          projectId: model.projectId!,
           userId: ctx.session.user.id,
         },
       })
@@ -220,24 +262,34 @@ export const projectModelRouter = createTRPCRouter({
         })
       }
 
-      // Check if user has permission to update models in this project
-      const projectMember = await ctx.db.projectMember.findFirst({
-        where: {
-          projectId: existingModel.projectId,
-          userId: ctx.session.user.id,
-          role: { in: ['ADMIN'] },
-        },
-      })
+      // SUPERADMIN can update any model (including global models)
+      if (ctx.session.user.role !== 'SUPERADMIN') {
+        // Regular users can only update models in their project
+        if (!existingModel.projectId) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Only SUPERADMIN can update global models',
+          })
+        }
 
-      if (!projectMember) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: "You don't have permission to update this model",
+        const projectMember = await ctx.db.projectMember.findFirst({
+          where: {
+            projectId: existingModel.projectId,
+            userId: ctx.session.user.id,
+            role: { in: ['ADMIN'] },
+          },
         })
+
+        if (!projectMember) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: "You don't have permission to update this model",
+          })
+        }
       }
 
-      // If this is set as default, unset all other defaults
-      if (input.isDefault) {
+      // If this is set as default, unset all other defaults in the same project
+      if (input.isDefault && existingModel.projectId) {
         await ctx.db.projectModel.updateMany({
           where: {
             projectId: existingModel.projectId,
@@ -284,20 +336,30 @@ export const projectModelRouter = createTRPCRouter({
         })
       }
 
-      // Check if user has permission to delete models in this project
-      const projectMember = await ctx.db.projectMember.findFirst({
-        where: {
-          projectId: model.projectId,
-          userId: ctx.session.user.id,
-          role: { in: ['ADMIN'] },
-        },
-      })
+      // SUPERADMIN can delete any model (including global models)
+      if (ctx.session.user.role !== 'SUPERADMIN') {
+        // Regular users can only delete models in their project
+        if (!model.projectId) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Only SUPERADMIN can delete global models',
+          })
+        }
 
-      if (!projectMember) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: "You don't have permission to delete this model",
+        const projectMember = await ctx.db.projectMember.findFirst({
+          where: {
+            projectId: model.projectId,
+            userId: ctx.session.user.id,
+            role: { in: ['ADMIN'] },
+          },
         })
+
+        if (!projectMember) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: "You don't have permission to delete this model",
+          })
+        }
       }
 
       // Check if model is in use by agents
@@ -314,4 +376,37 @@ export const projectModelRouter = createTRPCRouter({
 
       return { success: true }
     }),
+
+  // Get all models (SUPERADMIN only)
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    // Only SUPERADMIN can access all models
+    if (ctx.session.user.role !== 'SUPERADMIN') {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'Only SUPERADMIN can access all models',
+      })
+    }
+
+    const models = await ctx.db.projectModel.findMany({
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+        project: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    })
+
+    return models
+  }),
 })

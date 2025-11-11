@@ -69,13 +69,11 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
     { enabled: !!currentProject?.id }
   )
 
-  const {
-    data: projectModels = [],
-    isLoading: isModelsLoading,
-  } = api.projectModel.getByProject.useQuery(
-    { projectId: currentProject?.id || '' },
-    { enabled: !!currentProject?.id }
-  )
+  const { data: projectModels = [], isLoading: isModelsLoading } =
+    api.projectModel.getByProject.useQuery(
+      { projectId: currentProject?.id || '' },
+      { enabled: !!currentProject?.id }
+    )
 
   const {
     register,
@@ -524,13 +522,18 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
           ) : projectModels.length === 0 ? (
             <div>
               <div className="form-input bg-gray-50 dark:bg-gray-700 cursor-not-allowed opacity-75">
-                <span className="text-sm text-gray-500">No models available</span>
+                <span className="text-sm text-gray-500">
+                  No models available
+                </span>
               </div>
               {canManageAgents && (
-                <p className="mt-2 text-xs text-gray-400">
-                  <Link href="/apps/models" className="text-primary-600 hover:text-primary-500">
+                <p className="mt-2 text-xs text-gray-400 hidden">
+                  <Link
+                    href="/apps/models"
+                    className="text-primary-600 hover:text-primary-500">
                     Create a model
-                  </Link> to assign to this agent.
+                  </Link>{' '}
+                  to assign to this agent.
                 </p>
               )}
             </div>
@@ -541,7 +544,9 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
                 watch('modelId')
                   ? {
                       value: watch('modelId'),
-                      label: projectModels.find((m) => m.id === watch('modelId'))?.name || 'Select model',
+                      label:
+                        projectModels.find((m) => m.id === watch('modelId'))
+                          ?.name || 'Select model',
                     }
                   : null
               }
@@ -558,9 +563,11 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
             />
           )}
           {!isModelsLoading && projectModels.length > 0 && (
-            <p className="mt-2 text-xs text-gray-400">
+            <p className="mt-2 text-xs text-gray-400 hidden">
               Manage models in{' '}
-              <Link href="/apps/models" className="text-primary-600 hover:text-primary-500">
+              <Link
+                href="/apps/models"
+                className="text-primary-600 hover:text-primary-500 hidden">
                 Models page
               </Link>
               .

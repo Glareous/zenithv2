@@ -139,8 +139,8 @@ const WorkflowPage: React.FC<PageProps> = ({ params }) => {
   }
 
   return (
-    <WorkflowProvider agentId={id} workflowId={id}>
-      <WorkflowsPage />
+    <WorkflowProvider agentId={id} workflowId={id} canManageAgents={true}>
+      <WorkflowsPage canManageAgents={true} />
     </WorkflowProvider>
   )
 }

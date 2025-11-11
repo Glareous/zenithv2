@@ -55,7 +55,7 @@ const CardStep: React.FC<CardStepProps> = ({
   dragging,
   onDoubleClick,
   onDeleteRequest,
-  canManageAgents = true,
+  canManageAgents = false,
 }) => {
   const [isCardHovered, setIsCardHovered] = React.useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false)
@@ -63,7 +63,7 @@ const CardStep: React.FC<CardStepProps> = ({
   const { deleteNode, layout } = useWorkflow()
 
   // Use canManageAgents from props or data
-  const hasPermission = canManageAgents ?? data.canManageAgents ?? true
+  const hasPermission = canManageAgents ?? data.canManageAgents ?? false
 
   // Check if this node is at the end of the workflow (has no children)
   const isEndOfWorkflow = React.useMemo(() => {

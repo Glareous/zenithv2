@@ -378,7 +378,7 @@ const Agents: React.FC = () => {
       <Dialog
         open={isAssignModalOpen}
         onClose={() => setIsAssignModalOpen(false)}
-        className="relative z-50">
+        className="relative z-50 hidden">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <DialogPanel className="mx-auto max-w-lg w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl">

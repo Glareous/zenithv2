@@ -33,13 +33,14 @@ const CustomCardStep = ({
   data,
   selected,
   dragging,
-  onDeleteRequest,
-  canManageAgents,
 }: any) => {
   const { openDrawer } = useWorkflow()
 
+  console.log('🔍 CustomCardStep - canManageAgents:', data.canManageAgents)
+  console.log('🔍 CustomCardStep - full data:', data)
+
   const handleDoubleClick = (nodeId: string) => {
-    if (canManageAgents) {
+    if (data.canManageAgents) {
       openDrawer(nodeId, data.variant)
     }
   }
@@ -51,8 +52,8 @@ const CustomCardStep = ({
       selected={selected}
       dragging={dragging}
       onDoubleClick={handleDoubleClick}
-      onDeleteRequest={onDeleteRequest}
-      canManageAgents={canManageAgents}
+      onDeleteRequest={data.onDeleteRequest}
+      canManageAgents={data.canManageAgents}
     />
   )
 }
@@ -66,8 +67,10 @@ interface WorkflowsPageProps {
 }
 
 const WorkflowsPage: React.FC<WorkflowsPageProps> = ({
-  canManageAgents = true,
+  canManageAgents = false,
 }) => {
+  console.log('🔍 WorkflowsPage - canManageAgents prop:', canManageAgents)
+
   const {
     layout,
     createNode,

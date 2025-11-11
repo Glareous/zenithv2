@@ -35,34 +35,41 @@ export const projectAgentFileRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Check if user has access to this agent
-      const agent = await ctx.db.projectAgent.findFirst({
-        where: {
-          id: input.agentId,
-          project: {
-            OR: [
-              // User is a project member
-              {
-                members: {
-                  some: {
-                    userId: ctx.session.user.id,
-                  },
-                },
-              },
-              // User is organization owner/admin
-              {
-                organization: {
-                  members: {
-                    some: {
-                      userId: ctx.session.user.id,
-                      role: { in: ['OWNER', 'ADMIN'] },
+      // SUPERADMIN has access to all agents (including templates without projectId)
+      const isSuperAdmin = ctx.session.user.role === 'SUPERADMIN'
+
+      const agent = isSuperAdmin
+        ? await ctx.db.projectAgent.findUnique({
+            where: { id: input.agentId },
+          })
+        : await ctx.db.projectAgent.findFirst({
+            where: {
+              id: input.agentId,
+              project: {
+                OR: [
+                  // User is a project member
+                  {
+                    members: {
+                      some: {
+                        userId: ctx.session.user.id,
+                      },
                     },
                   },
-                },
+                  // User is organization owner/admin
+                  {
+                    organization: {
+                      members: {
+                        some: {
+                          userId: ctx.session.user.id,
+                          role: { in: ['OWNER', 'ADMIN'] },
+                        },
+                      },
+                    },
+                  },
+                ],
               },
-            ],
-          },
-        },
-      })
+            },
+          })
 
       if (!agent) {
         throw new TRPCError({
@@ -178,34 +185,41 @@ export const projectAgentFileRouter = createTRPCRouter({
       })
 
       // Check if user has access to this agent
-      const agent = await ctx.db.projectAgent.findFirst({
-        where: {
-          id: input.agentId,
-          project: {
-            OR: [
-              // User is a project member
-              {
-                members: {
-                  some: {
-                    userId: ctx.session.user.id,
-                  },
-                },
-              },
-              // User is organization owner/admin
-              {
-                organization: {
-                  members: {
-                    some: {
-                      userId: ctx.session.user.id,
-                      role: { in: ['OWNER', 'ADMIN'] },
+      // SUPERADMIN has access to all agents (including templates without projectId)
+      const isSuperAdmin = ctx.session.user.role === 'SUPERADMIN'
+
+      const agent = isSuperAdmin
+        ? await ctx.db.projectAgent.findUnique({
+            where: { id: input.agentId },
+          })
+        : await ctx.db.projectAgent.findFirst({
+            where: {
+              id: input.agentId,
+              project: {
+                OR: [
+                  // User is a project member
+                  {
+                    members: {
+                      some: {
+                        userId: ctx.session.user.id,
+                      },
                     },
                   },
-                },
+                  // User is organization owner/admin
+                  {
+                    organization: {
+                      members: {
+                        some: {
+                          userId: ctx.session.user.id,
+                          role: { in: ['OWNER', 'ADMIN'] },
+                        },
+                      },
+                    },
+                  },
+                ],
               },
-            ],
-          },
-        },
-      })
+            },
+          })
 
       if (!agent) {
         throw new TRPCError({
@@ -286,34 +300,41 @@ export const projectAgentFileRouter = createTRPCRouter({
       })
 
       // Check if user has access to this agent
-      const agent = await ctx.db.projectAgent.findFirst({
-        where: {
-          id: input.agentId,
-          project: {
-            OR: [
-              // User is a project member
-              {
-                members: {
-                  some: {
-                    userId: ctx.session.user.id,
-                  },
-                },
-              },
-              // User is organization owner/admin
-              {
-                organization: {
-                  members: {
-                    some: {
-                      userId: ctx.session.user.id,
-                      role: { in: ['OWNER', 'ADMIN'] },
+      // SUPERADMIN has access to all agents (including templates without projectId)
+      const isSuperAdmin = ctx.session.user.role === 'SUPERADMIN'
+
+      const agent = isSuperAdmin
+        ? await ctx.db.projectAgent.findUnique({
+            where: { id: input.agentId },
+          })
+        : await ctx.db.projectAgent.findFirst({
+            where: {
+              id: input.agentId,
+              project: {
+                OR: [
+                  // User is a project member
+                  {
+                    members: {
+                      some: {
+                        userId: ctx.session.user.id,
+                      },
                     },
                   },
-                },
+                  // User is organization owner/admin
+                  {
+                    organization: {
+                      members: {
+                        some: {
+                          userId: ctx.session.user.id,
+                          role: { in: ['OWNER', 'ADMIN'] },
+                        },
+                      },
+                    },
+                  },
+                ],
               },
-            ],
-          },
-        },
-      })
+            },
+          })
 
       if (!agent) {
         throw new TRPCError({
@@ -601,34 +622,41 @@ export const projectAgentFileRouter = createTRPCRouter({
       })
 
       // Check if user has access to this agent
-      const agent = await ctx.db.projectAgent.findFirst({
-        where: {
-          id: input.agentId,
-          project: {
-            OR: [
-              // User is a project member
-              {
-                members: {
-                  some: {
-                    userId: ctx.session.user.id,
-                  },
-                },
-              },
-              // User is organization owner/admin
-              {
-                organization: {
-                  members: {
-                    some: {
-                      userId: ctx.session.user.id,
-                      role: { in: ['OWNER', 'ADMIN'] },
+      // SUPERADMIN has access to all agents (including templates without projectId)
+      const isSuperAdmin = ctx.session.user.role === 'SUPERADMIN'
+
+      const agent = isSuperAdmin
+        ? await ctx.db.projectAgent.findUnique({
+            where: { id: input.agentId },
+          })
+        : await ctx.db.projectAgent.findFirst({
+            where: {
+              id: input.agentId,
+              project: {
+                OR: [
+                  // User is a project member
+                  {
+                    members: {
+                      some: {
+                        userId: ctx.session.user.id,
+                      },
                     },
                   },
-                },
+                  // User is organization owner/admin
+                  {
+                    organization: {
+                      members: {
+                        some: {
+                          userId: ctx.session.user.id,
+                          role: { in: ['OWNER', 'ADMIN'] },
+                        },
+                      },
+                    },
+                  },
+                ],
               },
-            ],
-          },
-        },
-      })
+            },
+          })
 
       if (!agent) {
         throw new TRPCError({

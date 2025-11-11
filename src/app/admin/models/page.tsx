@@ -50,6 +50,10 @@ const ModelsPage: NextPageWithLayout = () => {
   const { currentProject } = useSelector((state: RootState) => state.Project)
   const router = useRouter()
 
+  // Check if we're on admin route
+  const isAdminRoute =
+    typeof window !== 'undefined' && window.location.pathname.startsWith('/admin/models')
+
   const [showModal, setShowModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedModel, setSelectedModel] = useState<any>(null)
@@ -82,19 +86,33 @@ const ModelsPage: NextPageWithLayout = () => {
 
   const { data: isAdminData } = api.projectModel.checkIsAdmin.useQuery(
     { projectId: currentProject?.id || '' },
-    { enabled: !!currentProject?.id }
+    { enabled: !isAdminRoute && !!currentProject?.id }
   )
 
   const isAdmin = isAdminData?.isAdmin ?? false
+  const isSuperAdmin = session?.user?.role === 'SUPERADMIN'
 
+  // For admin route, get all models; for app route, get project models
   const {
-    data: models = [],
-    isLoading,
-    refetch,
+    data: projectModels = [],
+    isLoading: isProjectModelsLoading,
+    refetch: refetchProjectModels,
   } = api.projectModel.getByProject.useQuery(
     { projectId: currentProject?.id || '' },
-    { enabled: !!currentProject?.id && isAdmin }
+    { enabled: !isAdminRoute && !!currentProject?.id && isAdmin }
   )
+
+  const {
+    data: allModels = [],
+    isLoading: isAllModelsLoading,
+    refetch: refetchAllModels,
+  } = api.projectModel.getAll.useQuery(undefined, {
+    enabled: isAdminRoute && isSuperAdmin,
+  })
+
+  const models = isAdminRoute ? allModels : projectModels
+  const isLoading = isAdminRoute ? isAllModelsLoading : isProjectModelsLoading
+  const refetch = isAdminRoute ? refetchAllModels : refetchProjectModels
 
   const createMutation = api.projectModel.create.useMutation({
     onSuccess: () => {
@@ -298,7 +316,9 @@ const ModelsPage: NextPageWithLayout = () => {
           type: data.type,
           isActive: data.isActive,
           isDefault: data.isDefault,
-          projectId: currentProject.id,
+          // For admin route, create global models without projectId
+          isGlobal: isAdminRoute,
+          projectId: isAdminRoute ? undefined : currentProject.id,
         })
 
         if (selectedFile && newModel.id) {
@@ -416,7 +436,9 @@ const ModelsPage: NextPageWithLayout = () => {
     )
   }
 
-  if (session && currentProject && !isAdmin) {
+  // For admin route, SUPERADMIN always has access
+  // For app route, check if user is project admin
+  if (!isAdminRoute && session && currentProject && !isAdmin) {
     return (
       <React.Fragment>
         <BreadCrumb
