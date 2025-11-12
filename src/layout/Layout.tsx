@@ -141,9 +141,13 @@ export default function Layout({
   useEffect(() => {
     let newMenu = session?.user?.role === 'SUPERADMIN' ? adminMenu : menu
 
-    // Apply menu restrictions for regular users based on their organization
-    if (session?.user?.role !== 'SUPERADMIN' && userOrganization?.allowedPages) {
-      newMenu = filterMenuByAllowedPages(menu, userOrganization.allowedPages)
+    // Apply menu restrictions and update agent links for regular users
+    if (session?.user?.role !== 'SUPERADMIN' && userOrganization) {
+      newMenu = filterMenuByAllowedPages(
+        menu,
+        userOrganization.allowedPages,
+        userOrganization as any
+      )
     }
 
     setSearchSidebar(newMenu)

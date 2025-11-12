@@ -204,6 +204,12 @@ model Organization {
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
 
+    // Direct agent assignments (string IDs only, no Prisma relations to avoid cyclic dependencies with MongoDB)
+    agentPqrId          String?  // Reference to ProjectAgent.id (global agent)
+    agentRrhhId         String?  // Reference to ProjectAgent.id (global agent)
+    agentForecastingId  String?  // Reference to ProjectAgent.id (global agent)
+    agentChatId         String?  // Reference to ProjectAgent.id (global agent)
+
     // Relations
     owner        User                 @relation("OrganizationOwner", fields: [ownerId], references: [id])
   ownerId      String
@@ -211,9 +217,13 @@ model Organization {
     members      OrganizationMember[]
     phoneNumbers PhoneNumber[]
     files        OrganizationFile[]
-    assignedAgents OrganizationAgent[] // Agents assigned to this organization
+    assignedAgents OrganizationAgent[] // Agents assigned to this organization (deprecated - will be removed)
 
   @@index([ownerId])
+  @@index([agentPqrId])
+  @@index([agentRrhhId])
+  @@index([agentForecastingId])
+  @@index([agentChatId])
 }
 
 // Junction table for organization members with roles
@@ -286,7 +296,7 @@ model Project {
     logoUrl     String?
     
     // Relations
-    organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
     organizationId String
     createdBy      User           @relation(fields: [createdById], references: [id])
     createdById    String
@@ -452,7 +462,7 @@ model ProjectAgent {
     projectActions    ProjectAction[]       // Agent-specific actions
     cronExecutionLogs AgentCronExecutionLog[] // CRON job execution logs
     pqrProjects       Project[] @relation("PQRAgent") // Projects using this agent for PQR
-    organizationAgents OrganizationAgent[] // Organizations this agent is assigned to (when isGlobal=false)
+    organizationAgents OrganizationAgent[] // Organizations this agent is assigned to (when isGlobal=false) - DEPRECATED
 
     @@index([projectId])
     @@index([modelId])

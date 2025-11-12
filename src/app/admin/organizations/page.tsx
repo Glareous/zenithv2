@@ -9,6 +9,7 @@ import BreadCrumb from '@src/components/common/BreadCrumb'
 import DeleteModal from '@src/components/common/DeleteModal'
 import { Modal } from '@src/components/custom/modal/modal'
 import TableContainer from '@src/components/custom/table/table'
+import ModalSelectAgent from '@src/components/organisms/ModalSelectAgent'
 import { NextPageWithLayout } from '@src/dtos'
 import { api } from '@src/trpc/react'
 import {
@@ -56,7 +57,10 @@ const organizationSchema = z.object({
     )
     .min(1, 'At least one administrator is required'),
   allowedPages: z.array(z.string()).optional(),
-  assignedAgentIds: z.array(z.string()).optional(), // IDs of specific agents (isGlobal=false)
+  agentPqrId: z.string().optional(),
+  agentRrhhId: z.string().optional(),
+  agentForecastingId: z.string().optional(),
+  agentChatId: z.string().optional()
 })
 
 type OrganizationFormData = z.infer<typeof organizationSchema>
@@ -72,6 +76,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
   const [slugValue, setSlugValue] = useState('')
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
+  const [showAgentModal, setShowAgentModal] = useState(false)
+  const [selectedAgentType, setSelectedAgentType] = useState<'pqr' | 'rrhh' | 'forecasting' | 'chat' | null>(null)
 
   // Check if user is SUPERADMIN
   useEffect(() => {
@@ -113,7 +119,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
         },
       ],
       allowedPages: [],
-      assignedAgentIds: [],
+      agentPqrId: undefined,
+      agentRrhhId: undefined,
+      agentForecastingId: undefined,
+      agentChatId: undefined,
     },
   })
 
@@ -277,8 +286,6 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
     setLogoPreview(null)
     setSlugValue('')
     setLogoFile(null)
-    // Pre-select all global agents
-    const globalAgentIds = allAgents.filter(a => a.isGlobal).map(a => a.id)
     reset({
       name: '',
       description: '',
@@ -294,7 +301,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
         },
       ],
       allowedPages: [],
-      assignedAgentIds: globalAgentIds, // Pre-select global agents
+      agentPqrId: undefined,
+      agentRrhhId: undefined,
+      agentForecastingId: undefined,
+      agentChatId: undefined,
     })
     setShowModal(true)
   }
@@ -321,19 +331,16 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
         password: '', // Empty for existing users
       })) || []
 
-    // Load assigned agent IDs from cloned agents' sourceAgentId
-    // Note: In edit mode, we need to fetch the cloned agents to get their sourceAgentId
-    // For now, we'll use the assignedAgents relation (will be updated when we load the data)
-    const assignedAgentIds =
-      organization.assignedAgents?.map((a: any) => a.agentId) || []
-
     reset({
       name: organization.name,
       description: organization.description || '',
       logoUrl: organization.logoUrl || '',
       slug: organization.slug,
       allowedPages: organization.allowedPages || [],
-      assignedAgentIds,
+      agentPqrId: organization.agentPqrId || undefined,
+      agentRrhhId: organization.agentRrhhId || undefined,
+      agentForecastingId: organization.agentForecastingId || undefined,
+      agentChatId: organization.agentChatId || undefined,
       administrators: existingAdmins,
     })
     setShowModal(true)
@@ -385,7 +392,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           logoUrl,
           slug: data.slug,
           allowedPages: data.allowedPages,
-          assignedAgentIds: data.assignedAgentIds,
+          agentPqrId: data.agentPqrId || null,
+          agentRrhhId: data.agentRrhhId || null,
+          agentForecastingId: data.agentForecastingId || null,
+          agentChatId: data.agentChatId || null,
           administratorsToAdd:
             administratorsToAdd.length > 0 ? administratorsToAdd : undefined,
           administratorsToRemove:
@@ -399,7 +409,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           name: data.name,
           slug: data.slug,
           allowedPages: data.allowedPages || [],
-          assignedAgentIds: data.assignedAgentIds || [],
+          agentPqrId: data.agentPqrId,
+          agentRrhhId: data.agentRrhhId,
+          agentForecastingId: data.agentForecastingId,
+          agentChatId: data.agentChatId,
           custom: true,
           administrators: data.administrators.map((admin) => ({
             firstName: admin.firstName,
@@ -769,62 +782,62 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                   </div>
                 </div>
 
-                {/* Agent Restrictions */}
+                {/* Agents Section - Dynamic based on Menu Restrictions */}
                 <div className="mb-6">
                   <label className="block mb-3 text-sm font-medium">
-                    Agent Restrictions
+                    Agents
                   </label>
                   <p className="text-xs text-gray-500 mb-3">
-                    Global agents are pre-selected by default. You can select or deselect any agents for this organization.
+                    Assign global agents for each enabled page category
                   </p>
-                  {allAgents.length === 0 ? (
-                    <p className="text-sm text-gray-500 italic">
-                      No agents available. Create agents from the Agents page first.
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      {allAgents.map((agent) => {
-                        const assignedAgentIds = watch('assignedAgentIds') || []
-                        const isChecked = assignedAgentIds.includes(agent.id)
 
-                        return (
-                          <label
-                            key={agent.id}
-                            className="switch-group [&_.switch-wrapper]:h-5 [&_.switch-wrapper]:w-9 [&_.switch-dot]:h-4 [&_.switch-dot]:w-4 [&_.switch-dot]:top-[2px] [&_.switch-dot]:start-[2px]">
-                            <div className="relative">
-                              <input
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={(e) => {
-                                  const currentAgents = watch('assignedAgentIds') || []
-                                  if (e.target.checked) {
-                                    setValue('assignedAgentIds', [
-                                      ...currentAgents,
-                                      agent.id,
-                                    ])
-                                  } else {
-                                    setValue(
-                                      'assignedAgentIds',
-                                      currentAgents.filter((id) => id !== agent.id)
-                                    )
-                                  }
+                  {(() => {
+                    const allowedPages = watch('allowedPages') || []
+                    const agentPages = ['pqr', 'rrhh', 'forecasting', 'chat']
+                    const enabledAgentPages = allowedPages.filter(page => agentPages.includes(page))
+
+                    if (enabledAgentPages.length === 0) {
+                      return (
+                        <p className="text-sm text-gray-500 italic">
+                          Enable PQR, RRHH, Forecasting, or Chat in Menu Restrictions to assign agents
+                        </p>
+                      )
+                    }
+
+                    return (
+                      <div className="space-y-3">
+                        {enabledAgentPages.map((page) => {
+                          const agentKey = `agent${page.charAt(0).toUpperCase() + page.slice(1)}Id` as 'agentPqrId' | 'agentRrhhId' | 'agentForecastingId' | 'agentChatId'
+                          const selectedAgentId = watch(agentKey)
+                          const selectedAgent = allAgents.find(a => a.id === selectedAgentId)
+
+                          return (
+                            <div key={page} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md">
+                              <div className="flex-1">
+                                <span className="text-sm font-medium capitalize">{page} Agent</span>
+                                {selectedAgent && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Selected: {selectedAgent.name}
+                                    {selectedAgent.isGlobal && <span className="ml-1 text-green-600">(Global)</span>}
+                                  </p>
+                                )}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedAgentType(page as 'pqr' | 'rrhh' | 'forecasting' | 'chat')
+                                  setShowAgentModal(true)
                                 }}
-                                className="sr-only peer"
-                              />
-                              <div className="switch-wrapper peer-checked:bg-primary-500 peer-checked:border-primary-500"></div>
-                              <div className="switch-dot peer-checked:translate-x-full rtl:peer-checked:-translate-x-full"></div>
+                                className="btn btn-sm btn-outline-primary">
+                                <CirclePlus className="w-4 h-4 mr-1" />
+                                Select
+                              </button>
                             </div>
-                            <span className="ml-1 text-sm">
-                              {agent.name}
-                              {agent.isGlobal && (
-                                <span className="ml-1 text-xs text-green-600 font-medium">(Global)</span>
-                              )}
-                            </span>
-                          </label>
-                        )
-                      })}
-                    </div>
-                  )}
+                          )
+                        })}
+                      </div>
+                    )
+                  })()}
                 </div>
 
                 {/* Administrators */}
@@ -1199,62 +1212,62 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                     Add or manage administrators for this organization
                   </p>
 
-                  {/* Agent Restrictions - MOVED BEFORE ADMINISTRATORS */}
+                  {/* Agents Section - Dynamic based on Menu Restrictions */}
                   <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                     <label className="block mb-3 text-sm font-medium">
-                      Agent Restrictions
+                      Agents
                     </label>
                     <p className="text-xs text-gray-500 mb-3">
-                      Global agents are pre-selected by default. You can select or deselect any agents for this organization.
+                      Assign global agents for each enabled page category
                     </p>
-                    {allAgents.length === 0 ? (
-                      <p className="text-sm text-gray-500 italic">
-                        No agents available. Create agents from the Agents page first.
-                      </p>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-2">
-                        {allAgents.map((agent) => {
-                          const assignedAgentIds = watch('assignedAgentIds') || []
-                          const isChecked = assignedAgentIds.includes(agent.id)
 
-                          return (
-                            <label
-                              key={agent.id}
-                              className="switch-group [&_.switch-wrapper]:h-5 [&_.switch-wrapper]:w-9 [&_.switch-dot]:h-4 [&_.switch-dot]:w-4 [&_.switch-dot]:top-[2px] [&_.switch-dot]:start-[2px]">
-                              <div className="relative">
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={(e) => {
-                                    const currentAgents = watch('assignedAgentIds') || []
-                                    if (e.target.checked) {
-                                      setValue('assignedAgentIds', [
-                                        ...currentAgents,
-                                        agent.id,
-                                      ])
-                                    } else {
-                                      setValue(
-                                        'assignedAgentIds',
-                                        currentAgents.filter((id) => id !== agent.id)
-                                      )
-                                    }
+                    {(() => {
+                      const allowedPages = watch('allowedPages') || []
+                      const agentPages = ['pqr', 'rrhh', 'forecasting', 'chat']
+                      const enabledAgentPages = allowedPages.filter(page => agentPages.includes(page))
+
+                      if (enabledAgentPages.length === 0) {
+                        return (
+                          <p className="text-sm text-gray-500 italic">
+                            Enable PQR, RRHH, Forecasting, or Chat in Menu Restrictions to assign agents
+                          </p>
+                        )
+                      }
+
+                      return (
+                        <div className="space-y-3">
+                          {enabledAgentPages.map((page) => {
+                            const agentKey = `agent${page.charAt(0).toUpperCase() + page.slice(1)}Id` as 'agentPqrId' | 'agentRrhhId' | 'agentForecastingId' | 'agentChatId'
+                            const selectedAgentId = watch(agentKey)
+                            const selectedAgent = allAgents.find(a => a.id === selectedAgentId)
+
+                            return (
+                              <div key={page} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800">
+                                <div className="flex-1">
+                                  <span className="text-sm font-medium capitalize">{page} Agent</span>
+                                  {selectedAgent && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                      Selected: {selectedAgent.name}
+                                      {selectedAgent.isGlobal && <span className="ml-1 text-green-600">(Global)</span>}
+                                    </p>
+                                  )}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedAgentType(page as 'pqr' | 'rrhh' | 'forecasting' | 'chat')
+                                    setShowAgentModal(true)
                                   }}
-                                  className="sr-only peer"
-                                />
-                                <div className="switch-wrapper peer-checked:bg-primary-500 peer-checked:border-primary-500"></div>
-                                <div className="switch-dot peer-checked:translate-x-full rtl:peer-checked:-translate-x-full"></div>
+                                  className="btn btn-sm btn-outline-primary">
+                                  <CirclePlus className="w-4 h-4 mr-1" />
+                                  Select
+                                </button>
                               </div>
-                              <span className="ml-1 text-sm">
-                                {agent.name}
-                                {agent.isGlobal && (
-                                  <span className="ml-1 text-xs text-green-600 font-medium">(Global)</span>
-                                )}
-                              </span>
-                            </label>
-                          )
-                        })}
-                      </div>
-                    )}
+                            )
+                          })}
+                        </div>
+                      )
+                    })()}
                   </div>
 
                   {fields.map((field: any, index) => {
@@ -1463,6 +1476,26 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
       />
 
       {/* Delete Modal */}
+      {/* Agent Selection Modal */}
+      <ModalSelectAgent
+        isOpen={showAgentModal}
+        onClose={() => {
+          setShowAgentModal(false)
+          setSelectedAgentType(null)
+        }}
+        agents={allAgents.filter(a => a.isGlobal)}
+        onSelect={(agentId) => {
+          if (selectedAgentType) {
+            const agentKey = `agent${selectedAgentType.charAt(0).toUpperCase() + selectedAgentType.slice(1)}Id` as 'agentPqrId' | 'agentRrhhId' | 'agentForecastingId' | 'agentChatId'
+            setValue(agentKey, agentId)
+          }
+          setShowAgentModal(false)
+          setSelectedAgentType(null)
+        }}
+        title={`Select ${selectedAgentType?.toUpperCase()} Agent`}
+        buttonText="Assign Agent"
+      />
+
       <DeleteModal
         show={showDeleteModal}
         handleHide={() => setShowDeleteModal(false)}

@@ -133,8 +133,20 @@ const menu: MegaMenu[] = [
     title: 'Chat',
     lang: 'pe-chat',
     icon: 'messages-square',
-    link: '/apps/chat/default',
+    link: '/apps/chat',
     separator: false,
+    children: [
+      {
+        title: 'Chat view',
+        link: '/apps/chat/default',
+        lang: 'Chat view',
+      },
+      {
+        title: 'Chat Agent',
+        link: '/apps/agents',
+        lang: 'Chat Agent',
+      },
+    ],
   },
   {
     title: 'CRM',
@@ -198,7 +210,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'Pqr Agent',
-        link: '/apps/agents/default/cmhux8s60007hjbh4ylr1iiys/configure',
+        link: '/apps/agents',
         lang: 'Pqr Agent',
       },
     ],
@@ -224,6 +236,11 @@ const menu: MegaMenu[] = [
         title: 'Documentation',
         link: '/apps/forecasting/documentation',
         lang: 'Documentation',
+      },
+      {
+        title: 'Forecasting Agent',
+        link: '/apps/agents',
+        lang: 'Forecasting Agent',
       },
     ],
   },
@@ -251,13 +268,8 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'RRHH Agent',
-        link: '/apps/agents/default/cmhux8so5007ljbh4ica1nsqa/configure',
+        link: '/apps/agents',
         lang: 'RRHH Agent',
-      },
-      {
-        title: 'Chat',
-        link: '/apps/rrhh/rrhh-agent',
-        lang: 'Chat',
       },
     ],
   },

@@ -102,7 +102,7 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
     { id },
     {
       retry: 1,
-      enabled: !!id && !!currentProject,
+      enabled: !!id, // Allow loading without currentProject for global agents
     }
   )
 
@@ -164,6 +164,11 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
   }, [agent, reset])
 
   useEffect(() => {
+    // Skip redirect logic for global agents
+    if (agent?.isGlobal && !agent.projectId) {
+      return
+    }
+
     if (
       !currentProject ||
       !agent ||
@@ -325,7 +330,8 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
-  if (!currentProject) {
+  // Allow access without currentProject if it's a global agent
+  if (!currentProject && agent && !agent.isGlobal) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -359,7 +365,7 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
     )
   }
 
-  if (agentError || !agent || agent.project?.id !== currentProject.id) {
+  if (agentError || !agent) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -369,9 +375,26 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             {agentError
               ? `Error loading agent: ${agentError.message}`
-              : !agent
-                ? "The agent you're looking for doesn't exist or you don't have access to it."
-                : 'Agent not found or does not belong to the current project.'}
+              : "The agent you're looking for doesn't exist or you don't have access to it."}
+          </p>
+          <Link href="/apps/agents/default" className="btn btn-primary">
+            Back to Agents
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // For non-global agents, validate they belong to current project
+  if (!agent.isGlobal && currentProject && agent.project?.id !== currentProject.id) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white ">
+            Agent Not Found
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Agent not found or does not belong to the current project.
           </p>
           <Link href="/apps/agents/default" className="btn btn-primary">
             Back to Agents

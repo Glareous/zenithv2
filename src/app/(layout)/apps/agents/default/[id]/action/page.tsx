@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
+import { usePermissions } from '@src/hooks/usePermissions'
 import { RootState } from '@src/slices/reducer'
 import {
   Bot,
@@ -45,6 +46,7 @@ interface ActionPageProps {
 const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
   const { id } = React.use(params)
   const router = useRouter()
+  const { canManageAgents } = usePermissions()
 
   const { currentProject } = useSelector((state: RootState) => state.Project)
   const [isNavigating, setIsNavigating] = useState(false)
@@ -61,7 +63,7 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
     data: agent,
     isLoading: isAgentLoading,
     error: agentError,
-  } = api.projectAgent.getById.useQuery({ id: id }, { enabled: !!id })
+  } = api.projectAgent.getById.useQuery({ id: id }, { enabled: !!id }) // Allow loading without currentProject for global agents
 
   const {
     data: agentActions,
@@ -69,7 +71,7 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
     refetch,
   } = api.projectAgentActions.getByAgentId.useQuery(
     { agentId: id },
-    { enabled: !!id && !!agent && agent.project?.id === currentProject?.id }
+    { enabled: !!id && !!agent }
   )
 
   const {
@@ -78,7 +80,7 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
     refetch: refetchTriggers,
   } = api.projectAgentTrigger.getByAgentId.useQuery(
     { agentId: id },
-    { enabled: !!id && !!agent && agent.project?.id === currentProject?.id }
+    { enabled: !!id && !!agent }
   )
 
   const triggers = allTriggers.filter((trigger) => trigger.isActive)
@@ -90,6 +92,11 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
     )
 
   useEffect(() => {
+    // Skip redirect logic for global agents
+    if (agent?.isGlobal && !agent.projectId) {
+      return
+    }
+
     if (
       !currentProject ||
       !agent ||
@@ -640,78 +647,80 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
             Actions that are set to run before the call
           </p>
         </div>
-        <div>
-          <Dropdown position="right">
-            <DropdownButton colorClass="btn btn-gray flex items-center">
-              <Plus className="w-4 h-4 mr-1" />
-              Add Trigger
-            </DropdownButton>
-            <DropdownMenu menuClass="min-w-62 bg-white border border-gray-200 dark:bg-gray-900 mt-1  rounded-sm dark:border-gray-800 z-999">
-              <ul className="py-2 space-y-1 font-light text-xs ">
-                <li className="hover:bg-blue-50/50">
-                  <button
-                    className="dropdown-item w-full text-left flex items-center px-3 py-2"
-                    onClick={() => handleAddTrigger('WHATSAPP_MESSAGE')}>
-                    <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
-                      <WhatsAppIcon className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <div>WhatsApp message</div>
-                  </button>
-                </li>
-                <li className="hover:bg-blue-50/50">
-                  <button
-                    className="dropdown-item w-full text-left flex items-center px-3 py-2"
-                    onClick={() => handleAddTrigger('WHATSAPP_CALL')}>
-                    <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
-                      <WhatsAppIcon className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <div>WhatsApp call</div>
-                  </button>
-                </li>
-                <li className="hover:bg-blue-50/50">
-                  <button
-                    className="dropdown-item w-full text-left flex items-center px-3 py-2"
-                    onClick={() => handleAddTrigger('PHONE_CALL')}>
-                    <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
-                      <Phone className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <div>Phone call</div>
-                  </button>
-                </li>
-                <li className="hover:bg-blue-50/50">
-                  <button
-                    className="dropdown-item w-full text-left flex items-center px-3 py-2"
-                    onClick={() => handleAddTrigger('WEBHOOK')}>
-                    <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
-                      <FileSearch2 className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <div>Webhook</div>
-                  </button>
-                </li>
-                <li className="hover:bg-blue-50/50">
-                  <button
-                    className="dropdown-item w-full text-left flex items-center px-3 py-2"
-                    onClick={() => handleAddTrigger('CRON_JOB')}>
-                    <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
-                      <ClockFading className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <div>CRON_JOB</div>
-                  </button>
-                </li>
-                <li className="hover:bg-blue-50/50">
-                  <button
-                    className="dropdown-item w-full text-left flex items-center px-3 py-2"
-                    onClick={() => handleAddTrigger('MCP_PROTOCOL')}>
-                    <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
-                      <Bot className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <div>MCP_PROTOCOL</div>
-                  </button>
-                </li>
-              </ul>
-            </DropdownMenu>
-          </Dropdown>
-        </div>
+        {canManageAgents && (
+          <div>
+            <Dropdown position="right">
+              <DropdownButton colorClass="btn btn-gray flex items-center">
+                <Plus className="w-4 h-4 mr-1" />
+                Add Trigger
+              </DropdownButton>
+              <DropdownMenu menuClass="min-w-62 bg-white border border-gray-200 dark:bg-gray-900 mt-1  rounded-sm dark:border-gray-800 z-999">
+                <ul className="py-2 space-y-1 font-light text-xs ">
+                  <li className="hover:bg-blue-50/50">
+                    <button
+                      className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                      onClick={() => handleAddTrigger('WHATSAPP_MESSAGE')}>
+                      <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
+                        <WhatsAppIcon className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <div>WhatsApp message</div>
+                    </button>
+                  </li>
+                  <li className="hover:bg-blue-50/50">
+                    <button
+                      className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                      onClick={() => handleAddTrigger('WHATSAPP_CALL')}>
+                      <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
+                        <WhatsAppIcon className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <div>WhatsApp call</div>
+                    </button>
+                  </li>
+                  <li className="hover:bg-blue-50/50">
+                    <button
+                      className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                      onClick={() => handleAddTrigger('PHONE_CALL')}>
+                      <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
+                        <Phone className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <div>Phone call</div>
+                    </button>
+                  </li>
+                  <li className="hover:bg-blue-50/50">
+                    <button
+                      className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                      onClick={() => handleAddTrigger('WEBHOOK')}>
+                      <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
+                        <FileSearch2 className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <div>Webhook</div>
+                    </button>
+                  </li>
+                  <li className="hover:bg-blue-50/50">
+                    <button
+                      className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                      onClick={() => handleAddTrigger('CRON_JOB')}>
+                      <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
+                        <ClockFading className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <div>CRON_JOB</div>
+                    </button>
+                  </li>
+                  <li className="hover:bg-blue-50/50">
+                    <button
+                      className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                      onClick={() => handleAddTrigger('MCP_PROTOCOL')}>
+                      <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
+                        <Bot className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <div>MCP_PROTOCOL</div>
+                    </button>
+                  </li>
+                </ul>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        )}
       </div>
 
       {isTriggersLoading ? (
@@ -817,8 +826,8 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
             return (
               <div
                 key={trigger.id}
-                className="p-2 border rounded-md border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 group relative cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 w-53"
-                onClick={() => handleAddTrigger(trigger.type)}>
+                className={`p-2 border rounded-md border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 group relative ${canManageAgents ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} transition-colors duration-200 w-53`}
+                onClick={canManageAgents ? () => handleAddTrigger(trigger.type) : undefined}>
                 <div className="flex">
                   <div className="flex items-center w-full">
                     {getTriggerIcon()}
@@ -857,17 +866,19 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
                       )}
                     </div>
                   </div>
-                  <div
-                    className="flex items-center"
-                    onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => handleDeleteTrigger(trigger.type)}
-                      disabled={deleteTriggerMutation.isPending}
-                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="Remove trigger">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
+                  {canManageAgents && (
+                    <div
+                      className="flex items-center"
+                      onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => handleDeleteTrigger(trigger.type)}
+                        disabled={deleteTriggerMutation.isPending}
+                        className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Remove trigger">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )
@@ -930,48 +941,50 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
               Actions that are set to run after the call
             </p>
           </div>
-          <div>
-            <Dropdown position="right">
-              <DropdownButton colorClass="btn btn-gray flex items-center">
-                <Plus className="w-4 h-4 mr-1" />
-                Add Actions
-              </DropdownButton>
-              <DropdownMenu menuClass="min-w-62 bg-white border border-gray-200 dark:bg-gray-900 mt-1  rounded-sm dark:border-gray-800 z-999">
-                <ul className="py-2 space-y-1 font-light text-xs ">
-                  <li className="hover:bg-blue-50/50">
-                    <button
-                      className="dropdown-item w-full text-left flex items-center px-3 py-2"
-                      onClick={() => handleAddAction('information-extractor')}>
-                      <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
-                        <FileSearch2 className="w-5 h-5 text-gray-400" />
-                      </div>
-                      <div>
-                        Information Extractor
-                        <p className="text-gray-500">
-                          Extracts information from the call
-                        </p>
-                      </div>
-                    </button>
-                  </li>
-                  <li className="hover:bg-blue-50/50">
-                    <button
-                      className="dropdown-item w-full text-left flex items-center px-3 py-2"
-                      onClick={() => handleAddAction('custom-evaluation')}>
-                      <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
-                        <FileSearch2 className="w-5 h-5 text-gray-400" />
-                      </div>
-                      <div>
-                        Custom Evaluation
-                        <p className="text-gray-500">
-                          Create and manage evaluation templates
-                        </p>
-                      </div>
-                    </button>
-                  </li>
-                </ul>
-              </DropdownMenu>
-            </Dropdown>
-          </div>
+          {canManageAgents && (
+            <div>
+              <Dropdown position="right">
+                <DropdownButton colorClass="btn btn-gray flex items-center">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Actions
+                </DropdownButton>
+                <DropdownMenu menuClass="min-w-62 bg-white border border-gray-200 dark:bg-gray-900 mt-1  rounded-sm dark:border-gray-800 z-999">
+                  <ul className="py-2 space-y-1 font-light text-xs ">
+                    <li className="hover:bg-blue-50/50">
+                      <button
+                        className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                        onClick={() => handleAddAction('information-extractor')}>
+                        <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
+                          <FileSearch2 className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <div>
+                          Information Extractor
+                          <p className="text-gray-500">
+                            Extracts information from the call
+                          </p>
+                        </div>
+                      </button>
+                    </li>
+                    <li className="hover:bg-blue-50/50">
+                      <button
+                        className="dropdown-item w-full text-left flex items-center px-3 py-2"
+                        onClick={() => handleAddAction('custom-evaluation')}>
+                        <div className="mr-3 bg-blue-50/40 rounded-sm p-2">
+                          <FileSearch2 className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <div>
+                          Custom Evaluation
+                          <p className="text-gray-500">
+                            Create and manage evaluation templates
+                          </p>
+                        </div>
+                      </button>
+                    </li>
+                  </ul>
+                </DropdownMenu>
+              </Dropdown>
+            </div>
+          )}
         </div>
 
         {/* Actions List or Empty State */}
@@ -1063,8 +1076,8 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
               return (
                 <div
                   key={action.id}
-                  className="p-3 border rounded-md border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 group relative cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 w-53"
-                  onClick={handleEditAction}>
+                  className={`p-3 border rounded-md border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 group relative ${canManageAgents ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} transition-colors duration-200 w-53`}
+                  onClick={canManageAgents ? handleEditAction : undefined}>
                   <div className="flex">
                     <div className="space-y-2 truncate">
                       <p className="text-[11px] text-gray-400 mt-1 font-normal badge badge-green flex items-center w-36">
@@ -1080,18 +1093,20 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
                         Extracts information from the call
                       </p>
                     </div>
-                    <div
-                      className="flex items-center"
-                      onClick={(e) => e.stopPropagation()}>
-                      {/* Remove button - only visible on hover */}
-                      <button
-                        onClick={handleRemoveAction}
-                        disabled={updateAfterCallActionsMutation.isPending}
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Remove action">
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
+                    {canManageAgents && (
+                      <div
+                        className="flex items-center"
+                        onClick={(e) => e.stopPropagation()}>
+                        {/* Remove button - only visible on hover */}
+                        <button
+                          onClick={handleRemoveAction}
+                          disabled={updateAfterCallActionsMutation.isPending}
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Remove action">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )
@@ -1111,7 +1126,8 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
     )
   }
 
-  if (!currentProject) {
+  // Allow access without currentProject if it's a global agent
+  if (!currentProject && agent && !agent.isGlobal) {
     return (
       <div className="m-6">
         <h1 className="pb-4 text-xl">Actions</h1>
@@ -1165,7 +1181,7 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
     )
   }
 
-  if (agentError || !agent || agent.project?.id !== currentProject.id) {
+  if (agentError || !agent) {
     return (
       <div className="m-6">
         <h1 className="pb-4 text-xl">Actions</h1>
@@ -1175,11 +1191,26 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
               <p>
                 {agentError
                   ? `Error loading agent: ${agentError.message}`
-                  : 'Agent not found or does not belong to the current project.'}
+                  : "The agent you're looking for doesn't exist or you don't have access to it."}
               </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // For non-global agents, validate they belong to current project
+  if (!agent.isGlobal && currentProject && agent.project?.id !== currentProject.id) {
+    return (
+      <div className="m-6">
+        <h1 className="pb-4 text-xl">Actions</h1>
+        <div className="card">
+          <div className="card-body">
+            <div className="text-center text-red-500">
+              <p>Agent not found or does not belong to the current project.</p>
               <p className="mt-2 text-sm text-gray-500">
-                Please verify the agent exists and belongs to your current
-                project.
+                Please verify the agent exists and belongs to your current project.
               </p>
             </div>
           </div>

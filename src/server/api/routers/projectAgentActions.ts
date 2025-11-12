@@ -144,9 +144,43 @@ export const projectAgentActionsRouter = createTRPCRouter({
     .input(z.object({ agentId: z.string() }))
     .query(async ({ ctx, input }) => {
       // First get the agent to verify access and get project ID
-      const agent = await ctx.db.projectAgent.findFirst({
+      // Check if user's organization has this global agent assigned
+      const userOrganization = await ctx.db.organizationMember.findFirst({
         where: {
-          id: input.agentId,
+          userId: ctx.session.user.id,
+        },
+        select: {
+          organization: {
+            select: {
+              id: true,
+              agentPqrId: true,
+              agentRrhhId: true,
+              agentForecastingId: true,
+              agentChatId: true,
+            },
+          },
+        },
+      })
+
+      const isAssignedGlobalAgent =
+        userOrganization &&
+        (userOrganization.organization.agentPqrId === input.agentId ||
+          userOrganization.organization.agentRrhhId === input.agentId ||
+          userOrganization.organization.agentForecastingId === input.agentId ||
+          userOrganization.organization.agentChatId === input.agentId)
+
+      // Build where conditions
+      const whereConditions: any[] = []
+
+      // If it's a global agent assigned to user's org, allow access
+      if (isAssignedGlobalAgent) {
+        whereConditions.push({
+          isGlobal: true,
+          projectId: null,
+        })
+      } else {
+        // Only check project membership if it's not a global agent
+        whereConditions.push({
           project: {
             OR: [
               { createdById: ctx.session.user.id },
@@ -159,6 +193,13 @@ export const projectAgentActionsRouter = createTRPCRouter({
               },
             ],
           },
+        })
+      }
+
+      const agent = await ctx.db.projectAgent.findFirst({
+        where: {
+          id: input.agentId,
+          OR: whereConditions,
         },
         select: {
           id: true,

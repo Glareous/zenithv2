@@ -88,7 +88,7 @@ export const projectAgentRouter = createTRPCRouter({
         const agent = await tx.projectAgent.create({
           data: {
             name: input.name,
-            projectId: input.projectId,
+            projectId: input.isGlobal ? null : input.projectId, // Explicitly set null for global agents
             type: input.type,
             systemInstructions: input.systemInstructions,
             isActive: input.isActive,
@@ -268,9 +268,44 @@ export const projectAgentRouter = createTRPCRouter({
       }
 
       // Regular users - check if user has access to this agent
-      const agent = await ctx.db.projectAgent.findFirst({
+      // First, get user's organization to check for assigned global agents
+      const userOrganization = await ctx.db.organizationMember.findFirst({
         where: {
-          id: input.id,
+          userId: ctx.session.user.id,
+        },
+        select: {
+          organization: {
+            select: {
+              id: true,
+              agentPqrId: true,
+              agentRrhhId: true,
+              agentForecastingId: true,
+              agentChatId: true,
+            },
+          },
+        },
+      })
+
+      // Check if this agent is assigned to user's organization
+      const isAssignedGlobalAgent =
+        userOrganization &&
+        (userOrganization.organization.agentPqrId === input.id ||
+          userOrganization.organization.agentRrhhId === input.id ||
+          userOrganization.organization.agentForecastingId === input.id ||
+          userOrganization.organization.agentChatId === input.id)
+
+      // Build where conditions
+      const whereConditions: any[] = []
+
+      // If it's a global agent assigned to user's org, allow access
+      if (isAssignedGlobalAgent) {
+        whereConditions.push({
+          isGlobal: true,
+          projectId: null,
+        })
+      } else {
+        // Only check project membership if it's not a global agent
+        whereConditions.push({
           project: {
             OR: [
               // User is a project member
@@ -294,6 +329,13 @@ export const projectAgentRouter = createTRPCRouter({
               },
             ],
           },
+        })
+      }
+
+      const agent = await ctx.db.projectAgent.findFirst({
+        where: {
+          id: input.id,
+          OR: whereConditions,
         },
         include: {
           project: {
@@ -516,6 +558,25 @@ export const projectAgentRouter = createTRPCRouter({
             code: 'BAD_REQUEST',
             message:
               'Cannot delete agent with active chats. Please close all chats first.',
+          })
+        }
+
+        // Check if this global agent is being used by any organizations
+        const organizationsUsing = await ctx.db.organization.count({
+          where: {
+            OR: [
+              { agentPqrId: input.id },
+              { agentRrhhId: input.id },
+              { agentForecastingId: input.id },
+              { agentChatId: input.id },
+            ],
+          },
+        })
+
+        if (organizationsUsing > 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: `Cannot delete agent. It is being used by ${organizationsUsing} organization(s). Please remove it from those organizations first.`,
           })
         }
 

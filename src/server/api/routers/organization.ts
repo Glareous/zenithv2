@@ -49,18 +49,6 @@ export const organizationRouter = createTRPCRouter({
             },
           },
         },
-        projects: {
-          where: { name: 'Initial Project' },
-          select: {
-            id: true,
-            agents: {
-              where: { sourceAgentId: { not: null } },
-              select: {
-                sourceAgentId: true,
-              },
-            },
-          },
-        },
         _count: {
           select: {
             members: true,
@@ -71,17 +59,47 @@ export const organizationRouter = createTRPCRouter({
       orderBy: { createdAt: 'desc' },
     })
 
-    // Transform to include assignedAgentIds from cloned agents
-    return organizations.map((org) => {
-      const initialProject = org.projects?.[0]
-      const assignedAgentIds = initialProject?.agents.map((a) => a.sourceAgentId).filter((id): id is string => id !== null) || []
+    // Manually fetch agents since we removed Prisma relations to avoid cycles
+    const organizationsWithAgents = await Promise.all(
+      organizations.map(async (org) => {
+        const [agentPqr, agentRrhh, agentForecasting, agentChat] = await Promise.all([
+          org.agentPqrId
+            ? ctx.db.projectAgent.findUnique({
+                where: { id: org.agentPqrId },
+                select: { id: true, name: true, isGlobal: true },
+              })
+            : Promise.resolve(null),
+          org.agentRrhhId
+            ? ctx.db.projectAgent.findUnique({
+                where: { id: org.agentRrhhId },
+                select: { id: true, name: true, isGlobal: true },
+              })
+            : Promise.resolve(null),
+          org.agentForecastingId
+            ? ctx.db.projectAgent.findUnique({
+                where: { id: org.agentForecastingId },
+                select: { id: true, name: true, isGlobal: true },
+              })
+            : Promise.resolve(null),
+          org.agentChatId
+            ? ctx.db.projectAgent.findUnique({
+                where: { id: org.agentChatId },
+                select: { id: true, name: true, isGlobal: true },
+              })
+            : Promise.resolve(null),
+        ])
 
-      return {
-        ...org,
-        assignedAgents: assignedAgentIds.map(id => ({ agentId: id })), // Maintain compatibility with frontend
-        projects: undefined, // Remove projects from response
-      }
-    })
+        return {
+          ...org,
+          agentPqr,
+          agentRrhh,
+          agentForecasting,
+          agentChat,
+        }
+      })
+    )
+
+    return organizationsWithAgents
   }),
 
   // Get a single organization by ID
@@ -161,7 +179,10 @@ export const organizationRouter = createTRPCRouter({
             'Slug must be lowercase alphanumeric with hyphens'
           ),
         allowedPages: z.array(z.string()).default([]),
-        assignedAgentIds: z.array(z.string()).default([]),
+        agentPqrId: z.string().optional(),
+        agentRrhhId: z.string().optional(),
+        agentForecastingId: z.string().optional(),
+        agentChatId: z.string().optional(),
         custom: z.boolean().default(true),
         administrators: z
           .array(
@@ -227,6 +248,10 @@ export const organizationRouter = createTRPCRouter({
           allowedPages: input.allowedPages,
           custom: input.custom,
           ownerId: ownerUser.id,
+          agentPqrId: input.agentPqrId,
+          agentRrhhId: input.agentRrhhId,
+          agentForecastingId: input.agentForecastingId,
+          agentChatId: input.agentChatId,
           members: {
             create: {
               userId: ownerUser.id,
@@ -427,64 +452,7 @@ export const organizationRouter = createTRPCRouter({
             }
           }
 
-          // Clone assigned agents to this project
-          if (input.assignedAgentIds && input.assignedAgentIds.length > 0) {
-            for (const agentId of input.assignedAgentIds) {
-              // Get the template agent
-              const templateAgent = await tx.projectAgent.findUnique({
-                where: { id: agentId },
-                include: {
-                  workflow: true,
-                  actions: true,
-                },
-              })
-
-              if (!templateAgent) continue
-
-              // Clone the agent with projectId
-              const clonedAgent = await tx.projectAgent.create({
-                data: {
-                  name: templateAgent.name,
-                  type: templateAgent.type,
-                  systemInstructions: templateAgent.systemInstructions,
-                  isActive: templateAgent.isActive,
-                  isGlobal: false, // Clones are never global
-                  projectId: project.id, // ← Assign to Initial Project
-                  modelId: templateAgent.modelId,
-                  sourceAgentId: templateAgent.id, // ← Track the template
-                },
-              })
-
-              // Clone workflow if exists
-              if (templateAgent.workflow) {
-                await tx.projectAgentWorkflow.create({
-                  data: {
-                    agentId: clonedAgent.id,
-                    name: templateAgent.workflow.name,
-                    description: templateAgent.workflow.description,
-                    instructions: templateAgent.workflow.instructions,
-                    globalActions: templateAgent.workflow.globalActions as any,
-                    globalFaqs: templateAgent.workflow.globalFaqs as any,
-                    globalObjections: templateAgent.workflow.globalObjections as any,
-                    nodes: templateAgent.workflow.nodes as any,
-                    edges: templateAgent.workflow.edges as any,
-                    positionX: templateAgent.workflow.positionX,
-                    positionY: templateAgent.workflow.positionY,
-                  },
-                })
-              }
-
-              // Clone actions if exists
-              if (templateAgent.actions) {
-                await tx.projectAgentActions.create({
-                  data: {
-                    agentId: clonedAgent.id,
-                    afterCallActions: templateAgent.actions.afterCallActions as any,
-                  },
-                })
-              }
-            }
-          }
+          // No cloning needed - agents will be assigned directly to organization
         },
         {
           timeout: 60000, // 60 seconds timeout for creating project + API key + actions + cloning agents
@@ -504,7 +472,10 @@ export const organizationRouter = createTRPCRouter({
         logoUrl: z.string().optional(),
         slug: z.string().optional(),
         allowedPages: z.array(z.string()).optional(),
-        assignedAgentIds: z.array(z.string()).optional(),
+        agentPqrId: z.string().nullable().optional(),
+        agentRrhhId: z.string().nullable().optional(),
+        agentForecastingId: z.string().nullable().optional(),
+        agentChatId: z.string().nullable().optional(),
         administratorsToAdd: z.array(
           z.object({
             firstName: z.string(),
@@ -549,7 +520,7 @@ export const organizationRouter = createTRPCRouter({
         })
       }
 
-      const { id, administratorsToAdd, administratorsToRemove, assignedAgentIds, ...updateData } = input
+      const { id, administratorsToAdd, administratorsToRemove, ...updateData } = input
 
       // Import bcrypt for password hashing
       const bcrypt = await import('bcryptjs')
@@ -593,114 +564,7 @@ export const organizationRouter = createTRPCRouter({
         }
       }
 
-      // Handle updating assigned agents if provided
-      if (input.assignedAgentIds !== undefined) {
-        // Get the organization's Initial Project
-        const initialProject = await ctx.db.project.findFirst({
-          where: {
-            organizationId: id,
-            name: 'Initial Project',
-          },
-        })
-
-        if (!initialProject) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Initial project not found for this organization',
-          })
-        }
-
-        // Get currently cloned agents for this organization
-        const currentClonedAgents = await ctx.db.projectAgent.findMany({
-          where: {
-            projectId: initialProject.id,
-            sourceAgentId: { not: null },
-          },
-          select: { id: true, sourceAgentId: true },
-        })
-
-        const currentTemplateIds = currentClonedAgents
-          .map((a) => a.sourceAgentId)
-          .filter((id): id is string => id !== null)
-
-        // Determine which agents to add and which to remove
-        const assignedIds = input.assignedAgentIds || []
-        const agentsToAdd = assignedIds.filter(
-          (id) => !currentTemplateIds.includes(id)
-        )
-        const agentsToRemove = currentClonedAgents.filter(
-          (agent) =>
-            agent.sourceAgentId &&
-            !assignedIds.includes(agent.sourceAgentId)
-        )
-
-        // Remove agents that are no longer assigned
-        if (agentsToRemove.length > 0) {
-          await ctx.db.projectAgent.deleteMany({
-            where: {
-              id: { in: agentsToRemove.map((a) => a.id) },
-            },
-          })
-        }
-
-        // Clone new agents
-        if (agentsToAdd.length > 0) {
-          for (const agentId of agentsToAdd) {
-            const templateAgent = await ctx.db.projectAgent.findUnique({
-              where: { id: agentId },
-              include: {
-                workflow: true,
-                actions: true,
-              },
-            })
-
-            if (!templateAgent) continue
-
-            // Clone the agent
-            const clonedAgent = await ctx.db.projectAgent.create({
-              data: {
-                name: templateAgent.name,
-                type: templateAgent.type,
-                systemInstructions: templateAgent.systemInstructions,
-                isActive: templateAgent.isActive,
-                isGlobal: false,
-                projectId: initialProject.id,
-                modelId: templateAgent.modelId,
-                sourceAgentId: templateAgent.id,
-              },
-            })
-
-            // Clone workflow if exists
-            if (templateAgent.workflow) {
-              await ctx.db.projectAgentWorkflow.create({
-                data: {
-                  agentId: clonedAgent.id,
-                  name: templateAgent.workflow.name,
-                  description: templateAgent.workflow.description,
-                  instructions: templateAgent.workflow.instructions,
-                  globalActions: templateAgent.workflow.globalActions as any,
-                  globalFaqs: templateAgent.workflow.globalFaqs as any,
-                  globalObjections: templateAgent.workflow.globalObjections as any,
-                  nodes: templateAgent.workflow.nodes as any,
-                  edges: templateAgent.workflow.edges as any,
-                  positionX: templateAgent.workflow.positionX,
-                  positionY: templateAgent.workflow.positionY,
-                },
-              })
-            }
-
-            // Clone actions if exists
-            if (templateAgent.actions) {
-              await ctx.db.projectAgentActions.create({
-                data: {
-                  agentId: clonedAgent.id,
-                  afterCallActions: templateAgent.actions.afterCallActions as any,
-                },
-              })
-            }
-          }
-        }
-      }
+      // No cloning logic needed - agents are assigned directly via foreign keys
 
       // Update organization basic data
       return await ctx.db.organization.update({
@@ -892,6 +756,10 @@ export const organizationRouter = createTRPCRouter({
             logoUrl: true,
             slug: true,
             allowedPages: true,
+            agentPqrId: true,
+            agentRrhhId: true,
+            agentForecastingId: true,
+            agentChatId: true,
           },
         },
       },

@@ -253,25 +253,27 @@ const WorkflowsPage: React.FC<WorkflowsPageProps> = ({
         </ReactFlow>
 
         {/* Floating Save Button & Status - Inside Canvas */}
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-3">
-          {hasUnsavedChanges && (
-            <div className="flex items-center space-x-2 text-amber-600 bg-white px-3 py-2 rounded-lg shadow-lg border">
-              <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium">Unsaved changes</span>
-            </div>
-          )}
-          <button
-            onClick={handleSave}
-            disabled={!canManageAgents || !hasUnsavedChanges || isSaving}
-            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg">
-            {isSaving ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4 mr-2" />
+        {canManageAgents && (
+          <div className="absolute top-4 right-4 z-10 flex items-center gap-3">
+            {hasUnsavedChanges && (
+              <div className="flex items-center space-x-2 text-amber-600 bg-white px-3 py-2 rounded-lg shadow-lg border">
+                <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium">Unsaved changes</span>
+              </div>
             )}
-            {isSaving ? 'Saving...' : 'Save'}
-          </button>
-        </div>
+            <button
+              onClick={handleSave}
+              disabled={!hasUnsavedChanges || isSaving}
+              className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg">
+              {isSaving ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4 mr-2" />
+              )}
+              {isSaving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Stats Footer */}
