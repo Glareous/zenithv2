@@ -1,0 +1,166 @@
+# PQR Management Module
+
+## Overview
+
+The **PQR (Peticiones, Quejas y Reclamos)** module is a comprehensive customer service management system designed to handle customer requests, complaints, and claims efficiently. This module enables organizations to track, manage, and resolve customer inquiries in a structured and organized manner.
+
+## What is PQR?
+
+PQR stands for:
+- **P**eticiones (Requests): Customer inquiries or service requests
+- **Q**uejas (Complaints): Customer complaints about products or services
+- **R**eclamos (Claims): Formal claims for compensation or issue resolution
+
+## Key Features
+
+### 1. Complete Customer Information Management
+- First and last name tracking
+- Email and phone contact information
+- City/location data
+- Document identification (CC, CE, Passport, NIT)
+- Document number storage
+
+### 2. Request Tracking
+- Status monitoring (Processing/Completed)
+- Detailed message/description storage
+- Full CRUD operations (Create, Read, Update, Delete)
+- Real-time updates
+
+### 3. Document Types Supported
+- **CC** (Cédula de Ciudadanía): Citizenship Card
+- **CE** (Cédula de Extranjería): Foreign ID
+- **PASSPORT**: International passport
+- **NIT** (Número de Identificación Tributaria): Tax ID
+
+## How to Use
+
+### Creating a New PQR
+
+1. Navigate to the PQR List page
+2. Click the **"Add PQR"** button
+3. Fill in the required information:
+   - First Name *
+   - Last Name *
+   - Phone *
+   - Email *
+   - City *
+   - Document Type *
+   - Document Number *
+   - Message/Description *
+   - Status (Processing/Completed)
+4. Click **"Create PQR"** to save
+
+### Editing an Existing PQR
+
+1. Locate the PQR in the table
+2. Click the **Edit** button (pencil icon)
+3. Modify the necessary fields
+4. Click **"Update PQR"** to save changes
+
+### Viewing PQR Details
+
+1. Find the PQR in the list
+2. Click the **View** button (eye icon)
+3. Review complete PQR information
+
+### Deleting a PQR
+
+1. Locate the PQR you want to delete
+2. Click the **Delete** button (trash icon)
+3. Confirm the deletion in the modal dialog
+
+## Data Structure
+
+Each PQR record contains:
+
+```typescript
+{
+  id: string
+  firstName: string (max 100 characters)
+  lastName: string (max 100 characters)
+  phone: string
+  email: string (valid email format)
+  city: string
+  documentType: 'CC' | 'CE' | 'PASSPORT' | 'NIT'
+  documentNumber: string
+  message: string
+  status: 'PROCESSING' | 'COMPLETED'
+  projectId: string
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
+## Status Types
+
+- **PROCESSING**: The PQR is currently being reviewed or worked on
+- **COMPLETED**: The PQR has been resolved and closed
+
+## Validation Rules
+
+All fields are required and must meet the following criteria:
+
+- **First Name**: 1-100 characters
+- **Last Name**: 1-100 characters
+- **Phone**: Valid phone number
+- **Email**: Valid email format
+- **City**: Non-empty string
+- **Document Type**: One of the supported types
+- **Document Number**: Non-empty string
+- **Message**: Detailed description of the request/complaint/claim
+
+## Integration with Projects
+
+The PQR module is **project-scoped**, meaning:
+- Each PQR belongs to a specific project
+- You must have a project selected to create or view PQRs
+- PQRs are isolated per project for data security and organization
+
+## API Endpoints
+
+The module uses tRPC for type-safe API calls:
+
+- `projectPQR.getByProject`: Fetch all PQRs for a project
+- `projectPQR.create`: Create a new PQR
+- `projectPQR.update`: Update an existing PQR
+- `projectPQR.delete`: Delete a PQR
+
+## Best Practices
+
+1. **Always fill in complete information**: Ensure all required fields are filled with accurate data
+2. **Update status regularly**: Keep PQR statuses up to date (Processing ’ Completed)
+3. **Use detailed messages**: Provide clear and detailed descriptions in the message field
+4. **Select correct document type**: Verify the document type matches the provided document number
+5. **Review before deletion**: Double-check before deleting PQRs as this action cannot be undone
+
+## Permissions
+
+To use the PQR module, you need:
+- An active project membership
+- Access to the PQR section in your project
+- Appropriate permissions to create, edit, or delete PQRs
+
+## Troubleshooting
+
+### "Please select a project first"
+**Solution**: Select a project from the project selector before accessing the PQR module.
+
+### Validation errors when creating/editing
+**Solution**: Check that all required fields are filled and meet the validation criteria (valid email, non-empty strings, etc.).
+
+### PQR not appearing in the list
+**Solution**:
+- Verify you're viewing the correct project
+- Refresh the page
+- Check your internet connection
+
+## Support
+
+For additional help or to report issues with the PQR module:
+- Contact your system administrator
+- Check the AI Agent section for automated assistance
+- Review the landing page for more information
+
+---
+
+*Last updated: {new Date().toLocaleDateString()}*

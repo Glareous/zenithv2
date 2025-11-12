@@ -1,3 +1,11 @@
+import nextra from 'nextra'
+
+const withNextra = nextra({
+  mdxOptions: {
+    rehypePlugins: [],
+  },
+})
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -21,4 +29,4 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
+export default withNextra(nextConfig)
