@@ -9,11 +9,10 @@ import BreadCrumb from '@src/components/common/BreadCrumb'
 import DeleteModal from '@src/components/common/DeleteModal'
 import { Modal } from '@src/components/custom/modal/modal'
 import TableContainer from '@src/components/custom/table/table'
-import ModalSelectAgent from '@src/components/organisms/ModalSelectAgent'
 import { NextPageWithLayout } from '@src/dtos'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
-import { CirclePlus, Eye, Pencil, Settings, Trash2 } from 'lucide-react'
+import { CirclePlus, Eye, Pencil, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
@@ -38,7 +37,6 @@ const PQRListPage: NextPageWithLayout = () => {
 
   const [showModal, setShowModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showAgentModal, setShowAgentModal] = useState(false)
   const [selectedPQR, setSelectedPQR] = useState<any>(null)
   const [isEditMode, setIsEditMode] = useState(false)
 
@@ -67,16 +65,6 @@ const PQRListPage: NextPageWithLayout = () => {
     refetch,
   } = api.projectPQR.getByProject.useQuery(
     { projectId: currentProject?.id || '' },
-    { enabled: !!currentProject?.id }
-  )
-
-  const { data: agents = [] } = api.projectAgent.getByProject.useQuery(
-    { projectId: currentProject?.id || '' },
-    { enabled: !!currentProject?.id }
-  )
-
-  const { data: projectDetails } = api.project.getById.useQuery(
-    { id: currentProject?.id || '' },
     { enabled: !!currentProject?.id }
   )
 
@@ -150,147 +138,6 @@ const PQRListPage: NextPageWithLayout = () => {
     setIsEditMode(false)
     setSelectedPQR(null)
     reset()
-  }
-
-  const upsertTriggerMutation = api.projectAgentTrigger.upsert.useMutation({
-    onError: (error) => {
-      toast.error(`Error creating webhook trigger: ${error.message}`)
-    },
-  })
-
-  const upsertWebhookActionMutation =
-    api.projectAction.upsertWebhookAction.useMutation({
-      onError: (error) => {
-        toast.error(`Error creating webhook action: ${error.message}`)
-      },
-    })
-
-  const updatePQRAgentMutation = api.project.updatePQRAgent.useMutation({
-    onSuccess: () => {
-      toast.success('PQR agent configured successfully!')
-      setShowAgentModal(false)
-
-      utils.project.getById.invalidate({ id: currentProject?.id || '' })
-    },
-    onError: (error) => {
-      toast.error(`Error configuring PQR agent: ${error.message}`)
-    },
-  })
-
-  const removePQRAgentMutation = api.project.removePQRAgent.useMutation({
-    onSuccess: () => {
-      toast.success('PQR agent removed successfully!')
-      setShowAgentModal(false)
-
-      utils.project.getById.invalidate({ id: currentProject?.id || '' })
-    },
-    onError: (error) => {
-      toast.error(`Error removing PQR agent: ${error.message}`)
-    },
-  })
-
-  const utils = api.useUtils()
-
-  const handleRemovePQRAgent = () => {
-    if (!currentProject?.id) {
-      toast.error('No project selected')
-      return
-    }
-
-    removePQRAgentMutation.mutate({
-      projectId: currentProject.id,
-    })
-  }
-
-  const handleSelectAgent = async (agentId: string) => {
-    if (!currentProject?.id) {
-      toast.error('No project selected')
-      return
-    }
-
-    try {
-      const triggers = await utils.projectAgentTrigger.getByAgentId.fetch({
-        agentId: agentId,
-      })
-
-      const existingWebhook = triggers?.find((t) => t.type === 'WEBHOOK')
-
-      let webhookConfig: {
-        requestBody: string
-        variables: Array<{
-          id: string
-          key: string
-          type: 'STRING' | 'NUMBER' | 'BOOLEAN'
-          value: string
-        }>
-      }
-
-      if (existingWebhook?.webhookConfig) {
-        const existingConfig = existingWebhook.webhookConfig as any
-        const existingVariables = existingConfig.variables || []
-
-        const hasIdVariable = existingVariables.some((v: any) => v.key === 'id')
-
-        if (hasIdVariable) {
-          webhookConfig = existingConfig
-        } else {
-          webhookConfig = {
-            requestBody: existingConfig.requestBody || '',
-            variables: [
-              ...existingVariables,
-              {
-                id: `pqr-id-${Date.now()}`,
-                key: 'id',
-                type: 'STRING' as const,
-                value: 'id',
-              },
-            ],
-          }
-        }
-      } else {
-        webhookConfig = {
-          requestBody: '',
-          variables: [
-            {
-              id: `pqr-id-${Date.now()}`,
-              key: 'id',
-              type: 'STRING' as const,
-              value: 'id',
-            },
-          ],
-        }
-      }
-
-      upsertTriggerMutation.mutate(
-        {
-          agentId: agentId,
-          type: 'WEBHOOK',
-          webhookConfig: webhookConfig,
-        },
-        {
-          onSuccess: () => {
-            upsertWebhookActionMutation.mutate(
-              {
-                agentId: agentId,
-                projectId: currentProject.id,
-                variables: webhookConfig.variables,
-              },
-              {
-                onSuccess: () => {
-                  updatePQRAgentMutation.mutate({
-                    projectId: currentProject.id,
-                    agentId: agentId,
-                  })
-                },
-              }
-            )
-          },
-        }
-      )
-    } catch (error) {
-      console.error('Error configuring PQR agent:', error)
-      toast.error('Failed to configure PQR agent')
-    }
   }
 
   const onSubmit = async (data: PQRFormData) => {
@@ -417,12 +264,6 @@ const PQRListPage: NextPageWithLayout = () => {
                 onClick={openCreateModal}>
                 <CirclePlus className="inline-block size-4 mr-1" />
                 <span className="align-middle">Add PQR</span>
-              </button>
-              <button
-                type="button"
-                className="btn btn-sub-primary btn-icon"
-                onClick={() => setShowAgentModal(true)}>
-                <Settings className="size-5" />
               </button>
             </div>
           </div>
@@ -688,25 +529,6 @@ const PQRListPage: NextPageWithLayout = () => {
         confirmText="Delete"
         cancelText="Cancel"
         type="delete"
-      />
-
-      {/* Agent Selection Modal */}
-      <ModalSelectAgent
-        isOpen={showAgentModal}
-        onClose={() => setShowAgentModal(false)}
-        agents={agents}
-        onSelect={handleSelectAgent}
-        isLoading={
-          upsertTriggerMutation.isPending ||
-          upsertWebhookActionMutation.isPending ||
-          updatePQRAgentMutation.isPending
-        }
-        title="Select Agent for PQR Analysis"
-        buttonText="Save Configuration"
-        initialSelectedId={projectDetails?.pqrAgentId}
-        onDelete={handleRemovePQRAgent}
-        deleteButtonText="Remove Agent"
-        isDeleting={removePQRAgentMutation.isPending}
       />
     </React.Fragment>
   )

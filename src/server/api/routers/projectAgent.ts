@@ -653,16 +653,16 @@ export const projectAgentRouter = createTRPCRouter({
         })
       }
 
-      // Check if agent is configured as PQR agent in any project
-      const projectsUsingAsPQR = await ctx.db.project.findFirst({
-        where: { pqrAgentId: input.id },
+      // Check if agent is configured as PQR agent in any organization
+      const organizationsUsingAsPQR = await ctx.db.organization.findFirst({
+        where: { agentPqrId: input.id },
       })
 
-      if (projectsUsingAsPQR) {
+      if (organizationsUsingAsPQR) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
           message:
-            'Cannot delete agent. This agent is configured for PQR analysis. Please change the PQR agent configuration first.',
+            'Cannot delete agent. This agent is configured as PQR agent for an organization. Please remove it from the organization first.',
         })
       }
 

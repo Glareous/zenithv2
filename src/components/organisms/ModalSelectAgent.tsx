@@ -40,8 +40,8 @@ const ModalSelectAgent: React.FC<ModalSelectAgentProps> = ({
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null)
 
   useEffect(() => {
-    if (isOpen && initialSelectedId) {
-      setSelectedAgentId(initialSelectedId)
+    if (isOpen) {
+      setSelectedAgentId(initialSelectedId || null)
     }
   }, [isOpen, initialSelectedId])
 

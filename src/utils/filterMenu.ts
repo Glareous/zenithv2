@@ -32,7 +32,7 @@ export function filterMenuByAllowedPages(
     Ecommerce: 'ecommerce',
     Rrhh: 'rrhh',
     Orders: 'orders',
-    Chat: 'chat',
+    CHAT: 'chat',
     CRM: 'crm',
     Agents: 'agents',
     Models: 'models',

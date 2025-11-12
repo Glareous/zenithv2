@@ -309,11 +309,15 @@ const ActionPage: React.FC<ActionPageProps> = ({ params }) => {
       },
       {
         onSuccess: () => {
-          if (currentProject?.id) {
+          // For admin routes, don't pass projectId to create global webhook actions
+          // For regular routes, pass projectId to create project-specific webhook actions
+          const shouldCreateWebhookAction = isAdminRoute || currentProject?.id
+
+          if (shouldCreateWebhookAction) {
             upsertWebhookActionMutation.mutate(
               {
                 agentId: id,
-                projectId: currentProject.id,
+                projectId: isAdminRoute ? undefined : currentProject?.id,
                 variables: config.variables,
               },
               {

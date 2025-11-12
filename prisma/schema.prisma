@@ -325,16 +325,11 @@ model Project {
     status  ProjectStatus @default(CREATED)
     action  String?
 
-    // PQR Agent configuration
-    pqrAgentId String?
-    pqrAgent   ProjectAgent? @relation("PQRAgent", fields: [pqrAgentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
     actions              ProjectAction[]
     assignedPhoneNumbers ProjectPhoneNumber[]
 
   @@index([organizationId])
   @@index([createdById])
-  @@index([pqrAgentId])
 }
 
 // Junction table for project members
@@ -461,7 +456,6 @@ model ProjectAgent {
     actions           ProjectAgentActions?  // One-to-one relationship with agent actions
     projectActions    ProjectAction[]       // Agent-specific actions
     cronExecutionLogs AgentCronExecutionLog[] // CRON job execution logs
-    pqrProjects       Project[] @relation("PQRAgent") // Projects using this agent for PQR
     organizationAgents OrganizationAgent[] // Organizations this agent is assigned to (when isGlobal=false) - DEPRECATED
 
     @@index([projectId])

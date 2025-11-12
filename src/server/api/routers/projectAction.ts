@@ -88,7 +88,7 @@ const updateActionSchema = z.object({
 // Schema for webhook action upsert
 const upsertWebhookActionSchema = z.object({
   agentId: z.string().min(1, 'Agent ID is required'),
-  projectId: z.string().min(1, 'Project ID is required'),
+  projectId: z.string().optional(), // Optional for SUPERADMIN creating global webhooks
   variables: z.array(
     z.object({
       id: z.string(),
@@ -744,10 +744,16 @@ export const projectActionRouter = createTRPCRouter({
         required: false,
       }))
 
+      // Determine if this should be a global action
+      const isGlobal = isSuperAdmin && !projectId
+
       // Check if webhook action already exists for this agent
       const existingAction = await ctx.db.projectAction.findFirst({
         where: {
-          projectId: projectId,
+          ...(isGlobal
+            ? { isGlobal: true }
+            : { projectId: projectId }
+          ),
           actionType: 'WEBHOOK',
           agentId: agentId,
         },
@@ -773,7 +779,8 @@ export const projectActionRouter = createTRPCRouter({
             name: 'webhook',
             description: `Webhook variables for ${agent.name}`,
             apiUrl: 'POST', // Default method, not used for webhook type
-            projectId: projectId,
+            projectId: isGlobal ? null : projectId,
+            isGlobal: isGlobal,
             actionType: 'WEBHOOK',
             agentId: agentId,
             variables: webhookVariables,

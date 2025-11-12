@@ -60,7 +60,7 @@ const organizationSchema = z.object({
   agentPqrId: z.string().optional(),
   agentRrhhId: z.string().optional(),
   agentForecastingId: z.string().optional(),
-  agentChatId: z.string().optional()
+  agentChatId: z.string().optional(),
 })
 
 type OrganizationFormData = z.infer<typeof organizationSchema>
@@ -77,7 +77,9 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
   const [showAgentModal, setShowAgentModal] = useState(false)
-  const [selectedAgentType, setSelectedAgentType] = useState<'pqr' | 'rrhh' | 'forecasting' | 'chat' | null>(null)
+  const [selectedAgentType, setSelectedAgentType] = useState<
+    'pqr' | 'rrhh' | 'forecasting' | 'chat' | null
+  >(null)
 
   // Check if user is SUPERADMIN
   useEffect(() => {
@@ -134,7 +136,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
   // Query to get all agents (both global and specific) for assignment
   const { data: allAgents = [] } = api.projectAgent.getAll.useQuery(
     {}, // Get all agents without filtering
-    { enabled: status === 'authenticated' && session?.user?.role === 'SUPERADMIN' }
+    {
+      enabled:
+        status === 'authenticated' && session?.user?.role === 'SUPERADMIN',
+    }
   )
 
   // Query to get all organizations (superadmin only)
@@ -735,7 +740,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       { value: 'ecommerce', label: 'Ecommerce' },
                       { value: 'rrhh', label: 'RRHH' },
                       { value: 'orders', label: 'Orders' },
-                      { value: 'chat', label: 'Chat' },
+                      { value: 'chat', label: 'CHAT' },
                       { value: 'crm', label: 'CRM' },
                       { value: 'agents', label: 'Agents' },
                       { value: 'models', label: 'Models' },
@@ -794,12 +799,15 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                   {(() => {
                     const allowedPages = watch('allowedPages') || []
                     const agentPages = ['pqr', 'rrhh', 'forecasting', 'chat']
-                    const enabledAgentPages = allowedPages.filter(page => agentPages.includes(page))
+                    const enabledAgentPages = allowedPages.filter((page) =>
+                      agentPages.includes(page)
+                    )
 
                     if (enabledAgentPages.length === 0) {
                       return (
                         <p className="text-sm text-gray-500 italic">
-                          Enable PQR, RRHH, Forecasting, or Chat in Menu Restrictions to assign agents
+                          Enable PQR, RRHH, Forecasting, or Chat in Menu
+                          Restrictions to assign agents
                         </p>
                       )
                     }
@@ -807,28 +815,49 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                     return (
                       <div className="space-y-3">
                         {enabledAgentPages.map((page) => {
-                          const agentKey = `agent${page.charAt(0).toUpperCase() + page.slice(1)}Id` as 'agentPqrId' | 'agentRrhhId' | 'agentForecastingId' | 'agentChatId'
+                          const agentKey =
+                            `agent${page.charAt(0).toUpperCase() + page.slice(1)}Id` as
+                              | 'agentPqrId'
+                              | 'agentRrhhId'
+                              | 'agentForecastingId'
+                              | 'agentChatId'
                           const selectedAgentId = watch(agentKey)
-                          const selectedAgent = allAgents.find(a => a.id === selectedAgentId)
+                          const selectedAgent = allAgents.find(
+                            (a) => a.id === selectedAgentId
+                          )
 
                           return (
-                            <div key={page} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md">
+                            <div
+                              key={page}
+                              className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md">
                               <div className="flex-1">
-                                <span className="text-sm font-medium capitalize">{page} Agent</span>
+                                <span className="text-sm font-medium capitalize">
+                                  {page} Agent
+                                </span>
                                 {selectedAgent && (
                                   <p className="text-xs text-gray-500 mt-1">
                                     Selected: {selectedAgent.name}
-                                    {selectedAgent.isGlobal && <span className="ml-1 text-green-600">(Global)</span>}
+                                    {selectedAgent.isGlobal && (
+                                      <span className="ml-1 text-green-600">
+                                        (Global)
+                                      </span>
+                                    )}
                                   </p>
                                 )}
                               </div>
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setSelectedAgentType(page as 'pqr' | 'rrhh' | 'forecasting' | 'chat')
+                                  setSelectedAgentType(
+                                    page as
+                                      | 'pqr'
+                                      | 'rrhh'
+                                      | 'forecasting'
+                                      | 'chat'
+                                  )
                                   setShowAgentModal(true)
                                 }}
-                                className="btn btn-sm btn-outline-primary">
+                                className="btn btn-outline-primary btn-md flex items-center">
                                 <CirclePlus className="w-4 h-4 mr-1" />
                                 Select
                               </button>
@@ -1137,7 +1166,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       { value: 'ecommerce', label: 'Ecommerce' },
                       { value: 'rrhh', label: 'RRHH' },
                       { value: 'orders', label: 'Orders' },
-                      { value: 'chat', label: 'Chat' },
+                      { value: 'chat', label: 'CHAT' },
                       { value: 'crm', label: 'CRM' },
                       { value: 'agents', label: 'Agents' },
                       { value: 'models', label: 'Models' },
@@ -1224,12 +1253,15 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                     {(() => {
                       const allowedPages = watch('allowedPages') || []
                       const agentPages = ['pqr', 'rrhh', 'forecasting', 'chat']
-                      const enabledAgentPages = allowedPages.filter(page => agentPages.includes(page))
+                      const enabledAgentPages = allowedPages.filter((page) =>
+                        agentPages.includes(page)
+                      )
 
                       if (enabledAgentPages.length === 0) {
                         return (
                           <p className="text-sm text-gray-500 italic">
-                            Enable PQR, RRHH, Forecasting, or Chat in Menu Restrictions to assign agents
+                            Enable PQR, RRHH, Forecasting, or Chat in Menu
+                            Restrictions to assign agents
                           </p>
                         )
                       }
@@ -1237,28 +1269,49 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       return (
                         <div className="space-y-3">
                           {enabledAgentPages.map((page) => {
-                            const agentKey = `agent${page.charAt(0).toUpperCase() + page.slice(1)}Id` as 'agentPqrId' | 'agentRrhhId' | 'agentForecastingId' | 'agentChatId'
+                            const agentKey =
+                              `agent${page.charAt(0).toUpperCase() + page.slice(1)}Id` as
+                                | 'agentPqrId'
+                                | 'agentRrhhId'
+                                | 'agentForecastingId'
+                                | 'agentChatId'
                             const selectedAgentId = watch(agentKey)
-                            const selectedAgent = allAgents.find(a => a.id === selectedAgentId)
+                            const selectedAgent = allAgents.find(
+                              (a) => a.id === selectedAgentId
+                            )
 
                             return (
-                              <div key={page} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800">
+                              <div
+                                key={page}
+                                className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800">
                                 <div className="flex-1">
-                                  <span className="text-sm font-medium capitalize">{page} Agent</span>
+                                  <span className="text-sm font-medium capitalize">
+                                    {page} Agent
+                                  </span>
                                   {selectedAgent && (
                                     <p className="text-xs text-gray-500 mt-1">
                                       Selected: {selectedAgent.name}
-                                      {selectedAgent.isGlobal && <span className="ml-1 text-green-600">(Global)</span>}
+                                      {selectedAgent.isGlobal && (
+                                        <span className="ml-1 text-green-600">
+                                          (Global)
+                                        </span>
+                                      )}
                                     </p>
                                   )}
                                 </div>
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    setSelectedAgentType(page as 'pqr' | 'rrhh' | 'forecasting' | 'chat')
+                                    setSelectedAgentType(
+                                      page as
+                                        | 'pqr'
+                                        | 'rrhh'
+                                        | 'forecasting'
+                                        | 'chat'
+                                    )
                                     setShowAgentModal(true)
                                   }}
-                                  className="btn btn-sm btn-outline-primary">
+                                  className="btn btn-md btn-outline-primary flex items-center">
                                   <CirclePlus className="w-4 h-4 mr-1" />
                                   Select
                                 </button>
@@ -1483,15 +1536,31 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           setShowAgentModal(false)
           setSelectedAgentType(null)
         }}
-        agents={allAgents.filter(a => a.isGlobal)}
+        agents={allAgents.filter((a) => a.isGlobal)}
         onSelect={(agentId) => {
           if (selectedAgentType) {
-            const agentKey = `agent${selectedAgentType.charAt(0).toUpperCase() + selectedAgentType.slice(1)}Id` as 'agentPqrId' | 'agentRrhhId' | 'agentForecastingId' | 'agentChatId'
+            const agentKey =
+              `agent${selectedAgentType.charAt(0).toUpperCase() + selectedAgentType.slice(1)}Id` as
+                | 'agentPqrId'
+                | 'agentRrhhId'
+                | 'agentForecastingId'
+                | 'agentChatId'
             setValue(agentKey, agentId)
           }
           setShowAgentModal(false)
           setSelectedAgentType(null)
         }}
+        initialSelectedId={
+          selectedAgentType
+            ? watch(
+                `agent${selectedAgentType.charAt(0).toUpperCase() + selectedAgentType.slice(1)}Id` as
+                  | 'agentPqrId'
+                  | 'agentRrhhId'
+                  | 'agentForecastingId'
+                  | 'agentChatId'
+              )
+            : null
+        }
         title={`Select ${selectedAgentType?.toUpperCase()} Agent`}
         buttonText="Assign Agent"
       />

@@ -130,7 +130,7 @@ const menu: MegaMenu[] = [
   },
 
   {
-    title: 'Chat',
+    title: 'CHAT',
     lang: 'pe-chat',
     icon: 'messages-square',
     link: '/apps/chat',
@@ -245,7 +245,7 @@ const menu: MegaMenu[] = [
     ],
   },
   {
-    title: 'Rrhh',
+    title: 'RRHH',
     lang: 'pe-rrhh',
     icon: 'users-round',
     link: '/apps/rrhh/',
