@@ -229,7 +229,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'Landing',
-        link: '/apps/forecasting/forecasting-landing',
+        link: '/apps/forecasting/landing',
         lang: 'Landing',
       },
       {

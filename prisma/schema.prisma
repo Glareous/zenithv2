@@ -497,7 +497,7 @@ model Chat {
     id          String   @id @default(cuid()) @map("_id")
 
     // User information
-    userId          String   // Identifier for the user chatting
+    userId          String   // Identifier for the user chatting (can be external user or employee ID)
 
     // Chat metadata
     status          ChatStatus @default(ACTIVE)
@@ -507,12 +507,15 @@ model Chat {
     metadata        Json?    // Flexible metadata for AI analytics, costs, summary, etc.
 
     // Relations
-    agent           ProjectAgent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+    agent           ProjectAgent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
     agentId         String
+    employee        ProjectEmployee?    @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+    employeeId      String?             // Optional: Link to employee if chat is for an employee
     messages        Message[]
 
     @@index([agentId])
     @@index([userId])
+    @@index([employeeId])
     @@index([status])
 }
 
@@ -1529,6 +1532,7 @@ model ProjectEmployee {
     // Related data
     files           ProjectEmployeeFile[]
     histories       ProjectEmployeeHistory[]
+    chats           Chat[]                    // Chats related to this employee
 
     @@index([projectId])
     @@index([createdById])

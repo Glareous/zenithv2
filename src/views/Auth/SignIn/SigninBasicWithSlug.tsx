@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter, useSearchParams, useParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 
 import whiteLogo from '@assets/images/logo-white.png'
 import LogoMain from '@assets/images/main-logo.png'
@@ -12,7 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { api } from '@src/trpc/react'
 import { TRPCClientError } from '@trpc/client'
 import { Eye, EyeOff } from 'lucide-react'
-import { signIn, signOut, getSession } from 'next-auth/react'
+import { getSession, signIn, signOut } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
@@ -32,7 +32,7 @@ export default function SigninBasicWithSlug() {
   const searchParams = useSearchParams()
   const params = useParams()
   const slug = params.slug as string
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboards/ecommerce'
+  const callbackUrl = searchParams.get('callbackUrl') || '/apps/pqr/pqr-list'
   const utils = api.useUtils()
 
   // Invitation context from URL params
@@ -42,10 +42,11 @@ export default function SigninBasicWithSlug() {
   const invitationError = searchParams.get('error')
 
   // Fetch organization by slug
-  const { data: organization, isLoading: isLoadingOrg, error: orgError } = api.organization.getBySlug.useQuery(
-    { slug },
-    { enabled: !!slug }
-  )
+  const {
+    data: organization,
+    isLoading: isLoadingOrg,
+    error: orgError,
+  } = api.organization.getBySlug.useQuery({ slug }, { enabled: !!slug })
 
   // Accept invitation mutation
   const acceptInvitation = api.projectMember.acceptInvitation.useMutation()
@@ -170,7 +171,9 @@ export default function SigninBasicWithSlug() {
       <div className="relative flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="inline-block size-8 border-4 border-primary-500 border-r-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading organization...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            Loading organization...
+          </p>
         </div>
       </div>
     )
