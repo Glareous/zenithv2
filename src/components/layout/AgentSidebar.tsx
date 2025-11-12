@@ -23,27 +23,20 @@ export const AgentSidebar = ({
   const router = useRouter()
   const [isTestModalOpen, setIsTestModalOpen] = useState(false)
 
-  // Detect if we're on PQR agent or admin agent page
-  const isPQRAgent = currentPath.includes('/apps/pqr/pqr-agent/')
+  // Detect if we're on admin agent page
   const isAdminAgent = currentPath.includes('/admin/agents/')
 
-  const baseRoute = isPQRAgent
-    ? '/apps/pqr/pqr-agent'
-    : isAdminAgent
-      ? '/admin/agents'
-      : '/apps/agents/default'
+  const baseRoute = isAdminAgent
+    ? '/admin/agents'
+    : '/apps/agents/default'
 
-  const backRoute = isPQRAgent
-    ? '/apps/pqr/pqr-agent'
-    : isAdminAgent
-      ? '/admin/agents'
-      : '/apps/agents/default'
+  const backRoute = isAdminAgent
+    ? '/admin/agents'
+    : '/apps/agents/default'
 
-  const backText = isPQRAgent
-    ? 'Back to PQR Agents'
-    : isAdminAgent
-      ? 'Back to Agents'
-      : 'Back to Agents'
+  const backText = isAdminAgent
+    ? 'Back to Agents'
+    : 'Back to Agents'
 
   const navigationItems = [
     {
@@ -158,15 +151,12 @@ export const AgentMobileDrawer = ({
   isOpen: boolean
   onClose: () => void
 }) => {
-  // Detect if we're on PQR agent or admin agent page
-  const isPQRAgent = currentPath.includes('/apps/pqr/pqr-agent/')
+  // Detect if we're on admin agent page
   const isAdminAgent = currentPath.includes('/admin/agents/')
 
-  const baseRoute = isPQRAgent
-    ? '/apps/pqr/pqr-agent'
-    : isAdminAgent
-      ? '/admin/agents'
-      : '/apps/agents/default'
+  const baseRoute = isAdminAgent
+    ? '/admin/agents'
+    : '/apps/agents/default'
 
   const navigationItems = [
     {

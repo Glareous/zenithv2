@@ -175,10 +175,35 @@ export const projectAgentRouter = createTRPCRouter({
         })
       }
 
+      // Get organization to filter global agents
+      const organization = await ctx.db.organization.findUnique({
+        where: { id: project.organization.id },
+        select: {
+          agentPqrId: true,
+          agentRrhhId: true,
+          agentForecastingId: true,
+          agentChatId: true,
+        },
+      })
+
+      // Build list of allowed global agent IDs from organization
+      const allowedGlobalAgentIds = [
+        organization?.agentPqrId,
+        organization?.agentRrhhId,
+        organization?.agentForecastingId,
+        organization?.agentChatId,
+      ].filter((id): id is string => id !== null && id !== undefined)
+
       const agents = await ctx.db.projectAgent.findMany({
         where: {
-          // Only show agents that belong to this project (cloned agents)
-          projectId: input.projectId,
+          OR: [
+            // Project-specific agents (cloned agents)
+            { projectId: input.projectId },
+            // Global agents assigned to the organization
+            ...(allowedGlobalAgentIds.length > 0
+              ? [{ id: { in: allowedGlobalAgentIds }, isGlobal: true }]
+              : []),
+          ],
           ...(input.type && { type: input.type }),
           ...(input.isActive !== undefined && { isActive: input.isActive }),
         },
