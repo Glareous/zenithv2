@@ -695,34 +695,42 @@ export const projectActionRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { agentId, projectId, variables } = input
 
-      // Verify user has access to the project
-      const membership = await ctx.db.projectMember.findFirst({
-        where: {
-          userId: ctx.session.user.id,
-          projectId: projectId,
-        },
-      })
+      const isSuperAdmin = ctx.session.user.role === 'SUPERADMIN'
 
-      if (!membership) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message:
-            'You do not have permission to manage actions in this project',
+      // Verify user has access to the project (skip for SUPERADMIN with global agents)
+      if (!isSuperAdmin || projectId) {
+        const membership = await ctx.db.projectMember.findFirst({
+          where: {
+            userId: ctx.session.user.id,
+            projectId: projectId,
+          },
         })
+
+        if (!membership && !isSuperAdmin) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message:
+              'You do not have permission to manage actions in this project',
+          })
+        }
       }
 
-      // Verify agent exists and belongs to this project
-      const agent = await ctx.db.projectAgent.findFirst({
-        where: {
-          id: agentId,
-          projectId: projectId,
-        },
-      })
+      // Verify agent exists
+      const agent = isSuperAdmin
+        ? await ctx.db.projectAgent.findUnique({
+            where: { id: agentId },
+          })
+        : await ctx.db.projectAgent.findFirst({
+            where: {
+              id: agentId,
+              projectId: projectId,
+            },
+          })
 
       if (!agent) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Agent not found in this project',
+          message: 'Agent not found',
         })
       }
 

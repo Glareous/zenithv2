@@ -47,27 +47,37 @@ export const projectAgentTriggerRouter = createTRPCRouter({
     .input(getByAgentSchema)
     .query(async ({ ctx, input }) => {
       // First verify the agent exists and user has access
-      const agent = await ctx.db.projectAgent.findFirst({
-        where: {
-          id: input.agentId,
-          project: {
-            OR: [
-              { createdById: ctx.session.user.id },
-              {
-                members: {
-                  some: {
-                    userId: ctx.session.user.id,
+      const isSuperAdmin = ctx.session.user.role === 'SUPERADMIN'
+
+      const agent = isSuperAdmin
+        ? await ctx.db.projectAgent.findUnique({
+            where: { id: input.agentId },
+            select: {
+              id: true,
+              projectId: true,
+            },
+          })
+        : await ctx.db.projectAgent.findFirst({
+            where: {
+              id: input.agentId,
+              project: {
+                OR: [
+                  { createdById: ctx.session.user.id },
+                  {
+                    members: {
+                      some: {
+                        userId: ctx.session.user.id,
+                      },
+                    },
                   },
-                },
+                ],
               },
-            ],
-          },
-        },
-        select: {
-          id: true,
-          projectId: true,
-        },
-      })
+            },
+            select: {
+              id: true,
+              projectId: true,
+            },
+          })
 
       if (!agent) {
         throw new Error('Agent not found or access denied')
@@ -124,27 +134,37 @@ export const projectAgentTriggerRouter = createTRPCRouter({
       }
 
       // Verify agent exists and user has access
-      const agent = await ctx.db.projectAgent.findFirst({
-        where: {
-          id: agentId,
-          project: {
-            OR: [
-              { createdById: ctx.session.user.id },
-              {
-                members: {
-                  some: {
-                    userId: ctx.session.user.id,
+      const isSuperAdmin = ctx.session.user.role === 'SUPERADMIN'
+
+      const agent = isSuperAdmin
+        ? await ctx.db.projectAgent.findUnique({
+            where: { id: agentId },
+            select: {
+              id: true,
+              projectId: true,
+            },
+          })
+        : await ctx.db.projectAgent.findFirst({
+            where: {
+              id: agentId,
+              project: {
+                OR: [
+                  { createdById: ctx.session.user.id },
+                  {
+                    members: {
+                      some: {
+                        userId: ctx.session.user.id,
+                      },
+                    },
                   },
-                },
+                ],
               },
-            ],
-          },
-        },
-        select: {
-          id: true,
-          projectId: true,
-        },
-      })
+            },
+            select: {
+              id: true,
+              projectId: true,
+            },
+          })
 
       if (!agent) {
         throw new Error('Agent not found or access denied')
@@ -244,23 +264,29 @@ export const projectAgentTriggerRouter = createTRPCRouter({
       const { agentId, type } = input
 
       // Verify agent exists and user has access
-      const agent = await ctx.db.projectAgent.findFirst({
-        where: {
-          id: agentId,
-          project: {
-            OR: [
-              { createdById: ctx.session.user.id },
-              {
-                members: {
-                  some: {
-                    userId: ctx.session.user.id,
+      const isSuperAdmin = ctx.session.user.role === 'SUPERADMIN'
+
+      const agent = isSuperAdmin
+        ? await ctx.db.projectAgent.findUnique({
+            where: { id: agentId },
+          })
+        : await ctx.db.projectAgent.findFirst({
+            where: {
+              id: agentId,
+              project: {
+                OR: [
+                  { createdById: ctx.session.user.id },
+                  {
+                    members: {
+                      some: {
+                        userId: ctx.session.user.id,
+                      },
+                    },
                   },
-                },
+                ],
               },
-            ],
-          },
-        },
-      })
+            },
+          })
 
       if (!agent) {
         throw new Error('Agent not found or access denied')
