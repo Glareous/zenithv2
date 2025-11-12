@@ -42,7 +42,7 @@ enum ChatStatus {
     ARCHIVED
 }
 
-enum MessageType {
+enum MessageMediaType {
     TEXT
     IMAGE
     AUDIO
@@ -50,9 +50,9 @@ enum MessageType {
     VIDEO
 }
 
-enum MessageSender {
+enum MessageType {
     AGENT
-    CUSTOMER
+    USER
 }
 
 enum ProjectStatus {
@@ -495,25 +495,24 @@ model ProjectAgentFile {
 // Chat model - records of agent conversations
 model Chat {
     id          String   @id @default(cuid()) @map("_id")
-    
-    // Customer information
-    customerName    String?
-    customerPhone   String
-    customerEmail   String?
-    
+
+    // User information
+    userId          String   // Identifier for the user chatting
+
     // Chat metadata
     status          ChatStatus @default(ACTIVE)
     startedAt       DateTime @default(now())
     endedAt         DateTime?
     updatedAt       DateTime @updatedAt
-    
+    metadata        Json?    // Flexible metadata for AI analytics, costs, summary, etc.
+
     // Relations
     agent           ProjectAgent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
     agentId         String
     messages        Message[]
-    
+
     @@index([agentId])
-    @@index([customerPhone])
+    @@index([userId])
     @@index([status])
 }
 
@@ -521,18 +520,19 @@ model Chat {
 model Message {
     id          String   @id @default(cuid()) @map("_id")
     content     String
-    messageType MessageType @default(TEXT)
-    sender      MessageSender
+    mediaType   MessageMediaType @default(TEXT)
+    type        MessageType
     timestamp   DateTime @default(now())
-    
+    metadata    Json?    // Flexible metadata for AI confidence, tokens, intent, etc.
+
     // WhatsApp specific fields
     whatsappMessageId String?
     mediaUrl          String? // For images, documents, etc.
-    
+
     // Relations
     chat        Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
     chatId      String
-    
+
     @@index([chatId])
     @@index([timestamp])
 }

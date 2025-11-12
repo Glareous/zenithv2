@@ -45,6 +45,8 @@ import { projectForecastingFileRouter } from './routers/projectForecastingFile'
 import { projectForecastingSeriesRouter } from './routers/projectForecastingSeries'
 import { organizationRouter } from './routers/organization'
 import { organizationFileRouter } from './routers/organizationFile'
+import { projectChatRouter } from './routers/projectChat'
+import { projectMessageRouter } from './routers/projectMessage'
 
 /**
  * This is the primary router for your server.
@@ -97,6 +99,8 @@ export const appRouter = createTRPCRouter({
   projectForecasting: projectForecastingRouter,
   projectForecastingFile: projectForecastingFileRouter,
   projectForecastingSeries: projectForecastingSeriesRouter,
+  projectChat: projectChatRouter,
+  projectMessage: projectMessageRouter,
 })
 
 // export type definition of API
