@@ -575,6 +575,18 @@ export const projectActionRouter = createTRPCRouter({
                 },
               }),
         },
+        select: {
+          id: true,
+          endpointUrl: true,
+          apiUrl: true,
+          requestBody: true,
+          headers: true,
+          authorizationNeeded: true,
+          authenticationKey: true,
+          authenticationValue: true,
+          timeout: true,
+          variables: true, // Include variables for proper mapping
+        },
       })
 
       if (!action) {
@@ -592,7 +604,69 @@ export const projectActionRouter = createTRPCRouter({
       }
 
       try {
-        const processedBody = input.data ? JSON.stringify(input.data) : '{}'
+        // Process body: use requestBody template and replace variable placeholders
+        let processedBody = '{}'
+
+        if (action.requestBody) {
+          try {
+            // Parse the requestBody (could be JSON string or Tiptap document)
+            const parsedBody = typeof action.requestBody === 'string'
+              ? JSON.parse(action.requestBody)
+              : action.requestBody
+
+            // Check if it's a Tiptap document structure
+            if (parsedBody.type === 'doc' && parsedBody.content) {
+              // Convert Tiptap document to plain text with variable substitution
+              console.log('Converting Tiptap document with variables:', input.data)
+              console.log('Action variables:', action.variables)
+              processedBody = convertTiptapToText(
+                parsedBody,
+                input.data || {},
+                action.variables as any
+              )
+              console.log('Converted body:', processedBody)
+            } else {
+              // It's already a plain JSON object, just replace placeholders
+              let bodyTemplate = JSON.stringify(parsedBody)
+
+              if (input.data && typeof input.data === 'object') {
+                Object.entries(input.data).forEach(([key, value]) => {
+                  const patterns = [
+                    new RegExp(`\\{[^}]*\\.${key}\\}`, 'g'),
+                    new RegExp(`\\{${key}\\}`, 'g'),
+                    new RegExp(`\\{\\{${key}\\}\\}`, 'g'),
+                  ]
+                  patterns.forEach(pattern => {
+                    bodyTemplate = bodyTemplate.replace(pattern, String(value))
+                  })
+                })
+              }
+
+              processedBody = bodyTemplate
+            }
+          } catch (error) {
+            // If parsing fails, treat as plain text template
+            let bodyTemplate = action.requestBody
+
+            if (input.data && typeof input.data === 'object') {
+              Object.entries(input.data).forEach(([key, value]) => {
+                const patterns = [
+                  new RegExp(`\\{[^}]*\\.${key}\\}`, 'g'),
+                  new RegExp(`\\{${key}\\}`, 'g'),
+                  new RegExp(`\\{\\{${key}\\}\\}`, 'g'),
+                ]
+                patterns.forEach(pattern => {
+                  bodyTemplate = bodyTemplate.replace(pattern, String(value))
+                })
+              })
+            }
+
+            processedBody = bodyTemplate
+          }
+        } else if (input.data) {
+          // Fallback: if no template, just stringify the data
+          processedBody = JSON.stringify(input.data)
+        }
 
         let headers: Record<string, string> = {}
 
@@ -638,20 +712,30 @@ export const projectActionRouter = createTRPCRouter({
           signal: AbortSignal.timeout(action.timeout || 30000),
         }
 
-        if (['POST', 'PUT', 'PATCH'].includes(action.apiUrl) && processedBody) {
+        // Add body for POST, PUT, PATCH requests (case-insensitive check)
+        const upperMethod = action.apiUrl.toUpperCase()
+        if (['POST', 'PUT', 'PATCH'].includes(upperMethod)) {
           requestOptions.body = processedBody
         }
 
         const queryParams =
-          action.apiUrl == 'GET' && processedBody
+          upperMethod === 'GET' && processedBody
             ? '?' + qs.stringify(JSON.parse(processedBody))
             : ''
 
-        console.log({ queryParams })
-        const response = await fetch(
-          action.endpointUrl + queryParams,
-          requestOptions
-        )
+        const finalUrl = action.endpointUrl + queryParams
+
+        console.log('API Test Call Details:', {
+          url: finalUrl,
+          method: requestOptions.method,
+          headers: requestOptions.headers,
+          body: requestOptions.body,
+          hasBody: !!requestOptions.body,
+          upperMethod,
+          originalMethod: action.apiUrl,
+        })
+
+        const response = await fetch(finalUrl, requestOptions)
         const responseText = await response.text()
 
         let responseData
@@ -800,6 +884,111 @@ export const projectActionRouter = createTRPCRouter({
       }
     }),
 })
+
+// Helper function to convert Tiptap document to plain text with variable substitution
+function convertTiptapToText(
+  tiptapDoc: any,
+  testValues: Record<string, any>,
+  actionVariables?: any[]
+): string {
+  let result = ''
+
+  // Build a comprehensive mapping of all possible label formats to values
+  const variableMap: Record<string, any> = {}
+
+  // If we have action variables metadata, use it to build the mapping
+  if (actionVariables && Array.isArray(actionVariables)) {
+    actionVariables.forEach((variable: any) => {
+      const key = variable.key || variable.label
+      const variableId = variable.variable_id || variable.id
+
+      // Map by key (e.g., "name")
+      if (key && testValues[key] !== undefined) {
+        variableMap[key] = testValues[key]
+      }
+
+      // Map by variable_id
+      if (variableId && testValues[key] !== undefined) {
+        variableMap[variableId] = testValues[key]
+      }
+    })
+  }
+
+  // Also add direct mappings from testValues
+  Object.entries(testValues).forEach(([key, value]) => {
+    variableMap[key] = value
+  })
+
+  console.log('Built variable map:', variableMap)
+
+  function processNode(node: any): string {
+    if (!node) return ''
+
+    // Handle text nodes
+    if (node.type === 'text') {
+      return node.text || ''
+    }
+
+    // Handle reactMention nodes (variable placeholders)
+    if (node.type === 'reactMention') {
+      const label = node.attrs?.label
+      const id = node.attrs?.id
+
+      console.log('Found reactMention - label:', label, 'id:', id, 'Available keys:', Object.keys(variableMap))
+
+      // Try to find the value by various identifiers
+      let value = undefined
+
+      // 1. Try exact label match
+      if (label && variableMap[label] !== undefined) {
+        value = variableMap[label]
+      }
+
+      // 2. Try ID match
+      if (value === undefined && id && variableMap[id] !== undefined) {
+        value = variableMap[id]
+      }
+
+      // 3. Try to find by matching variable metadata
+      if (value === undefined && actionVariables && Array.isArray(actionVariables)) {
+        const matchingVar = actionVariables.find((v: any) =>
+          v.variable_id === id ||
+          v.id === id ||
+          v.key === label ||
+          v.label === label
+        )
+        if (matchingVar) {
+          const key = matchingVar.key || matchingVar.label
+          if (key && testValues[key] !== undefined) {
+            value = testValues[key]
+          }
+        }
+      }
+
+      if (value !== undefined) {
+        console.log('Replacing', label, 'with', value)
+        return String(value)
+      }
+
+      console.log('Variable not found for label:', label, 'id:', id)
+      return `{${label || id || 'unknown'}}`
+    }
+
+    // Handle container nodes (doc, paragraph, etc.)
+    if (node.content && Array.isArray(node.content)) {
+      return node.content.map(processNode).join('')
+    }
+
+    return ''
+  }
+
+  // Process the entire document
+  if (tiptapDoc.content && Array.isArray(tiptapDoc.content)) {
+    result = tiptapDoc.content.map(processNode).join('')
+  }
+
+  return result
+}
 
 function parseResponseFields(
   data: any,
