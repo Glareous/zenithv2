@@ -557,16 +557,23 @@ export const projectActionRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Check if user is SUPERADMIN
+      const isSuperAdmin = ctx.session.user.role === 'SUPERADMIN'
+
       const action = await ctx.db.projectAction.findFirst({
         where: {
           id: input.actionId,
-          project: {
-            members: {
-              some: {
-                userId: ctx.session.user.id,
-              },
-            },
-          },
+          ...(isSuperAdmin
+            ? {}
+            : {
+                project: {
+                  members: {
+                    some: {
+                      userId: ctx.session.user.id,
+                    },
+                  },
+                },
+              }),
         },
       })
 
