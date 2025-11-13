@@ -40,7 +40,6 @@ next-env.d.ts
 public/references/
 examples/
 .claude/settings.local.json
-docs/
 DESIGN.md
 plan.md
 task.md
