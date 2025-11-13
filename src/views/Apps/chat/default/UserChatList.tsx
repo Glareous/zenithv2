@@ -1,24 +1,125 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 
-import Image from 'next/image'
-import Link from 'next/link'
-
-import MessageComponent from '@src/components/common/MessageComponent'
-import { UserChatRecord } from '@src/dtos'
-import { UserChatListProps } from '@src/dtos/apps/chat'
-import { Search } from 'lucide-react'
+import { RootState } from '@src/slices/reducer'
+import { api } from '@src/trpc/react'
+import { Search, Plus } from 'lucide-react'
+import { useSelector } from 'react-redux'
 import SimpleBar from 'simplebar-react'
+import { toast } from 'react-toastify'
+
+interface UserChatListProps {
+  selectedEmployeeId: string | null
+  selectedChatId: string | null
+  onSelectChat: (chatId: string) => void
+}
 
 const UserChatList: React.FC<UserChatListProps> = ({
-  chatMessageList,
-  searchContact,
-  searchValue,
-  handleAddNewContact,
-  currentChat,
+  selectedEmployeeId,
+  selectedChatId,
   onSelectChat,
 }) => {
+  const { currentProject } = useSelector((state: RootState) => state.Project)
+  const [searchValue, setSearchValue] = useState('')
+
+  // Get chats for selected employee
+  const {
+    data: chatsData,
+    isLoading,
+    refetch,
+  } = api.projectChat.getByEmployeeId.useQuery(
+    {
+      employeeId: selectedEmployeeId || '',
+      status: 'ACTIVE',
+    },
+    {
+      enabled: !!selectedEmployeeId,
+    }
+  )
+
+  // Get project to access organization
+  const { data: project } = api.project.getById.useQuery(
+    { id: currentProject?.id || '' },
+    { enabled: !!currentProject?.id }
+  )
+
+  // Get organization to access agentChatId
+  const { data: organization } = api.organization.getById.useQuery(
+    { id: project?.organization?.id || '' },
+    { enabled: !!project?.organization?.id }
+  )
+
+  // Get employee details
+  const { data: employee } = api.projectEmployee.getById.useQuery(
+    { id: selectedEmployeeId || '' },
+    { enabled: !!selectedEmployeeId }
+  )
+
+  // Create new chat mutation
+  const createChatMutation = api.projectChat.create.useMutation({
+    onSuccess: (newChat) => {
+      toast.success('New chat created!')
+      refetch()
+      onSelectChat(newChat.id)
+    },
+    onError: (error) => {
+      toast.error(`Error creating chat: ${error.message}`)
+    },
+  })
+
+  const handleCreateNewChat = () => {
+    if (!selectedEmployeeId) {
+      toast.error('Please select an employee first')
+      return
+    }
+
+    if (!organization?.agentChatId) {
+      toast.error('No chat agent configured for this organization')
+      return
+    }
+
+    if (!employee) {
+      toast.error('Employee not found')
+      return
+    }
+
+    createChatMutation.mutate({
+      userId: employee.employeeId,
+      agentId: organization.agentChatId,
+      employeeId: selectedEmployeeId,
+      metadata: {
+        employeeName: `${employee.firstName} ${employee.lastName}`,
+        source: 'web',
+      },
+    })
+  }
+
+  const chats = chatsData?.chats || []
+
+  // Filter chats by search
+  const filteredChats = chats.filter((chat) => {
+    if (!searchValue.trim()) return true
+    const searchLower = searchValue.toLowerCase()
+    return (
+      chat.userId.toLowerCase().includes(searchLower) ||
+      chat.employee?.firstName?.toLowerCase().includes(searchLower) ||
+      chat.employee?.lastName?.toLowerCase().includes(searchLower)
+    )
+  })
+
+  if (!selectedEmployeeId) {
+    return (
+      <div className="col-span-12 xl:col-span-4 2xl:col-span-3 card">
+        <div className="card-body">
+          <div className="flex items-center justify-center h-64 text-gray-500 dark:text-dark-500">
+            <p>Select an employee to view their chats</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <React.Fragment>
       <div className="col-span-12 xl:col-span-4 2xl:col-span-3 card">
@@ -27,10 +128,10 @@ const UserChatList: React.FC<UserChatListProps> = ({
             <input
               type="text"
               className="ltr:pl-9 rtl:pr-9 form-input ltr:group-[&.right]/form:pr-9 rtl:group-[&.right]/form:pl-9 ltr:group-[&.right]/form:pl-4 rtl:group-[&.right]/form:pr-4"
-              placeholder="Search for ..."
+              placeholder="Search chats..."
               value={searchValue}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                searchContact(e.target.value)
+                setSearchValue(e.target.value)
               }
             />
             <button
@@ -42,121 +143,79 @@ const UserChatList: React.FC<UserChatListProps> = ({
           <div className="py-4">
             <button
               type="button"
-              data-modal-target="addNewChatModals"
-              className="w-full btn btn-primary"
-              onClick={handleAddNewContact}>
-              Start New Chat
+              className="w-full btn btn-primary flex items-center justify-center gap-2"
+              onClick={handleCreateNewChat}
+              disabled={createChatMutation.isPending || !organization?.agentChatId}>
+              {createChatMutation.isPending ? (
+                'Creating...'
+              ) : (
+                <>
+                  <Plus className="size-4" />
+                  Start New Chat
+                </>
+              )}
             </button>
           </div>
-          <SimpleBar className="max-h-[calc(100vh_-_22.5rem)] -mx-space">
-            <ul className="flex flex-col gap-3">
-              {chatMessageList && chatMessageList.length > 0 ? (
-                chatMessageList.map((item: UserChatRecord, index: number) => (
-                  <li key={index} onClick={() => onSelectChat(item)}>
-                    <Link
-                      href="#!"
-                      className={`${
-                        currentChat && currentChat.id === item.id
-                          ? ' active'
-                          : ''
-                      } flex items-center gap-2 px-space py-2.5 hover:bg-gray-50 dark:hover:bg-dark-850 [&.active]:bg-primary-500/10 transition ease-linear duration-300 group/item ${
-                        item.unread > 0 ? 'unread' : ''
-                      } `}>
-                      <div className="relative flex items-center justify-center font-semibold transition duration-200 ease-linear bg-gray-100 rounded-full dark:bg-dark-850 size-10 shrink-0">
-                        {item.receiverImage ? (
-                          <Image
-                            src={item.receiverImage}
-                            alt="userImg"
-                            className="rounded-full"
-                            width={40}
-                            height={40}
-                          />
-                        ) : (
-                          <span>{item.receiverName}</span>
-                        )}
-                        <span className="absolute bottom-0 bg-green-500 border-2 border-white dark:border-dark-900 rounded-full ltr:right-0.5 rtl:left-0.5 size-2.5"></span>
-                      </div>
-                      <div className="overflow-hidden grow">
-                        <h6 className="mb-0.5">{item.name}</h6>
-                        <p
-                          className={`text-sm group-[&.unread]/item:font-medium truncate group-[&.unread]/item:text-gray-950 text-gray-500 dark:text-dark-500 dark:group-[&.unread]/item:text-gray-50 ${
-                            item.unread > 0 ? 'unread' : ''
-                          }`}>
-                          {item.lastMessage && (
-                            <MessageComponent message={item.lastMessage} />
-                          )}
-                        </p>
-                      </div>
-                      <div className="ltr:text-right rtl:text-left shrink-0">
-                        <p className="mb-1 text-xs text-gray-500 dark:text-dark-500"></p>
-                        {item.unread > 0 && (
-                          <span className="badge-sub-red badge-square size-5">
-                            {item.unread}
-                          </span>
-                        )}
-                      </div>
-                    </Link>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <SimpleBar className="max-h-[calc(100vh_-_22.5rem)] -mx-space">
+              <ul className="flex flex-col gap-3">
+                {filteredChats && filteredChats.length > 0 ? (
+                  filteredChats.map((chat) => {
+                    const isActive = selectedChatId === chat.id
+                    const employeeName = chat.employee
+                      ? `${chat.employee.firstName} ${chat.employee.lastName}`
+                      : chat.userId
+                    const initials = chat.employee
+                      ? `${chat.employee.firstName.charAt(0)}${chat.employee.lastName.charAt(0)}`
+                      : chat.userId.substring(0, 2).toUpperCase()
+
+                    return (
+                      <li key={chat.id} onClick={() => onSelectChat(chat.id)}>
+                        <button
+                          className={`${
+                            isActive ? 'active' : ''
+                          } flex items-center gap-2 px-space py-2.5 hover:bg-gray-50 dark:hover:bg-dark-850 [&.active]:bg-primary-500/10 transition ease-linear duration-300 group/item w-full text-left`}>
+                          <div className="relative flex items-center justify-center font-semibold transition duration-200 ease-linear bg-gray-100 rounded-full dark:bg-dark-850 size-10 shrink-0">
+                            <span className="text-sm">{initials}</span>
+                            {chat.status === 'ACTIVE' && (
+                              <span className="absolute bottom-0 bg-green-500 border-2 border-white dark:border-dark-900 rounded-full ltr:right-0.5 rtl:left-0.5 size-2.5"></span>
+                            )}
+                          </div>
+                          <div className="overflow-hidden grow">
+                            <h6 className="mb-0.5 truncate">{employeeName}</h6>
+                            <p className="text-sm text-gray-500 dark:text-dark-500 truncate">
+                              {chat._count?.messages || 0} messages
+                            </p>
+                          </div>
+                          <div className="ltr:text-right rtl:text-left shrink-0">
+                            <p className="mb-1 text-xs text-gray-500 dark:text-dark-500">
+                              {new Date(chat.updatedAt).toLocaleDateString()}
+                            </p>
+                            {chat.status === 'ACTIVE' && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                Active
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      </li>
+                    )
+                  })
+                ) : (
+                  <li className="text-center text-gray-500 dark:text-dark-500 py-8">
+                    {searchValue.trim()
+                      ? 'No chats found'
+                      : 'No chats yet. Start a new chat!'}
                   </li>
-                ))
-              ) : (
-                <li>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    x="0px"
-                    y="0px"
-                    className="mx-auto size-12"
-                    viewBox="0 0 48 48">
-                    <linearGradient
-                      id="SVGID_1__h35ynqzIJzH4_gr1"
-                      x1="34.598"
-                      x2="15.982"
-                      y1="15.982"
-                      y2="34.598"
-                      gradientUnits="userSpaceOnUse">
-                      <stop offset="0" stopColor="#60e8fe"></stop>
-                      <stop offset=".033" stopColor="#6ae9fe"></stop>
-                      <stop offset=".197" stopColor="#97f0fe"></stop>
-                      <stop offset=".362" stopColor="#bdf5ff"></stop>
-                      <stop offset=".525" stopColor="#dafaff"></stop>
-                      <stop offset=".687" stopColor="#eefdff"></stop>
-                      <stop offset=".846" stopColor="#fbfeff"></stop>
-                      <stop offset="1" stopColor="#fff"></stop>
-                    </linearGradient>
-                    <path
-                      fill="url(#SVGID_1__h35ynqzIJzH4_gr1)"
-                      d="M40.036,33.826L31.68,25.6c0.847-1.739,1.335-3.684,1.335-5.748c0-7.27-5.894-13.164-13.164-13.164	S6.688,12.582,6.688,19.852c0,7.27,5.894,13.164,13.164,13.164c2.056,0,3.995-0.485,5.728-1.326l3.914,4.015l4.331,4.331	c1.715,1.715,4.496,1.715,6.211,0C41.751,38.321,41.751,35.541,40.036,33.826z"></path>
-                    <path
-                      fill="none"
-                      stroke="#10cfe3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeMiterlimit="10"
-                      strokeWidth="3"
-                      d="M31.95,25.739l8.086,8.086c1.715,1.715,1.715,4.496,0,6.211l0,0c-1.715,1.715-4.496,1.715-6.211,0	l-4.331-4.331"></path>
-                    <path
-                      fill="none"
-                      stroke="#10cfe3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeMiterlimit="10"
-                      strokeWidth="3"
-                      d="M7.525,24.511c-1.771-4.694-0.767-10.196,3.011-13.975c3.847-3.847,9.48-4.817,14.228-2.912"></path>
-                    <path
-                      fill="none"
-                      stroke="#10cfe3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeMiterlimit="10"
-                      strokeWidth="3"
-                      d="M30.856,12.603c3.376,5.114,2.814,12.063-1.688,16.565c-4.858,4.858-12.565,5.129-17.741,0.814"></path>
-                  </svg>
-                  <p className="mt-2 text-center text-gray-500 dark:text-dark-500">
-                    No matching records found
-                  </p>
-                </li>
-              )}
-            </ul>
-          </SimpleBar>
+                )}
+              </ul>
+            </SimpleBar>
+          )}
         </div>
       </div>
     </React.Fragment>

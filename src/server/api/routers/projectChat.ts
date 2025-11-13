@@ -5,6 +5,7 @@ import { z } from 'zod'
 const createChatSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
   agentId: z.string().min(1, 'Agent ID is required'),
+  employeeId: z.string().optional(),
   metadata: z.any().optional(),
 })
 
@@ -20,7 +21,7 @@ export const projectChatRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createChatSchema)
     .mutation(async ({ ctx, input }) => {
-      const { agentId, userId, metadata } = input
+      const { agentId, userId, employeeId, metadata } = input
 
       // Verify agent exists and user has access
       const agent = await ctx.db.projectAgent.findFirst({
@@ -58,10 +59,25 @@ export const projectChatRouter = createTRPCRouter({
         })
       }
 
+      // Verify employeeId exists if provided
+      if (employeeId) {
+        const employee = await ctx.db.projectEmployee.findUnique({
+          where: { id: employeeId },
+        })
+
+        if (!employee) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Employee not found',
+          })
+        }
+      }
+
       const chat = await ctx.db.chat.create({
         data: {
           userId,
           agentId,
+          employeeId,
           status: 'ACTIVE',
           metadata: metadata || {},
         },
@@ -71,6 +87,13 @@ export const projectChatRouter = createTRPCRouter({
               id: true,
               name: true,
               type: true,
+            },
+          },
+          employee: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
             },
           },
         },
@@ -109,6 +132,13 @@ export const projectChatRouter = createTRPCRouter({
               id: true,
               name: true,
               type: true,
+            },
+          },
+          employee: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
             },
           },
           messages: {
@@ -181,6 +211,97 @@ export const projectChatRouter = createTRPCRouter({
                 id: true,
                 name: true,
                 type: true,
+              },
+            },
+            _count: {
+              select: {
+                messages: true,
+              },
+            },
+          },
+          skip,
+          take: limit,
+          orderBy: {
+            updatedAt: 'desc',
+          },
+        }),
+        ctx.db.chat.count({ where }),
+      ])
+
+      return {
+        chats,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalCount / limit),
+          totalItems: totalCount,
+          itemsPerPage: limit,
+          hasNextPage: page < Math.ceil(totalCount / limit),
+          hasPrevPage: page > 1,
+        },
+      }
+    }),
+
+  // Get chats by employee ID
+  getByEmployeeId: protectedProcedure
+    .input(
+      z.object({
+        employeeId: z.string(),
+        status: z.enum(['ACTIVE', 'CLOSED', 'ARCHIVED']).optional(),
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(100).default(20),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { employeeId, status, page, limit } = input
+      const skip = (page - 1) * limit
+
+      // Verify employee exists and user has access to the project
+      const employee = await ctx.db.projectEmployee.findFirst({
+        where: {
+          id: employeeId,
+          project: {
+            members: {
+              some: {
+                userId: ctx.session.user.id,
+              },
+            },
+          },
+        },
+      })
+
+      if (!employee) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Employee not found or you do not have access to it',
+        })
+      }
+
+      const where: any = {
+        employeeId,
+      }
+
+      if (status) {
+        where.status = status
+      }
+
+      const [chats, totalCount] = await Promise.all([
+        ctx.db.chat.findMany({
+          where,
+          include: {
+            agent: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+              },
+            },
+            employee: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                image: true,
+                email: true,
               },
             },
             _count: {
