@@ -1,0 +1,345 @@
+import { Callout, Steps, Tabs, FileTree } from 'nextra/components'
+
+# 📈 Forecasting Module
+
+<Callout type="info" emoji="ℹ️">
+  **Time-Series Forecasting System** - Predict future trends and patterns using advanced forecasting algorithms and historical data analysis.
+</Callout>
+
+<br />
+## What is Forecasting?
+<br />
+The **Forecasting** module is a powerful predictive analytics system designed to analyze time-series data and generate accurate forecasts for business planning and decision-making.
+
+<br />
+
+### Key Forecasting Capabilities
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+  <div className="card card-body">
+    <h4 className="text-lg font-semibold mb-2">📊 Time-Series Analysis</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Analyze historical data patterns and trends
+    </p>
+  </div>
+  <div className="card card-body">
+    <h4 className="text-lg font-semibold mb-2">🔮 Predictions</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Generate accurate forecasts for future periods
+    </p>
+  </div>
+  <div className="card card-body">
+    <h4 className="text-lg font-semibold mb-2">📁 Data Import</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Upload CSV/Excel files for quick analysis
+    </p>
+  </div>
+</div>
+
+<br />
+
+## ✨ Key Features
+
+<Tabs items={['Time Configuration', 'Data Management', 'Forecasting Tools']}>
+  <Tabs.Tab>
+    ### Flexible Time Intervals
+    <br />
+    - ✅ Configurable time intervals (seconds to years)
+    - ✅ Multiple time units supported
+    - ✅ Custom interval definitions
+    - ✅ Automatic time-series alignment
+    - ✅ Historical data aggregation
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ### Data Import & Export
+<br />
+    - 📥 Upload CSV/Excel files
+    - 📤 Export forecast results
+    - 🔄 Data format validation
+    - ⚡ Batch data processing
+    - 📊 Visual data preview
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ### Advanced Analytics
+    <br />
+
+    - 🔮 Predictive modeling
+    - 📈 Trend analysis
+    - 📊 Statistical forecasting
+    - 🎯 Accuracy metrics
+    - 📉 Confidence intervals
+
+  </Tabs.Tab>
+</Tabs>
+
+<br />
+
+## 🚀 Getting Started
+
+<Steps>
+
+### Navigate to Forecasting
+
+Go to the Forecasting page from the sidebar menu under **FORECASTING → Create-view**
+
+### Create Forecasting Model
+
+Click the **"Add Forecasting"** button to create a new forecast
+
+### Configure Time Settings
+
+Set up your forecast parameters:
+
+- Select time interval (e.g., 1, 7, 30)
+- Choose time unit (Seconds, Minutes, Hours, Days, Months, Years)
+- Add optional description
+
+### Upload Data (Optional)
+
+Upload historical data in CSV format for analysis
+
+### Generate Forecast
+
+Save the configuration and generate your forecast
+
+</Steps>
+
+<br />
+## 📊 Forecasting Data Structure
+
+```typescript
+interface Forecasting {
+  id: string
+  timeInterval: number // Positive integer
+  timeUnit: 'SECONDS' | 'MINUTES' | 'HOURS' | 'DAYS' | 'MONTHS' | 'YEARS'
+  description?: string
+  dataFile?: string // CSV file path
+  projectId: string
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
+<Callout type="warning" emoji="⚠️">
+  Time interval must be a positive integer. Choose appropriate time units based on your forecasting needs.
+</Callout>
+
+<br />
+
+## 🎯 Time Unit Options
+
+<div className="card">
+  <div className="card-body">
+    <div className="overflow-x-auto">
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Time Unit</th>
+            <th>Use Case</th>
+            <th>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="font-semibold">SECONDS</td>
+            <td>Real-time data, IoT sensors</td>
+            <td><span className="badge badge-info">High-frequency</span></td>
+          </tr>
+          <tr>
+            <td className="font-semibold">MINUTES</td>
+            <td>Short-term monitoring</td>
+            <td><span className="badge badge-info">Intraday</span></td>
+          </tr>
+          <tr>
+            <td className="font-semibold">HOURS</td>
+            <td>Daily operations, traffic</td>
+            <td><span className="badge badge-primary">Operational</span></td>
+          </tr>
+          <tr>
+            <td className="font-semibold">DAYS</td>
+            <td>Sales, inventory, demand</td>
+            <td><span className="badge badge-primary">Business</span></td>
+          </tr>
+          <tr>
+            <td className="font-semibold">MONTHS</td>
+            <td>Financial planning, budgets</td>
+            <td><span className="badge badge-success">Strategic</span></td>
+          </tr>
+          <tr>
+            <td className="font-semibold">YEARS</td>
+            <td>Long-term projections</td>
+            <td><span className="badge badge-success">Long-term</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<br />
+
+## 🔧 Common Operations
+
+<Tabs items={['Create Forecast', 'Upload Data', 'View Results', 'Manage']}>
+  <Tabs.Tab>
+    ### Creating a New Forecast
+    <br />
+
+    1. Click **"Add Forecasting"** button
+    2. Set time interval (e.g., 7)
+    3. Choose time unit (e.g., DAYS for weekly forecast)
+    4. Add description (optional)
+    5. Click **"Create"** to save
+
+    <Callout type="info">
+    Time interval and unit determine the forecasting granularity
+    </Callout>
+
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    ### Uploading Historical Data
+    <br />
+
+    1. Click the **Upload** button (📥 icon)
+    2. Select CSV file with historical data
+    3. Verify data format (Date, Value columns)
+    4. Confirm upload
+    5. Data will be processed automatically
+
+    <Callout>
+    CSV files should have proper date/time columns and numeric values
+    </Callout>
+
+  </Tabs.Tab>
+
+<Tabs.Tab>
+  ### Viewing Forecast Results
+  <br />
+  1. Find the forecast in the list
+  2. Click the **View** button (👁️ eye icon)
+  3. Review forecast details and predictions
+  4. Analyze trends and patterns
+  5. Export results if needed
+
+  <Callout>
+  Results include historical data, predictions, and accuracy metrics
+  </Callout>
+</Tabs.Tab>
+
+  <Tabs.Tab>
+    ### Managing Forecasts
+    <br />
+
+    1. **Edit**: Update time interval or description
+    2. **Delete**: Remove forecasts (⚠️ irreversible)
+    3. **Duplicate**: Create similar forecasts
+    4. **Archive**: Keep historical forecasts
+
+    <Callout type="error" emoji="🚨">
+    Deleting a forecast removes all associated data and results
+    </Callout>
+
+  </Tabs.Tab>
+</Tabs>
+
+<br />
+
+## 🔐 Project Integration
+
+<Callout type="info" emoji="🏢">
+  The Forecasting module is **project-scoped** for data organization and security.
+</Callout>
+<br />
+
+### Key Points:
+
+<br />
+
+- ✅ Each forecast belongs to a specific project
+- ✅ You must have a project selected to create forecasts
+- ✅ Forecasts are isolated per project
+- ✅ Only project members can access forecast data
+
+<br />
+
+## 🛠️ API Reference
+
+The module uses **tRPC** for type-safe API calls:
+
+```typescript
+// Get all forecasts for a project
+projectForecasting.getByProject({ projectId })
+
+// Create a new forecast
+projectForecasting.create({
+  timeInterval,
+  timeUnit,
+  description,
+  projectId
+})
+
+// Update forecast configuration
+projectForecasting.update({ id, ...forecastingData })
+
+// Delete a forecast
+projectForecasting.delete({ id })
+
+// Upload data file
+projectForecasting.uploadData({ id, file })
+```
+
+<br />
+
+## ✅ Best Practices
+
+<br />
+
+1. **Choose Appropriate Intervals** - Match time units to your business cycles
+2. **Upload Quality Data** - Ensure historical data is clean and complete
+3. **Regular Updates** - Update forecasts with new data regularly
+4. **Validate Results** - Review forecast accuracy and adjust parameters
+5. **Document Assumptions** - Use descriptions to note forecast assumptions
+
+<br />
+
+## ❓ Troubleshooting
+
+<Callout type="warning">
+  ### "Please select a project first" **Solution**: Select a project from the
+  project selector before accessing the Forecasting module.
+</Callout>
+
+<Callout type="warning">
+  ### Data upload failed **Solution**:
+  - Verify CSV format (Date, Value columns)
+  - Check for missing or invalid data
+  - Ensure file size is within limits
+  - Validate date/time format consistency
+</Callout>
+
+<Callout type="warning">
+  ### Forecast not generating **Solution**:
+  - Ensure time interval is a positive integer
+  - Verify sufficient historical data
+  - Check that time unit matches your data granularity
+  - Review system logs for errors
+</Callout>
+
+<br />
+
+## 🆘 Support
+
+<br />
+Need help with the Forecasting module?
+
+- 👨‍💼 Contact your system administrator
+- 🤖 Check the AI Agent section for automated assistance
+- 📄 Review the [landing page](/apps/forecasting/forecasting-landing) for more information
+
+<br />
+
+<Callout type="default" emoji="📅">
+  *Last updated: {new Date().toLocaleDateString()}*
+</Callout>

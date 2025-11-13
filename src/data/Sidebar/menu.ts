@@ -205,7 +205,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'Documentation',
-        link: '/apps/pqr/documentation',
+        link: '/docs/pqr',
         lang: 'Documentation',
       },
       {
@@ -234,7 +234,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'Documentation',
-        link: '/apps/forecasting/documentation',
+        link: '/docs/forecasting',
         lang: 'Documentation',
       },
       {
@@ -263,7 +263,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'Documentation',
-        link: '/apps/rrhh/documentation',
+        link: '/docs/rrhh',
         lang: 'Documentation',
       },
       {

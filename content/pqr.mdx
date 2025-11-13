@@ -1,0 +1,315 @@
+import { Callout, FileTree, Steps, Tabs } from 'nextra/components'
+
+# 📋 PQR Management Module
+
+<Callout type="info" emoji="ℹ️">
+  **Customer Service Management System** - Handle Peticiones (Requests), Quejas
+  (Complaints), and Reclamos (Claims) efficiently in one centralized platform.
+</Callout>
+
+<br />
+## What is PQR?
+<br />
+The **PQR (Peticiones, Quejas y Reclamos)** module is a comprehensive customer
+service management system designed to handle customer requests, complaints, and
+claims efficiently.
+
+<br />
+
+### Three Types of Cases
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+  <div className="card card-body">
+    <h4 className="text-lg font-semibold mb-2">📝 Peticiones</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Customer inquiries or service requests
+    </p>
+  </div>
+  <div className="card card-body">
+    <h4 className="text-lg font-semibold mb-2">😟 Quejas</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Customer complaints about products or services
+    </p>
+  </div>
+  <div className="card card-body">
+    <h4 className="text-lg font-semibold mb-2">⚖️ Reclamos</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Formal claims for compensation or issue resolution
+    </p>
+  </div>
+</div>
+
+## ✨ Key Features
+
+<Tabs items={['Customer Management', 'Request Tracking', 'Document Types']}>
+  <Tabs.Tab>
+    ### Complete Customer Information
+    <br />
+    - ✅ First and last name tracking 
+    - ✅ Email and phone contact information 
+    - ✅ City/location data 
+    - ✅ Document identification (CC, CE, Passport, NIT) 
+    - ✅ Document number storage
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ### Advanced Tracking System
+
+    <br />
+    - 📊 Status monitoring (Processing/Completed)
+    - 💬 Detailed message/description storage
+    - 🔄 Full CRUD operations
+    - ⚡ Real-time updates
+    - 🔍 Easy search and filtering
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ### Supported Document Types
+    <br />
+
+    - **CC** - Cédula de Ciudadanía (Citizenship Card)
+    - **CE** - Cédula de Extranjería (Foreign ID)
+    - **PASSPORT** - International passport
+    - **NIT** - Número de Identificación Tributaria (Tax ID)
+
+  </Tabs.Tab>
+</Tabs>
+
+<br />
+
+## 🚀 Getting Started
+
+<Steps>
+
+### Navigate to PQR List
+
+Go to the PQR List page from the sidebar menu under **PQR → Create-view**
+
+### Create a New PQR
+
+Click the **"Add PQR"** button in the top right corner
+
+### Fill in the Form
+
+Complete all required fields:
+
+- Personal Information (First Name, Last Name)
+- Contact Details (Email, Phone)
+- Location (City)
+- Identification (Document Type & Number)
+- Request Details (Message)
+- Status (Processing/Completed)
+
+### Save and Manage
+
+Click **"Create PQR"** to save. You can then edit, view, or delete the PQR from the table.
+
+</Steps>
+
+## 📊 Data Structure
+
+```typescript
+interface PQR {
+  id: string
+  firstName: string // Max 100 characters
+  lastName: string // Max 100 characters
+  phone: string
+  email: string // Valid email format
+  city: string
+  documentType: 'CC' | 'CE' | 'PASSPORT' | 'NIT'
+  documentNumber: string
+  message: string // Detailed description
+  status: 'PROCESSING' | 'COMPLETED'
+  projectId: string
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
+<Callout type="warning" emoji="⚠️">
+  All fields are **required** and must meet validation criteria. Make sure to
+  provide valid email addresses and complete information.
+</Callout>
+
+<br />
+
+## 🎯 Status Management
+
+<br />
+
+<div className="card">
+  <div className="card-body">
+    <div className="overflow-x-auto">
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Description</th>
+            <th>Indicator</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="font-semibold">PROCESSING</td>
+            <td>The PQR is currently being reviewed or worked on</td>
+            <td>
+              <span className="badge badge-warning">🟡 Yellow</span>
+            </td>
+          </tr>
+          <tr>
+            <td className="font-semibold">COMPLETED</td>
+            <td>The PQR has been resolved and closed</td>
+            <td>
+              <span className="badge badge-success">🟢 Green</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<br />
+
+## 🔧 Common Operations
+
+<Tabs items={['Create', 'Edit', 'View', 'Delete']}>
+  <Tabs.Tab>
+    ### Creating a New PQR
+    <br />
+
+    1. Click **"Add PQR"** button
+    2. Fill in all required fields
+    3. Select appropriate document type
+    4. Write a detailed message
+    5. Choose status (Processing/Completed)
+    6. Click **"Create PQR"**
+
+    <Callout type="info">
+    Make sure you have a project selected before creating a PQR!
+    </Callout>
+
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    ### Editing an Existing PQR
+    <br />
+
+    1. Locate the PQR in the table
+    2. Click the **Edit** button (✏️ pencil icon)
+    3. Modify the necessary fields
+    4. Click **"Update PQR"** to save changes
+
+    <Callout>
+    Changes are saved immediately and cannot be undone.
+    </Callout>
+
+  </Tabs.Tab>
+
+<Tabs.Tab>
+  ### Viewing PQR Details 1. Find the PQR in the list 2. Click the **View**
+  button (👁️ eye icon) 3. Review complete PQR information including all fields
+  and timestamps
+</Tabs.Tab>
+
+  <Tabs.Tab>
+    ### Deleting a PQR
+    <br />
+
+    1. Locate the PQR you want to delete
+    2. Click the **Delete** button (🗑️ trash icon)
+    3. Confirm the deletion in the modal dialog
+
+    <Callout type="error" emoji="🚨">
+    **Warning**: This action cannot be undone! Make sure you really want to delete this PQR.
+    </Callout>
+
+  </Tabs.Tab>
+</Tabs>
+
+<br />
+
+## 🔐 Project Integration
+
+<Callout type="info" emoji="🏢">
+  The PQR module is **project-scoped** for enhanced security and organization.
+</Callout>
+<br />
+
+### Key Points:
+
+<br />
+
+- ✅ Each PQR belongs to a specific project
+- ✅ You must have a project selected to create or view PQRs
+- ✅ PQRs are isolated per project for data security
+- ✅ Only project members can access project PQRs
+
+<br />
+
+## 🛠️ API Reference
+
+The module uses **tRPC** for type-safe API calls:
+
+```typescript
+// Get all PQRs for a project
+projectPQR.getByProject({ projectId: string })
+
+// Create a new PQR
+projectPQR.create({ ...pqrData, projectId: string })
+
+// Update an existing PQR
+projectPQR.update({ id: string, ...pqrData })
+
+// Delete a PQR
+projectPQR.delete({ id: string })
+```
+
+<br />
+
+## ✅ Best Practices
+
+<br />
+
+1. **Complete Information** - Always fill in all required fields with accurate data
+2. **Regular Updates** - Keep PQR statuses up to date (Processing → Completed)
+3. **Detailed Messages** - Provide clear and detailed descriptions
+4. **Correct Document Type** - Verify the document type matches the number
+5. **Review Before Deletion** - Double-check before deleting (cannot be undone)
+
+<br />
+
+## ❓ Troubleshooting
+
+<Callout type="warning">
+  ### "Please select a project first" **Solution**: Select a project from the
+  project selector before accessing the PQR module.
+</Callout>
+
+<Callout type="warning">
+  ### Validation errors when creating/editing **Solution**: Check that all
+  required fields are filled and meet validation criteria: - Valid email format
+  - Non-empty strings - Correct document type selection
+</Callout>
+
+<Callout type="warning">
+  ### PQR not appearing in the list **Solution**: 1. Verify you're viewing the
+  correct project 2. Refresh the page 3. Check your internet connection 4.
+  Ensure you have proper permissions
+</Callout>
+
+<br />
+
+## 🆘 Support
+
+<br />
+Need help with the PQR module?
+
+- 👨‍💼 Contact your system administrator
+- 🤖 Check the AI Agent section for automated assistance
+- 📄 Review the [landing page](/apps/pqr/landing) for more information
+
+<br />
+
+<Callout type="default" emoji="📅">
+  *Last updated: {new Date().toLocaleDateString()}*
+</Callout>

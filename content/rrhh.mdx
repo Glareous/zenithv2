@@ -1,0 +1,320 @@
+import { Callout, Steps, Tabs, FileTree } from 'nextra/components'
+
+# 👥 RRHH Management Module
+
+<Callout type="info" emoji="ℹ️">
+  **Human Resources Management System** - Manage employee information, admissions, and HR processes efficiently in one centralized platform.
+</Callout>
+
+<br />
+## What is RRHH?
+<br />
+The **RRHH (Recursos Humanos)** module is a comprehensive human resources management system designed to handle employee data, admissions, classifications, and HR workflows efficiently.
+
+<br />
+
+### Key HR Features
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+  <div className="card card-body">
+    <h4 className="text-lg font-semibold mb-2">👤 Employee Management</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Complete employee profiles and information tracking
+    </p>
+  </div>
+  <div className="card card-body">
+    <h4 className="text-lg font-semibold mb-2">📝 Admissions</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Streamlined employee onboarding and admission process
+    </p>
+  </div>
+  <div className="card card-body">
+    <h4 className="text-lg font-semibold mb-2">📊 Classifications</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Organize employees by departments and roles
+    </p>
+  </div>
+</div>
+
+<br />
+
+## ✨ Key Features
+
+<Tabs items={['Employee Data', 'Search & Filter', 'Management Tools']}>
+  <Tabs.Tab>
+    ### Complete Employee Information
+    <br />
+    - ✅ Personal information tracking
+    - ✅ Contact details management
+    - ✅ Employment classification
+    - ✅ Employee photos and profiles
+    - ✅ Detailed employee records
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ### Advanced Search & Filtering
+<br />
+    - 🔍 Search by name or ID
+    - 📁 Filter by employee class/department
+    - 📄 Pagination for large datasets
+    - ⚡ Real-time search results
+    - 🎯 Quick employee lookup
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ### Management Tools
+    <br />
+
+    - 📊 Employee list view
+    - 👁️ Detailed employee overview
+    - ✏️ Edit employee information
+    - 🗑️ Employee record management
+    - 📥 Employee admission workflow
+
+  </Tabs.Tab>
+</Tabs>
+
+<br />
+
+## 🚀 Getting Started
+
+<Steps>
+
+### Navigate to RRHH List
+
+Go to the RRHH List page from the sidebar menu under **RRHH → Create-view**
+
+### Add New Employee
+
+Click the **"Add Employee"** button to start the admission process
+
+### Complete Employee Profile
+
+Fill in all required information:
+
+- Personal details (Name, ID)
+- Contact information
+- Employment classification
+- Additional employee data
+
+### Save Employee Record
+
+Submit the form to create the employee record in the system
+
+</Steps>
+
+<br />
+## 📊 Employee Data Structure
+
+```typescript
+interface Employee {
+  id: string
+  name: string
+  employeeId: string
+  class: string // Department/Classification
+  contactInfo: string
+  photoUrl?: string
+  projectId: string
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
+<Callout type="warning" emoji="⚠️">
+  All employee data is project-scoped and protected. Only authorized project members can access employee information.
+</Callout>
+
+<br />
+
+## 🎯 Employee Classifications
+
+<div className="card">
+  <div className="card-body">
+    <div className="overflow-x-auto">
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Description</th>
+            <th>Benefit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="font-semibold">Department Grouping</td>
+            <td>Organize employees by departments</td>
+            <td><span className="badge badge-primary">Organization</span></td>
+          </tr>
+          <tr>
+            <td className="font-semibold">Role Classification</td>
+            <td>Classify employees by their roles</td>
+            <td><span className="badge badge-success">Clarity</span></td>
+          </tr>
+          <tr>
+            <td className="font-semibold">Custom Classes</td>
+            <td>Create custom employee classifications</td>
+            <td><span className="badge badge-info">Flexibility</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<br />
+
+## 🔧 Common Operations
+
+<Tabs items={['View Employees', 'Add Employee', 'Edit Employee', 'Search']}>
+  <Tabs.Tab>
+    ### Viewing Employee List
+    <br />
+
+    1. Navigate to **RRHH → Create-view**
+    2. Browse the employee list with pagination
+    3. View employee cards with key information
+    4. Click on an employee to see full details
+
+    <Callout type="info">
+    The list shows all employees for the selected project
+    </Callout>
+
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    ### Adding New Employee
+    <br />
+
+    1. Click **"Add Employee"** button
+    2. Fill in employee information form
+    3. Upload employee photo (optional)
+    4. Select employee classification
+    5. Save the employee record
+
+    <Callout>
+    Employee IDs must be unique within the project
+    </Callout>
+
+  </Tabs.Tab>
+
+<Tabs.Tab>
+  ### Editing Employee Information
+  <br />
+  1. Find the employee in the list
+  2. Click the **Edit** button (✏️ pencil icon)
+  3. Update employee information
+  4. Save changes to update the record
+
+  <Callout>
+  Changes are saved immediately and update all related records
+  </Callout>
+</Tabs.Tab>
+
+  <Tabs.Tab>
+    ### Searching Employees
+    <br />
+
+    1. Use the search bar at the top
+    2. Enter employee name or ID
+    3. Filter by employee class/department
+    4. Results update in real-time
+
+    <Callout type="error" emoji="🔍">
+    Search is case-insensitive and searches across all employee fields
+    </Callout>
+
+  </Tabs.Tab>
+</Tabs>
+
+<br />
+
+## 🔐 Project Integration
+
+<Callout type="info" emoji="🏢">
+  The RRHH module is **project-scoped** for data privacy and security.
+</Callout>
+<br />
+
+### Key Points:
+
+<br />
+
+- ✅ Each employee belongs to a specific project
+- ✅ You must have a project selected to manage employees
+- ✅ Employee data is isolated per project
+- ✅ Only project members can access employee information
+
+<br />
+
+## 🛠️ API Reference
+
+The module uses **tRPC** for type-safe API calls:
+
+```typescript
+// Get all employees for a project
+projectEmployee.getAll({ projectId, page, limit, search, class })
+
+// Get employee classes/departments
+projectEmployee.getClasses({ projectId })
+
+// Create a new employee
+projectEmployee.create({ ...employeeData, projectId })
+
+// Update employee information
+projectEmployee.update({ id, ...employeeData })
+
+// Delete an employee
+projectEmployee.delete({ id })
+```
+
+<br />
+
+## ✅ Best Practices
+
+<br />
+
+1. **Complete Profiles** - Fill in all employee information for better tracking
+2. **Use Classifications** - Organize employees by departments or roles
+3. **Regular Updates** - Keep employee information current
+4. **Photo Management** - Add employee photos for easy identification
+5. **Search Efficiency** - Use search and filters to quickly find employees
+
+<br />
+
+## ❓ Troubleshooting
+
+<Callout type="warning">
+  ### "Please select a project first" **Solution**: Select a project from the
+  project selector before accessing the RRHH module.
+</Callout>
+
+<Callout type="warning">
+  ### Employee not appearing in the list **Solution**:
+  - Check if you're viewing the correct project
+  - Verify search filters are not too restrictive
+  - Refresh the page
+  - Ensure the employee was saved correctly
+</Callout>
+
+<Callout type="warning">
+  ### Cannot edit employee information **Solution**:
+  - Verify you have edit permissions
+  - Check that the employee exists
+  - Ensure you're not trying to use a duplicate employee ID
+</Callout>
+
+<br />
+
+## 🆘 Support
+
+<br />
+Need help with the RRHH module?
+
+- 👨‍💼 Contact your system administrator
+- 🤖 Check the AI Agent section for automated assistance
+- 📄 Review the [landing page](/apps/rrhh/landing) for more information
+
+<br />
+
+<Callout type="default" emoji="📅">
+  *Last updated: {new Date().toLocaleDateString()}*
+</Callout>
