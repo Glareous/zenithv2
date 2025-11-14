@@ -225,7 +225,9 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
                       className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                         forecasting.status === 'COMPLETED'
                           ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
+                          : forecasting.status === 'FAIL'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
                       }`}>
                       {forecasting.status}
                     </span>
@@ -302,6 +304,39 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
         </div>{' '}
       </div>
 
+      {forecasting.status === 'FAIL' && (
+        <div className="card card-body">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex-shrink-0">
+                <svg
+                  className="w-6 h-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h6 className="text-15 font-semibold text-red-800 mb-1">
+                  Forecasting Failed
+                </h6>
+                <p className="text-sm text-red-700">
+                  The forecasting process encountered an error and could not be completed.
+                  Please check your data and try again, or contact support if the issue persists.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {forecasting.status === 'COMPLETED' && (
         <div className="card card-body">
           <div className="space-y-4">
@@ -311,6 +346,28 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
             ) : (
               <p className="text-sm text-gray-500 italic">No summary available yet.</p>
             )}
+          </div>
+        </div>
+      )}
+
+      {forecasting.forecastingInfo && (
+        <div className="card card-body">
+          <div className="space-y-4">
+            <h6 className="text-15 font-semibold">Forecasting Info</h6>
+            <ul className="list-disc list-inside space-y-2 text-sm text-gray-700">
+              {Object.entries(forecasting.forecastingInfo as Record<string, any>).map(([key, value]) => (
+                <li key={key} className="ml-2">
+                  <span className="font-medium">{key.replace(/_/g, ' ')}:</span>{' '}
+                  <span className="text-gray-600">
+                    {typeof value === 'number'
+                      ? value.toLocaleString(undefined, { maximumFractionDigits: 10 })
+                      : value === null
+                        ? 'null'
+                        : String(value)}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       )}

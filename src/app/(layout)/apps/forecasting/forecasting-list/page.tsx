@@ -23,6 +23,8 @@ const forecastingSchema = z.object({
   timeInterval: z.number().int().positive('Must be a positive number'),
   timeUnit: z.enum(['SECONDS', 'MINUTES', 'HOURS', 'DAYS', 'MONTHS', 'YEARS']),
   description: z.string().optional(),
+  periodToPredict: z.number().int().positive('Period to predict must be a positive number'),
+  confidenceLevel: z.number().min(80, 'Confidence level must be at least 80%').max(100, 'Confidence level cannot exceed 100%').optional(),
 })
 
 type ForecastingFormData = z.infer<typeof forecastingSchema>
@@ -59,6 +61,8 @@ const ForecastingListPage: NextPageWithLayout = () => {
     defaultValues: {
       timeInterval: 1,
       timeUnit: 'HOURS',
+      periodToPredict: 1,
+      confidenceLevel: undefined,
     },
   })
 
@@ -107,6 +111,8 @@ const ForecastingListPage: NextPageWithLayout = () => {
     reset({
       timeInterval: 1,
       timeUnit: 'HOURS',
+      periodToPredict: 1,
+      confidenceLevel: undefined,
     })
     setShowModal(true)
   }
@@ -118,6 +124,8 @@ const ForecastingListPage: NextPageWithLayout = () => {
       timeInterval: forecasting.timeInterval,
       timeUnit: forecasting.timeUnit,
       description: forecasting.description || '',
+      periodToPredict: forecasting.periodToPredict || 1,
+      confidenceLevel: forecasting.confidenceLevel,
     })
     setShowModal(true)
   }
@@ -150,6 +158,8 @@ const ForecastingListPage: NextPageWithLayout = () => {
           timeInterval: data.timeInterval,
           timeUnit: data.timeUnit,
           description: data.description,
+          periodToPredict: data.periodToPredict,
+          confidenceLevel: data.confidenceLevel,
         })
 
         // If there's a new CSV file selected, upload it
@@ -241,6 +251,8 @@ const ForecastingListPage: NextPageWithLayout = () => {
         timeInterval: data.timeInterval,
         timeUnit: data.timeUnit,
         description: data.description,
+        periodToPredict: data.periodToPredict,
+        confidenceLevel: data.confidenceLevel,
         status: 'PROCESSING',
         projectId: currentProject.id,
       })
@@ -529,6 +541,51 @@ const ForecastingListPage: NextPageWithLayout = () => {
                   {errors.description.message}
                 </p>
               )}
+            </div>
+
+            <div className="mb-4">
+              <label className="block mb-2 text-sm font-medium">
+                Period to Predict <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                {...register('periodToPredict', { valueAsNumber: true })}
+                className={`form-input ${errors.periodToPredict ? 'border-red-500' : ''}`}
+                placeholder="Enter number of periods to predict"
+              />
+              {errors.periodToPredict && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.periodToPredict.message}
+                </p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                Number of future time intervals to forecast
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label className="block mb-2 text-sm font-medium">
+                Confidence Level (%)
+              </label>
+              <input
+                type="number"
+                min="80"
+                max="100"
+                step="1"
+                {...register('confidenceLevel', { valueAsNumber: true })}
+                className={`form-input ${errors.confidenceLevel ? 'border-red-500' : ''}`}
+                placeholder="Enter confidence level (80-100)"
+              />
+              {errors.confidenceLevel && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.confidenceLevel.message}
+                </p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                Optional. Statistical confidence level for predictions (80-100%)
+              </p>
             </div>
 
             <div className="mb-4">

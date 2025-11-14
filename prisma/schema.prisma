@@ -1729,6 +1729,7 @@ model ProjectPQRAnalysis {
 enum ForecastingStatus {
     PROCESSING
     COMPLETED
+    FAIL
 }
 
 enum TimeUnit {
@@ -1750,6 +1751,7 @@ model ProjectForecasting {
     // Metadata
     description     String?                   @db.String // Optional description
     summary         String?                   @db.String // Summary/analysis shown when status is COMPLETED
+    forecastingInfo Json?                     // AI-generated forecasting information and metrics
     status          ForecastingStatus         @default(PROCESSING)
 
     // Timestamps
