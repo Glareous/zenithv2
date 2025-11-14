@@ -111,6 +111,14 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
     socket.on('message-received', ({ message }) => {
       console.log('Message received:', message)
       setRealtimeMessages((prev) => [...prev, message])
+
+      // If message is from AGENT, mark as read immediately since user is viewing the chat
+      if (message.type === 'AGENT') {
+        markAsReadMutation.mutate({ chatId: selectedChatId })
+      }
+
+      // Invalidate chat list to update last message preview and unread count
+      utils.projectChat.getByEmployeeId.invalidate()
     })
 
     // Listen for typing indicators
@@ -384,11 +392,11 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
               {/* Typing indicator */}
               {isTyping && (
                 <div className="flex justify-end">
-                  <div className="bg-primary-500 text-white rounded-lg p-3 max-w-[70%]">
+                  <div className="bg-primary-500/50 text-white rounded-lg p-2 max-w-[70%]">
                     <div className="flex gap-1">
-                      <span className="w-2 h-2 bg-white rounded-full animate-bounce"></span>
-                      <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-100"></span>
-                      <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-200"></span>
+                      <span className="w-1 h-1 bg-white rounded-full animate-bounce"></span>
+                      <span className="w-1 h-1 bg-white rounded-full animate-bounce delay-100"></span>
+                      <span className="w-1 h-1 bg-white rounded-full animate-bounce delay-200"></span>
                     </div>
                   </div>
                 </div>

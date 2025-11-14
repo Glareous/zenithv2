@@ -129,7 +129,7 @@ const menu: MegaMenu[] = [
     ],
   },
 
-  {
+  /*  {
     title: 'CHAT',
     lang: 'pe-chat',
     icon: 'messages-square',
@@ -147,7 +147,7 @@ const menu: MegaMenu[] = [
         lang: 'Chat Agent',
       },
     ],
-  },
+  }, */
   {
     title: 'CRM',
     lang: 'pe-crm',
@@ -270,6 +270,11 @@ const menu: MegaMenu[] = [
         title: 'RRHH Agent',
         link: '/apps/agents',
         lang: 'RRHH Agent',
+      },
+      {
+        title: 'Chat',
+        link: '/apps/chat/default',
+        lang: 'Chat',
       },
     ],
   },
