@@ -19,13 +19,21 @@ import Select from 'react-select'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
-const forecastingSchema = z.object({
+const createForecastingSchema = (maxPeriod?: number) => z.object({
   timeInterval: z.number().int().positive('Must be a positive number'),
   timeUnit: z.enum(['SECONDS', 'MINUTES', 'HOURS', 'DAYS', 'MONTHS', 'YEARS']),
   description: z.string().optional(),
-  periodToPredict: z.number().int().positive('Period to predict must be a positive number'),
+  periodToPredict: z.number()
+    .int('Period must be an integer')
+    .min(2, 'Period to predict must be at least 2')
+    .refine((val) => {
+      if (maxPeriod === undefined) return true
+      return val <= maxPeriod
+    }, (val) => ({ message: `Period cannot exceed ${maxPeriod} (15% of CSV rows)` })),
   confidenceLevel: z.number().min(80, 'Confidence level must be at least 80%').max(100, 'Confidence level cannot exceed 100%').optional(),
 })
+
+const forecastingSchema = createForecastingSchema()
 
 type ForecastingFormData = z.infer<typeof forecastingSchema>
 
@@ -48,6 +56,8 @@ const ForecastingListPage: NextPageWithLayout = () => {
   const [selectedForecasting, setSelectedForecasting] = useState<any>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isEditMode, setIsEditMode] = useState(false)
+  const [csvRowCount, setCsvRowCount] = useState<number | null>(null)
+  const [maxPeriodToPredict, setMaxPeriodToPredict] = useState<number | undefined>(undefined)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   const {
@@ -61,7 +71,7 @@ const ForecastingListPage: NextPageWithLayout = () => {
     defaultValues: {
       timeInterval: 1,
       timeUnit: 'HOURS',
-      periodToPredict: 1,
+      periodToPredict: 2,
       confidenceLevel: undefined,
     },
   })
@@ -105,13 +115,34 @@ const ForecastingListPage: NextPageWithLayout = () => {
   const createFileMutation = api.projectForecastingFile.create.useMutation()
   const deleteFileMutation = api.projectForecastingFile.delete.useMutation()
 
+  const countCsvRows = async (file: File) => {
+    try {
+      const text = await file.text()
+      const lines = text.split('\n').filter(line => line.trim() !== '')
+      // Subtract 1 for header row
+      const dataRows = lines.length - 1
+      setCsvRowCount(dataRows)
+
+      // Calculate max period (15% of data rows, rounded down to integer)
+      const maxPeriod = Math.floor(dataRows * 0.15)
+      setMaxPeriodToPredict(maxPeriod)
+
+      return { dataRows, maxPeriod }
+    } catch (error) {
+      console.error('Error counting CSV rows:', error)
+      setCsvRowCount(null)
+      setMaxPeriodToPredict(undefined)
+      return null
+    }
+  }
+
   const openCreateModal = () => {
     setIsEditMode(false)
     setSelectedForecasting(null)
     reset({
       timeInterval: 1,
       timeUnit: 'HOURS',
-      periodToPredict: 1,
+      periodToPredict: 2,
       confidenceLevel: undefined,
     })
     setShowModal(true)
@@ -124,7 +155,7 @@ const ForecastingListPage: NextPageWithLayout = () => {
       timeInterval: forecasting.timeInterval,
       timeUnit: forecasting.timeUnit,
       description: forecasting.description || '',
-      periodToPredict: forecasting.periodToPredict || 1,
+      periodToPredict: forecasting.periodToPredict || 2,
       confidenceLevel: forecasting.confidenceLevel,
     })
     setShowModal(true)
@@ -135,6 +166,8 @@ const ForecastingListPage: NextPageWithLayout = () => {
     setSelectedFile(null)
     setIsEditMode(false)
     setSelectedForecasting(null)
+    setCsvRowCount(null)
+    setMaxPeriodToPredict(undefined)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -545,46 +578,69 @@ const ForecastingListPage: NextPageWithLayout = () => {
 
             <div className="mb-4">
               <label className="block mb-2 text-sm font-medium">
-                Period to Predict <span className="text-red-500">*</span>
+                Prediction Settings{' '}
+                <span className="text-red-500">*</span>
+                {maxPeriodToPredict !== undefined && (
+                  <span className="ml-2 text-xs text-blue-600">
+                    (Max period: {maxPeriodToPredict} - based on CSV rows)
+                  </span>
+                )}
               </label>
-              <input
-                type="number"
-                min="1"
-                step="1"
-                {...register('periodToPredict', { valueAsNumber: true })}
-                className={`form-input ${errors.periodToPredict ? 'border-red-500' : ''}`}
-                placeholder="Enter number of periods to predict"
-              />
-              {errors.periodToPredict && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.periodToPredict.message}
-                </p>
-              )}
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="block mb-1 text-xs font-medium text-gray-600">
+                    Period to Predict <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="2"
+                    max={maxPeriodToPredict}
+                    step="1"
+                    {...register('periodToPredict', {
+                      valueAsNumber: true,
+                      validate: (value) => {
+                        if (maxPeriodToPredict !== undefined && value > maxPeriodToPredict) {
+                          return `Period cannot exceed ${maxPeriodToPredict} (15% of CSV rows)`
+                        }
+                        return true
+                      }
+                    })}
+                    className={`form-input ${errors.periodToPredict ? 'border-red-500' : ''}`}
+                    placeholder="Min: 2"
+                  />
+                  {errors.periodToPredict && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.periodToPredict.message}
+                    </p>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <label className="block mb-1 text-xs font-medium text-gray-600">
+                    Confidence Level (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="80"
+                    max="100"
+                    step="1"
+                    {...register('confidenceLevel', { valueAsNumber: true })}
+                    className={`form-input ${errors.confidenceLevel ? 'border-red-500' : ''}`}
+                    placeholder="Optional (80-100)"
+                  />
+                  {errors.confidenceLevel && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.confidenceLevel.message}
+                    </p>
+                  )}
+                </div>
+              </div>
               <p className="mt-1 text-xs text-gray-500">
-                Number of future time intervals to forecast
-              </p>
-            </div>
-
-            <div className="mb-4">
-              <label className="block mb-2 text-sm font-medium">
-                Confidence Level (%)
-              </label>
-              <input
-                type="number"
-                min="80"
-                max="100"
-                step="1"
-                {...register('confidenceLevel', { valueAsNumber: true })}
-                className={`form-input ${errors.confidenceLevel ? 'border-red-500' : ''}`}
-                placeholder="Enter confidence level (80-100)"
-              />
-              {errors.confidenceLevel && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.confidenceLevel.message}
-                </p>
-              )}
-              <p className="mt-1 text-xs text-gray-500">
-                Optional. Statistical confidence level for predictions (80-100%)
+                Number of future time intervals to forecast (integer only)
+                {csvRowCount !== null && (
+                  <span className="block mt-1 text-blue-600">
+                    CSV has {csvRowCount} data rows. Max period allowed: {maxPeriodToPredict} (15% of rows)
+                  </span>
+                )}
               </p>
             </div>
 
@@ -601,7 +657,16 @@ const ForecastingListPage: NextPageWithLayout = () => {
                 ref={fileInputRef}
                 type="file"
                 accept=".csv"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0] || null
+                  setSelectedFile(file)
+                  if (file) {
+                    await countCsvRows(file)
+                  } else {
+                    setCsvRowCount(null)
+                    setMaxPeriodToPredict(undefined)
+                  }
+                }}
                 className="hidden"
               />
               <div className="flex items-center gap-2">
@@ -620,6 +685,8 @@ const ForecastingListPage: NextPageWithLayout = () => {
                     type="button"
                     onClick={() => {
                       setSelectedFile(null)
+                      setCsvRowCount(null)
+                      setMaxPeriodToPredict(undefined)
                       if (fileInputRef.current) {
                         fileInputRef.current.value = ''
                       }

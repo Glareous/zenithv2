@@ -96,7 +96,7 @@ const GradientLineChart = ({
   const options: ApexOptions = {
     chart: {
       defaultLocale: 'en',
-      height: 300,
+      height: 420,
       type: 'line',
       zoom: {
         enabled: false,
@@ -137,6 +137,12 @@ const GradientLineChart = ({
     yaxis: {
       min: seriesData.length > 0 ? undefined : 0,
       max: seriesData.length > 0 ? undefined : 10,
+      labels: {
+        formatter: (value: number) => {
+          if (value === null || value === undefined) return ''
+          return value.toFixed(3)
+        },
+      },
     },
     noData: {
       text: 'No data available. Upload a CSV file to see the forecast.',
@@ -163,7 +169,7 @@ const GradientLineChart = ({
         options={options}
         series={series}
         type="line"
-        height={300}
+        height={420}
         width="100%"
       />
     </React.Fragment>
