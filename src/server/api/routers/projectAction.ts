@@ -987,7 +987,34 @@ function convertTiptapToText(
     result = tiptapDoc.content.map(processNode).join('')
   }
 
-  return result
+  // Try to parse and re-stringify to clean up any extra spaces in JSON values
+  try {
+    const parsed = JSON.parse(result)
+    // Recursively trim all string values
+    const trimmed = trimJsonValues(parsed)
+    return JSON.stringify(trimmed)
+  } catch (e) {
+    // If not valid JSON, return as-is
+    return result
+  }
+}
+
+// Helper function to recursively trim all string values in an object/array
+function trimJsonValues(obj: any): any {
+  if (typeof obj === 'string') {
+    return obj.trim()
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(trimJsonValues)
+  }
+  if (obj !== null && typeof obj === 'object') {
+    const trimmed: any = {}
+    for (const [key, value] of Object.entries(obj)) {
+      trimmed[key] = trimJsonValues(value)
+    }
+    return trimmed
+  }
+  return obj
 }
 
 function parseResponseFields(
