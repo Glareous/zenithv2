@@ -1,15 +1,29 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+
+import Image from 'next/image'
 
 import { api } from '@src/trpc/react'
-import { ChevronsLeft, Phone, Video } from 'lucide-react'
+import { Bot, ChevronsLeft, Phone, Send, Video } from 'lucide-react'
+import { toast } from 'react-toastify'
 import SimpleBar from 'simplebar-react'
+import { Socket, io } from 'socket.io-client'
 
 interface UserChatBoardProps {
   selectedChatId: string | null
   selectedEmployeeId: string | null
   onBack: () => void
+}
+
+interface Message {
+  id: string
+  content: string
+  type: 'USER' | 'AGENT'
+  mediaType: string
+  timestamp: Date
+  chatId: string
+  metadata?: any
 }
 
 const UserChatBoard: React.FC<UserChatBoardProps> = ({
@@ -18,27 +32,146 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
   onBack,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const socketRef = useRef<Socket | null>(null)
+  const [messageInput, setMessageInput] = useState('')
+  const [realtimeMessages, setRealtimeMessages] = useState<Message[]>([])
+  const [isTyping, setIsTyping] = useState(false)
+  const [isSending, setIsSending] = useState(false)
+
+  const utils = api.useUtils()
 
   // Get chat details
   const { data: chat, isLoading: isLoadingChat } =
     api.projectChat.getById.useQuery(
       { id: selectedChatId || '' },
-      { enabled: !!selectedChatId }
+      {
+        enabled: !!selectedChatId,
+        refetchOnMount: true,
+        refetchOnWindowFocus: false,
+      }
     )
 
-  // Get messages
-  const { data: messagesData, isLoading: isLoadingMessages } =
-    api.projectMessage.getByChatId.useQuery(
-      { chatId: selectedChatId || '' },
-      { enabled: !!selectedChatId }
-    )
+  // Get initial messages
+  const {
+    data: messagesData,
+    isLoading: isLoadingMessages,
+    refetch: refetchMessages,
+  } = api.projectMessage.getByChatId.useQuery(
+    { chatId: selectedChatId || '' },
+    {
+      enabled: !!selectedChatId,
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+    }
+  )
 
-  const messages = messagesData?.messages || []
+  // Mark messages as read mutation
+  const markAsReadMutation = api.projectMessage.markAsRead.useMutation({
+    onSuccess: () => {
+      // Invalidate chat list to update unread count badges
+      utils.projectChat.getByEmployeeId.invalidate()
+    },
+  })
+
+  // Initialize WebSocket connection
+  useEffect(() => {
+    if (!selectedChatId) return
+
+    // Clear realtime messages when changing chat
+    setRealtimeMessages([])
+    setIsTyping(false)
+
+    // Explicitly refetch messages from DB for this chat
+    refetchMessages()
+
+    // Mark all agent messages as read when opening chat
+    markAsReadMutation.mutate({ chatId: selectedChatId })
+
+    // Connect to WebSocket server
+    const socket = io('http://localhost:4000', {
+      transports: ['websocket'],
+    })
+
+    socketRef.current = socket
+
+    socket.on('connect', () => {
+      console.log('WebSocket connected:', socket.id)
+      // Join the chat room
+      socket.emit('join-chat', {
+        chatId: selectedChatId,
+        userId: selectedEmployeeId,
+      })
+    })
+
+    socket.on('joined-chat', ({ chatId }) => {
+      console.log('Joined chat:', chatId)
+    })
+
+    // Listen for new messages
+    socket.on('message-received', ({ message }) => {
+      console.log('Message received:', message)
+      setRealtimeMessages((prev) => [...prev, message])
+    })
+
+    // Listen for typing indicators
+    socket.on('user-typing', ({ userId, isTyping }) => {
+      if (userId === 'agent') {
+        setIsTyping(isTyping)
+      }
+    })
+
+    socket.on('error', ({ message }) => {
+      toast.error(message)
+    })
+
+    // Cleanup on unmount or chat change
+    return () => {
+      if (selectedChatId) {
+        socket.emit('leave-chat', { chatId: selectedChatId })
+      }
+      socket.disconnect()
+    }
+  }, [selectedChatId, selectedEmployeeId, refetchMessages])
+
+  // Combine initial messages with realtime messages
+  const allMessages = [
+    ...(messagesData?.messages || []),
+    ...realtimeMessages.filter(
+      (rtMsg) => !messagesData?.messages.some((msg) => msg.id === rtMsg.id)
+    ),
+  ].sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  )
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [allMessages, isTyping])
+
+  // Send message
+  const handleSendMessage = () => {
+    if (!messageInput.trim() || !selectedChatId || !socketRef.current) return
+
+    setIsSending(true)
+
+    socketRef.current.emit('send-message', {
+      chatId: selectedChatId,
+      content: messageInput.trim(),
+      type: 'USER',
+      metadata: {},
+    })
+
+    setMessageInput('')
+    setIsSending(false)
+  }
+
+  // Handle Enter key
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSendMessage()
+    }
+  }
 
   // Format time
   const formatTime = (date: Date | string): string => {
@@ -116,9 +249,13 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
   const employeeName = chat.employee
     ? `${chat.employee.firstName} ${chat.employee.lastName}`
     : chat.userId
-  const initials = chat.employee
+  const employeeInitials = chat.employee
     ? `${chat.employee.firstName.charAt(0)}${chat.employee.lastName.charAt(0)}`
     : chat.userId.substring(0, 2).toUpperCase()
+  const agentInitials = chat.agent?.name
+    ? chat.agent.name.substring(0, 2).toUpperCase()
+    : 'AI'
+  const agentImage = chat.agent?.files?.[0]?.s3Url || null
 
   return (
     <React.Fragment>
@@ -134,7 +271,17 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
 
             <div className="flex items-center gap-3 grow">
               <div className="relative flex items-center justify-center font-semibold bg-gray-100 rounded-full dark:bg-dark-850 size-12 shrink-0">
-                <span>{initials}</span>
+                {chat.employee?.image ? (
+                  <Image
+                    src={chat.employee.image}
+                    alt={employeeName}
+                    className="rounded-full size-12 object-cover"
+                    width={48}
+                    height={48}
+                  />
+                ) : (
+                  <span>{employeeInitials}</span>
+                )}
                 {chat.status === 'ACTIVE' && (
                   <span className="absolute bottom-0 right-0 bg-green-500 border-2 border-white dark:border-dark-900 rounded-full size-3"></span>
                 )}
@@ -166,13 +313,30 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
           {/* Messages */}
           <SimpleBar className="h-[calc(100vh_-_25rem)] my-4">
             <div className="flex flex-col gap-4 p-4">
-              {messages.length > 0 ? (
-                messages.map((message) => {
+              {allMessages.length > 0 ? (
+                allMessages.map((message) => {
                   const isAgent = message.type === 'AGENT'
                   return (
                     <div
                       key={message.id}
-                      className={`flex ${isAgent ? 'justify-end' : 'justify-start'}`}>
+                      className={`flex gap-2 ${isAgent ? 'justify-end' : 'justify-start'}`}>
+                      {/* Avatar - show on left for USER, right for AGENT */}
+                      {!isAgent && (
+                        <div className="flex items-center justify-center font-semibold bg-gray-100 rounded-full dark:bg-dark-850 size-8 shrink-0">
+                          {chat.employee?.image ? (
+                            <Image
+                              src={chat.employee.image}
+                              alt={employeeName}
+                              className="rounded-full size-8 object-cover"
+                              width={32}
+                              height={32}
+                            />
+                          ) : (
+                            <span className="text-xs">{employeeInitials}</span>
+                          )}
+                        </div>
+                      )}
+
                       <div
                         className={`max-w-[70%] ${
                           isAgent
@@ -191,6 +355,23 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
                           {formatTime(message.timestamp)}
                         </p>
                       </div>
+
+                      {/* Avatar - show on right for AGENT */}
+                      {isAgent && (
+                        <div className="flex items-center justify-center font-semibold bg-primary-100 dark:bg-primary-900 rounded-full size-8 shrink-0">
+                          {agentImage ? (
+                            <Image
+                              src={agentImage}
+                              alt={chat.agent?.name || 'Agent'}
+                              className="rounded-full size-8 object-cover"
+                              width={32}
+                              height={32}
+                            />
+                          ) : (
+                            <Bot className="size-6 text-gray-600 dark:text-gray-400" />
+                          )}
+                        </div>
+                      )}
                     </div>
                   )
                 })
@@ -199,20 +380,41 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
                   No messages yet. Start the conversation!
                 </div>
               )}
+
+              {/* Typing indicator */}
+              {isTyping && (
+                <div className="flex justify-end">
+                  <div className="bg-primary-500 text-white rounded-lg p-3 max-w-[70%]">
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 bg-white rounded-full animate-bounce"></span>
+                      <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-100"></span>
+                      <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-200"></span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div ref={messagesEndRef} />
             </div>
           </SimpleBar>
 
-          {/* Message Input (Disabled for now) */}
+          {/* Message Input */}
           <div className="pt-4 border-t border-gray-200 dark:border-dark-800">
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 className="form-input flex-1"
-                placeholder="Message sending will be implemented next..."
-                disabled
+                placeholder="Type a message..."
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                disabled={isSending}
               />
-              <button className="btn btn-primary" disabled>
+              <button
+                className="btn btn-primary flex items-center gap-2"
+                onClick={handleSendMessage}
+                disabled={!messageInput.trim() || isSending}>
+                <Send className="size-4" />
                 Send
               </button>
             </div>

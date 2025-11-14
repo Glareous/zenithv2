@@ -132,6 +132,19 @@ export const projectChatRouter = createTRPCRouter({
               id: true,
               name: true,
               type: true,
+              files: {
+                where: {
+                  fileType: 'IMAGE',
+                },
+                orderBy: {
+                  createdAt: 'asc',
+                },
+                take: 1,
+                select: {
+                  id: true,
+                  s3Url: true,
+                },
+              },
             },
           },
           employee: {
@@ -139,6 +152,7 @@ export const projectChatRouter = createTRPCRouter({
               id: true,
               firstName: true,
               lastName: true,
+              image: true,
             },
           },
           messages: {
@@ -306,8 +320,19 @@ export const projectChatRouter = createTRPCRouter({
             },
             _count: {
               select: {
-                messages: true,
+                messages: {
+                  where: {
+                    type: 'AGENT',
+                    isRead: false,
+                  },
+                },
               },
+            },
+            messages: {
+              orderBy: {
+                timestamp: 'desc',
+              },
+              take: 1,
             },
           },
           skip,

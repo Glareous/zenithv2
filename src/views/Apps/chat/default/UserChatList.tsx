@@ -2,12 +2,14 @@
 
 import React, { useState } from 'react'
 
+import Image from 'next/image'
+
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
-import { Search, Plus } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import { useSelector } from 'react-redux'
-import SimpleBar from 'simplebar-react'
 import { toast } from 'react-toastify'
+import SimpleBar from 'simplebar-react'
 
 interface UserChatListProps {
   selectedEmployeeId: string | null
@@ -145,7 +147,9 @@ const UserChatList: React.FC<UserChatListProps> = ({
               type="button"
               className="w-full btn btn-primary flex items-center justify-center gap-2"
               onClick={handleCreateNewChat}
-              disabled={createChatMutation.isPending || !organization?.agentChatId}>
+              disabled={
+                createChatMutation.isPending || !organization?.agentChatId
+              }>
               {createChatMutation.isPending ? (
                 'Creating...'
               ) : (
@@ -181,24 +185,39 @@ const UserChatList: React.FC<UserChatListProps> = ({
                             isActive ? 'active' : ''
                           } flex items-center gap-2 px-space py-2.5 hover:bg-gray-50 dark:hover:bg-dark-850 [&.active]:bg-primary-500/10 transition ease-linear duration-300 group/item w-full text-left`}>
                           <div className="relative flex items-center justify-center font-semibold transition duration-200 ease-linear bg-gray-100 rounded-full dark:bg-dark-850 size-10 shrink-0">
-                            <span className="text-sm">{initials}</span>
+                            {chat.employee?.image ? (
+                              <Image
+                                src={chat.employee.image}
+                                alt={employeeName}
+                                className="rounded-full size-10 object-cover"
+                                width={40}
+                                height={40}
+                              />
+                            ) : (
+                              <span className="text-sm">{initials}</span>
+                            )}
                             {chat.status === 'ACTIVE' && (
                               <span className="absolute bottom-0 bg-green-500 border-2 border-white dark:border-dark-900 rounded-full ltr:right-0.5 rtl:left-0.5 size-2.5"></span>
                             )}
                           </div>
                           <div className="overflow-hidden grow">
                             <h6 className="mb-0.5 truncate">{employeeName}</h6>
-                            <p className="text-sm text-gray-500 dark:text-dark-500 truncate">
-                              {chat._count?.messages || 0} messages
+                            <p
+                              className={`text-sm truncate ${
+                                chat._count?.messages > 0
+                                  ? 'text-gray-900 dark:text-white font-medium'
+                                  : 'text-gray-500 dark:text-dark-500'
+                              }`}>
+                              {chat.messages?.[0]?.content || 'No messages yet'}
                             </p>
                           </div>
                           <div className="ltr:text-right rtl:text-left shrink-0">
                             <p className="mb-1 text-xs text-gray-500 dark:text-dark-500">
                               {new Date(chat.updatedAt).toLocaleDateString()}
                             </p>
-                            {chat.status === 'ACTIVE' && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                Active
+                            {chat._count?.messages > 0 && (
+                              <span className="btn btn-xs btn-sub-red">
+                                {chat._count.messages}
                               </span>
                             )}
                           </div>

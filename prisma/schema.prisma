@@ -527,6 +527,7 @@ model Message {
     type        MessageType
     timestamp   DateTime @default(now())
     metadata    Json?    // Flexible metadata for AI confidence, tokens, intent, etc.
+    isRead      Boolean  @default(false) // Track if message has been read
 
     // WhatsApp specific fields
     whatsappMessageId String?
@@ -538,6 +539,7 @@ model Message {
 
     @@index([chatId])
     @@index([timestamp])
+    @@index([isRead])
 }
 
 // Project Integration model - for managing different integrations

@@ -139,6 +139,7 @@
     "resend": "^4.7.0",
     "simplebar": "^6.2.5",
     "simplebar-react": "^3.2.6",
+    "socket.io-client": "^4.8.1",
     "style-loader": "^4.0.0",
     "superjson": "^2.2.2",
     "swagger-ui-react": "^5.27.1",

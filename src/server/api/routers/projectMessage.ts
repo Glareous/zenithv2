@@ -331,4 +331,51 @@ export const projectMessageRouter = createTRPCRouter({
         agentMessages,
       }
     }),
+
+  // Mark messages as read
+  markAsRead: protectedProcedure
+    .input(z.object({ chatId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // Verify chat exists and user has access
+      const chat = await ctx.db.chat.findFirst({
+        where: {
+          id: input.chatId,
+          agent: {
+            OR: [
+              {
+                project: {
+                  members: {
+                    some: {
+                      userId: ctx.session.user.id,
+                    },
+                  },
+                },
+              },
+              { isGlobal: true },
+            ],
+          },
+        },
+      })
+
+      if (!chat) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Chat not found or you do not have access to it',
+        })
+      }
+
+      // Mark all AGENT messages as read in this chat
+      await ctx.db.message.updateMany({
+        where: {
+          chatId: input.chatId,
+          type: 'AGENT',
+          isRead: false,
+        },
+        data: {
+          isRead: true,
+        },
+      })
+
+      return { success: true }
+    }),
 })
