@@ -35,6 +35,13 @@ const adminMenu: MegaMenu[] = [
     link: '/admin/models',
     separator: false,
   },
+  {
+    title: 'Api key',
+    lang: 'pe-api-key',
+    icon: 'box',
+    link: '/admin/api-keys',
+    separator: false,
+  },
 ]
 
 export { adminMenu }

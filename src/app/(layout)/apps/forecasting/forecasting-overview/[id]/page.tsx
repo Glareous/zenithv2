@@ -9,7 +9,7 @@ import DeleteModal from '@src/components/common/DeleteModal'
 import { Modal } from '@src/components/custom/modal/modal'
 import { api } from '@src/trpc/react'
 import GradientLineChart from '@src/views/Apexcharts/LineCharts/GradientLineChart'
-import { ArrowLeft, Trash2, Upload } from 'lucide-react'
+import { ArrowLeft, RefreshCw, Trash2, Upload } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 interface ForecastingOverviewPageProps {
@@ -42,7 +42,9 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
     }
 
     // Sort by order field to ensure consistent colors
-    const sortedSeries = [...forecasting.series].sort((a: any, b: any) => a.order - b.order)
+    const sortedSeries = [...forecasting.series].sort(
+      (a: any, b: any) => a.order - b.order
+    )
 
     const processedSeries = sortedSeries.map((series: any) => ({
       name: series.name,
@@ -206,6 +208,12 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
                 </button>
               </div>
             )}
+            <button
+              onClick={() => window.location.reload()}
+              className="btn btn-outline-primary">
+              <RefreshCw className="inline-block size-4 mr-1" />
+              Refresh
+            </button>
           </div>
 
           <div className="space-y-4">
@@ -328,8 +336,9 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
                   Forecasting Failed
                 </h6>
                 <p className="text-sm text-red-700">
-                  The forecasting process encountered an error and could not be completed.
-                  Please check your data and try again, or contact support if the issue persists.
+                  The forecasting process encountered an error and could not be
+                  completed. Please check your data and try again, or contact
+                  support if the issue persists.
                 </p>
               </div>
             </div>
@@ -344,7 +353,9 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
             {forecasting.summary ? (
               <p className="text-sm text-gray-700">{forecasting.summary}</p>
             ) : (
-              <p className="text-sm text-gray-500 italic">No summary available yet.</p>
+              <p className="text-sm text-gray-500 italic">
+                No summary available yet.
+              </p>
             )}
           </div>
         </div>
@@ -355,12 +366,16 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
           <div className="space-y-4">
             <h6 className="text-15 font-semibold">Forecasting Info</h6>
             <ul className="list-disc list-inside space-y-2 text-sm text-gray-700">
-              {Object.entries(forecasting.forecastingInfo as Record<string, any>).map(([key, value]) => (
+              {Object.entries(
+                forecasting.forecastingInfo as Record<string, any>
+              ).map(([key, value]) => (
                 <li key={key} className="ml-2">
                   <span className="font-medium">{key.replace(/_/g, ' ')}:</span>{' '}
                   <span className="text-gray-600">
                     {typeof value === 'number'
-                      ? value.toLocaleString(undefined, { maximumFractionDigits: 10 })
+                      ? value.toLocaleString(undefined, {
+                          maximumFractionDigits: 10,
+                        })
                       : value === null
                         ? 'null'
                         : String(value)}

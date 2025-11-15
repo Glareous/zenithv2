@@ -374,7 +374,7 @@ export const projectForecastingFileRouter = createTRPCRouter({
         // Create ProjectForecastingSeries record with parsed data
         await ctx.db.projectForecastingSeries.create({
           data: {
-            name: 'Data', // Default name for all series
+            name: 'data', // Default name for all series
             csvFileName: input.fileName,
             values: finalParsedData, // Store as JSON
             order: existingSeriesCount, // Auto-increment order based on existing series
