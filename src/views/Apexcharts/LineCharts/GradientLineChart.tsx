@@ -207,7 +207,10 @@ const GradientLineChart = ({
         labels: {
           formatter: (value: number) => {
             if (value === null || value === undefined) return ''
-            return value.toFixed(3)
+            return value.toLocaleString(undefined, {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 3,
+            })
           },
         },
       },
