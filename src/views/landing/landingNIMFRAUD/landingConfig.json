@@ -1,0 +1,212 @@
+{
+    "heroBanner": {
+        "texts": {
+            "badge": "NVIDIA AI Blueprint – Financial Fraud Detection",
+            "title": {
+                "part1": "Stop Fraud",
+                "part2": "Before It Happens",
+                "part3": "with NVIDIA NIM"
+            },
+            "description": "Official NVIDIA reference architecture using Graph Neural Networks, RAPIDS acceleration and Dynamo-Triton inference. Delivers up to 40% higher accuracy, sub-10ms latency and full SHAP explainability. Production-ready with NVIDIA AI Enterprise."
+        },
+        "images": {
+            "mainHome": "/assets/images/hospital/landing/main-home.png",
+            "whiteLogo": "/assets/images/logo-white.png",
+            "darkLogo": "/assets/images/main-logo.png"
+        },
+        "colors": {
+            "background": "bg-gradient-to-b from-gray-200 via-gray-100 to-white dark:from-gray-800 dark:via-gray-900 dark:to-black",
+            "badge": {
+                "text": "text-green-400",
+                "border": "bg-green-400/20 border border-green-400/40"
+            },
+            "title": {
+                "highlight": "text-green-400",
+                "decoration": "decoration-green-400"
+            },
+            "description": "text-gray-700 dark:text-gray-300",
+            "card": {
+                "background": "bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-green-400/30",
+                "text": "text-gray-900 dark:text-gray-100",
+                "shadow": "shadow-2xl shadow-green-400/20"
+            },
+            "metricText": "text-green-400"
+        },
+        "metrics": [
+            {
+                "value": "40",
+                "suffix": "%",
+                "label": "Higher fraud detection accuracy"
+            },
+            {
+                "value": "10",
+                "suffix": "x",
+                "label": "Faster processing with RAPIDS"
+            },
+            {
+                "value": "<10",
+                "suffix": "ms",
+                "label": "Real-time inference latency"
+            },
+            {
+                "value": "100",
+                "suffix": "%",
+                "label": "Explainable decisions via SHAP"
+            }
+        ]
+    },
+    "availableFacilities": {
+        "colors": {
+            "cardBg": "bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-green-400/20",
+            "cardBorder": "border-green-400/20",
+            "cardHover": "hover:bg-white hover:dark:bg-gray-800 hover:border-green-400/60 hover:shadow-2xl hover:shadow-green-400/30",
+            "iconBg": "bg-green-400/10",
+            "iconColor": "text-green-400",
+            "titleColor": "text-green-400",
+            "descColor": "text-gray-700 dark:text-gray-300"
+        },
+        "facilities": [
+            {
+                "icon": "BrainCircuit",
+                "title": "Graph Neural Networks",
+                "description": "Detect sophisticated fraud rings across accounts",
+                "href": "#!"
+            },
+            {
+                "icon": "Zap",
+                "title": "RAPIDS GPU Acceleration",
+                "description": "Billions of transactions processed in seconds",
+                "href": "#!"
+            },
+            {
+                "icon": "Target",
+                "title": "Hybrid XGBoost + GNN Models",
+                "description": "Best of tabular and graph ML in one pipeline",
+                "href": "#!"
+            },
+            {
+                "icon": "Timer",
+                "title": "Dynamo-Triton Inference",
+                "description": "Sub-10ms real-time fraud scoring",
+                "href": "#!"
+            },
+            {
+                "icon": "FileSearch",
+                "title": "SHAP Explainability",
+                "description": "Regulatory-compliant reasons for every flag",
+                "href": "#!"
+            },
+            {
+                "icon": "ShieldCheck",
+                "title": "NVIDIA AI Enterprise Ready",
+                "description": "Production containers + full enterprise support",
+                "href": "#!"
+            }
+        ]
+    },
+    "ourDoctorsTeam": {
+        "images": {
+            "aboutImage": "/assets/images/hospital/landing/nvidia2.jpg"
+        },
+        "texts": {
+            "title": {
+                "part1": "Powered by",
+                "part2": "NVIDIA AI Enterprise",
+                "part3": "and NIM"
+            },
+            "description": "Official NVIDIA Blueprint deployed at Tier-1 banks and payment processors worldwide. Complete with Jupyter notebooks, Docker containers, Helm charts and validated partner deployments."
+        },
+        "colors": {
+            "titleHighlight": "text-green-400",
+            "titleDecoration": "decoration-green-400",
+            "description": "text-gray-700 dark:text-gray-300",
+            "iconColor": "text-green-400",
+            "featureDesc": "text-gray-700 dark:text-gray-300"
+        },
+        "features": [
+            {
+                "icon": "Zap",
+                "title": "Full GPU-Accelerated Pipeline",
+                "description": "From data ingestion to real-time inference"
+            },
+            {
+                "icon": "TrendingUp",
+                "title": "Up to 40% Fewer False Positives",
+                "description": "GNNs see patterns traditional methods miss"
+            },
+            {
+                "icon": "Handshake",
+                "title": "Partner-Certified Deployments",
+                "description": "Live at GSIBs with Cloudera, EXL, Infosys"
+            },
+            {
+                "icon": "FileCheck",
+                "title": "Open Source + Enterprise SLA",
+                "description": "GitHub repo + NVIDIA professional support"
+            }
+        ]
+    },
+    "healthService": {
+        "texts": {
+            "title": {
+                "part1": "Real-World Fraud",
+                "part2": "Prevention at Scale",
+                "part3": ""
+            },
+            "description": "How global financial institutions are winning with the NVIDIA AI Blueprint."
+        },
+        "colors": {
+            "sectionBg": "bg-gray-50 dark:bg-gray-900",
+            "titleHighlight": "text-green-400",
+            "titleDecoration": "decoration-green-400",
+            "description": "text-gray-700 dark:text-gray-300",
+            "cardBg": "bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-green-400/20",
+            "cardHover": "hover:bg-white hover:dark:bg-gray-800 hover:border-green-400/60 hover:shadow-2xl hover:shadow-green-400/30",
+            "serviceDesc": "text-gray-700 dark:text-gray-300"
+        },
+        "services": [
+            {
+                "icon": "Siren",
+                "iconBg": "bg-red-500/10",
+                "iconColor": "text-red-500",
+                "title": "Credit Card Fraud",
+                "description": "Millions of TPS with real-time detection"
+            },
+            {
+                "icon": "Scale",
+                "iconBg": "bg-amber-500/10",
+                "iconColor": "text-amber-500",
+                "title": "Account Takeover",
+                "description": "Behavioral graph analysis stops ATO rings"
+            },
+            {
+                "icon": "Handshake",
+                "iconBg": "bg-green-400/10",
+                "iconColor": "text-green-400",
+                "title": "Synthetic Identity",
+                "description": "Block fake accounts at onboarding"
+            },
+            {
+                "icon": "MessageSquareWarning",
+                "iconBg": "bg-orange-500/10",
+                "iconColor": "text-orange-500",
+                "title": "Money Laundering",
+                "description": "Multi-hop network detection"
+            },
+            {
+                "icon": "TrendingUp",
+                "iconBg": "bg-cyan-500/10",
+                "iconColor": "text-cyan-500",
+                "title": "Payments Authorization",
+                "description": "Sub-10ms scoring in production rails"
+            },
+            {
+                "icon": "Trophy",
+                "iconBg": "bg-green-400/10",
+                "iconColor": "text-green-400",
+                "title": "Deployed at Tier-1 Banks",
+                "description": "Live today at multiple global systemically important banks"
+            }
+        ]
+    }
+}

@@ -11,7 +11,7 @@ import OurDoctorsTeam from '@src/views/landing/landingRRHH/ourDoctorsTeam'
 const RRHHLanding: NextPageWithLayout = () => {
   return (
     <>
-      <main className="pt-20">
+      <main className="pt-0">
 
         <HeroBanner />
         <AvailableFacilities />
