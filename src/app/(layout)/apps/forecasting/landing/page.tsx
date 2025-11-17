@@ -11,7 +11,6 @@ const FORECASTINGLanding: NextPageWithLayout = () => {
   return (
     <>
       <main className="pt-20">
-
         <HeroBanner />
         <AvailableFacilities />
         <OurDoctorsTeam />
