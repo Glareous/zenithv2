@@ -1,0 +1,212 @@
+{
+    "heroBanner": {
+        "texts": {
+            "badge": "AI-Powered Organizational Development Agent",
+            "title": {
+                "part1": "Your Personal",
+                "part2": "AI Coach",
+                "part3": "Available 24/7"
+            },
+            "description": "A locally-hosted AI agent (OpenAI-compatible) fine-tuned with your organization’s unique culture, values, competencies, and HR policies. Acts as a personalized digital coach for every employee, strategic advisor for HR, and continuous ally in talent development and performance management."
+        },
+        "images": {
+            "mainHome": "/assets/images/hospital/landing/main-home.png",
+            "whiteLogo": "/assets/images/logo-white.png",
+            "darkLogo": "/assets/images/main-logo.png"
+        },
+        "colors": {
+            "background": "bg-gradient-to-b from-blue-500/20 via-sky-400/10 to-cyan-400/5",
+            "badge": {
+                "text": "text-blue-600",
+                "border": "bg-blue-200"
+            },
+            "title": {
+                "highlight": "text-blue-600",
+                "decoration": "decoration-cyan-500"
+            },
+            "description": "text-gray-700 dark:text-gray-200",
+            "card": {
+                "background": "bg-blue-600 dark:bg-blue-700",
+                "text": "text-white",
+                "shadow": "shadow-blue-500/40"
+            },
+            "metricText": "text-cyan-100"
+        },
+        "metrics": [
+            {
+                "value": "24",
+                "suffix": "/7",
+                "label": "Personal AI coach always available"
+            },
+            {
+                "value": "100",
+                "suffix": "%",
+                "label": "Aligned with your culture & policies"
+            },
+            {
+                "value": "68",
+                "suffix": "%",
+                "label": "Faster adoption of development plans"
+            },
+            {
+                "value": "0",
+                "suffix": "",
+                "label": "Data leaves your infrastructure"
+            }
+        ]
+    },
+    "availableFacilities": {
+        "colors": {
+            "cardBg": "bg-blue-50 dark:bg-blue-900/20",
+            "cardBorder": "border-blue-200 dark:border-blue-700",
+            "cardHover": "hover:bg-blue-100/80 hover:shadow-xl hover:shadow-blue-500/30",
+            "iconBg": "bg-white dark:bg-gray-900",
+            "iconColor": "text-blue-600",
+            "titleColor": "text-blue-800 dark:text-blue-200",
+            "descColor": "text-gray-600 dark:text-gray-400"
+        },
+        "facilities": [
+            {
+                "icon": "BrainCircuit",
+                "title": "Culture & Competency-Aware AI",
+                "description": "Trained exclusively on your values, competencies and internal policies",
+                "href": "#!"
+            },
+            {
+                "icon": "UsersRound",
+                "title": "Personalized Coaching Journeys",
+                "description": "Tailored development plans and real-time feedback for each employee",
+                "href": "#!"
+            },
+            {
+                "icon": "Target",
+                "title": "Smart Goal & OKR Alignment",
+                "description": "Automatically links individual objectives to company strategy",
+                "href": "#!"
+            },
+            {
+                "icon": "Timer",
+                "title": "Instant Career & Skill Recommendations",
+                "description": "Proactive suggestions based on performance, aspirations and gaps",
+                "href": "#!"
+            },
+            {
+                "icon": "FileSearch",
+                "title": "Full Conversation History & Traceability",
+                "description": "Complete audit trail of every interaction and recommendation",
+                "href": "#!"
+            },
+            {
+                "icon": "ShieldCheck",
+                "title": "On-Premise & 100% Data Secure",
+                "description": "Runs locally – your data never leaves your infrastructure",
+                "href": "#!"
+            }
+        ]
+    },
+    "ourDoctorsTeam": {
+        "images": {
+            "aboutImage": "/assets/images/hospital/landing/nvidia2.jpg"
+        },
+        "texts": {
+            "title": {
+                "part1": "Your Culture,",
+                "part2": "Your Policies,",
+                "part3": "Your AI Coach"
+            },
+            "description": "Our OpenAI-compatible agent is fine-tuned with thousands of internal documents, performance reviews, competency frameworks and real conversations from your organization. It speaks your language, respects your rules and accelerates talent development like never before."
+        },
+        "colors": {
+            "titleHighlight": "text-blue-600",
+            "titleDecoration": "decoration-cyan-500",
+            "description": "text-gray-700 dark:text-gray-300",
+            "iconColor": "text-blue-600",
+            "featureDesc": "text-gray-600 dark:text-gray-300"
+        },
+        "features": [
+            {
+                "icon": "Zap",
+                "title": "Real-Time Personalized Guidance",
+                "description": "Answers questions, suggests actions and coaches 24/7 in natural language"
+            },
+            {
+                "icon": "TrendingUp",
+                "title": "Performance & Potential Insights",
+                "description": "Identifies high-potentials, skill gaps and succession candidates instantly"
+            },
+            {
+                "icon": "Handshake",
+                "title": "Leadership & Feedback Coaching",
+                "description": "Helps managers give better feedback and run more effective 1:1s"
+            },
+            {
+                "icon": "FileCheck",
+                "title": "HR-Ready Reports & Analytics",
+                "description": "Generates compliance-ready summaries and development dashboards"
+            }
+        ]
+    },
+    "healthService": {
+        "texts": {
+            "title": {
+                "part1": "Transform Talent Management",
+                "part2": "with Your Own AI Coach",
+                "part3": ""
+            },
+            "description": "Real impact organizations are achieving today with their private AI coach."
+        },
+        "colors": {
+            "sectionBg": "bg-blue-50/50 dark:bg-gray-900/30",
+            "titleHighlight": "text-blue-600",
+            "titleDecoration": "decoration-cyan-500",
+            "description": "text-gray-700 dark:text-gray-300",
+            "cardBg": "bg-white/80 dark:bg-gray-900/70",
+            "cardHover": "hover:bg-blue-50 dark:hover:bg-blue-900/50 hover:-translate-y-2 hover:shadow-xl hover:shadow-blue-300/50",
+            "serviceDesc": "text-gray-600 dark:text-gray-300"
+        },
+        "services": [
+            {
+                "icon": "Siren",
+                "iconBg": "bg-red-100",
+                "iconColor": "text-red-600",
+                "title": "Succession Planning",
+                "description": "Instant identification of ready-now candidates and development roadmaps"
+            },
+            {
+                "icon": "Scale",
+                "iconBg": "bg-amber-100",
+                "iconColor": "text-amber-600",
+                "title": "Learning & Development",
+                "description": "Personalized training recommendations aligned with business needs"
+            },
+            {
+                "icon": "Handshake",
+                "iconBg": "bg-blue-100",
+                "iconColor": "text-blue-600",
+                "title": "Manager Enablement",
+                "description": "Real-time coaching for better conversations, feedback and team leadership"
+            },
+            {
+                "icon": "MessageSquareWarning",
+                "iconBg": "bg-emerald-100",
+                "iconColor": "text-emerald-600",
+                "title": "Employee Experience",
+                "description": "24/7 support for career questions, policy clarification and growth"
+            },
+            {
+                "icon": "TrendingUp",
+                "iconBg": "bg-indigo-100",
+                "iconColor": "text-indigo-600",
+                "title": "Engagement & Retention",
+                "description": "Early detection of flight risk and proactive retention strategies"
+            },
+            {
+                "icon": "Trophy",
+                "iconBg": "bg-cyan-100",
+                "iconColor": "text-cyan-600",
+                "title": "Culture Carrier",
+                "description": "Reinforces your values and behaviors in every single interaction"
+            }
+        ]
+    }
+}

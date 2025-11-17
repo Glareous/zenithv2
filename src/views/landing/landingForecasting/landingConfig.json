@@ -1,0 +1,212 @@
+{
+    "heroBanner": {
+        "texts": {
+            "badge": "GPU-accelerated time series forecasting",
+            "title": {
+                "part1": "NHITS Forecasts",
+                "part2": "in seconds",
+                "part3": "for real-time decisions"
+            },
+            "description": "Upload your time series and let a GPU-powered NHITS model, built with neuralforecast and PyTorch, generate multi-step forecasts with probabilistic intervals. Designed for high-frequency signals and large-scale deployments."
+        },
+        "images": {
+            "mainHome": "/assets/images/hospital/landing/main-home.png",
+            "whiteLogo": "/assets/images/logo-white.png",
+            "darkLogo": "/assets/images/main-logo.png"
+        },
+        "colors": {
+            "background": "bg-gradient-to-b from-violet-700/25 via-violet-700/10 to-fuchsia-500/10",
+            "badge": {
+                "text": "text-violet-400",
+                "border": "bg-violet-300"
+            },
+            "title": {
+                "highlight": "text-violet-500",
+                "decoration": "decoration-fuchsia-400"
+            },
+            "description": "text-gray-600 dark:text-gray-300",
+            "card": {
+                "background": "bg-violet-700 dark:bg-violet-800",
+                "text": "text-violet-50",
+                "shadow": "shadow-violet-400/40"
+            },
+            "metricText": "text-violet-100"
+        },
+        "metrics": [
+            {
+                "value": 263,
+                "suffix": "k+",
+                "label": "Forecasts generated per day"
+            },
+            {
+                "value": 92,
+                "suffix": "%",
+                "label": "Average error reduction vs. baselines"
+            },
+            {
+                "value": 102,
+                "suffix": "+",
+                "label": "Time series models in production"
+            },
+            {
+                "value": 100,
+                "suffix": "+",
+                "label": "Enterprise teams empowered"
+            }
+        ]
+    },
+    "availableFacilities": {
+        "colors": {
+            "cardBg": "bg-violet-100 dark:bg-violet-500/10",
+            "cardBorder": "border-violet-200 dark:border-violet-500/20",
+            "cardHover": "hover:bg-violet-200/60 hover:shadow-xl hover:shadow-violet-500/30",
+            "iconBg": "bg-white dark:bg-dark-850",
+            "iconColor": "text-violet-600",
+            "titleColor": "text-violet-800 dark:text-violet-200",
+            "descColor": "text-gray-600 dark:text-gray-400"
+        },
+        "facilities": [
+            {
+                "icon": "Database",
+                "title": "Series Loader",
+                "description": "As easy as dragging & dropping your CSV",
+                "href": "#!"
+            },
+            {
+                "icon": "CalendarClock",
+                "title": "Frequency",
+                "description": "You pick the cadence (daily, hourly, weekly…) .We handle the rest for flawless forecasting.",
+                "href": "#!"
+            },
+            {
+                "icon": "Cpu",
+                "title": "GPU NHITS Training",
+                "description": "Trains an NHITS model with neuralforecast and PyTorch, using CUDA when available.",
+                "href": "#!"
+            },
+            {
+                "icon": "Activity",
+                "title": "Probabilistic Output",
+                "description": "Returns point forecasts plus lower and upper bounds for each future timestamp.",
+                "href": "#!"
+            },
+            {
+                "icon": "FileText",
+                "title": "Model Summary",
+                "description": "Stores a detailed technical summary and forecastingInfo back into ProjectForecasting.",
+                "href": "#!"
+            },
+            {
+                "icon": "Network",
+                "title": "FastAPI Endpoint",
+                "description": "Exposes /forecast/ with horizon and level parameters for on-demand runs.",
+                "href": "#!"
+            }
+        ]
+    },
+    "ourDoctorsTeam": {
+        "images": {
+            "aboutImage": "/assets/images/hospital/landing/nvidia2.jpg"
+        },
+        "texts": {
+            "title": {
+                "part1": "Reliable NHITS Forecasts",
+                "part2": "built for real-world data",
+                "part3": ""
+            },
+            "description": "Our forecasting engine combines NHITS (Neural Hierarchical Interpolation for Time Series) with PyTorch + neuralforecast running on GPU. For each project, the model is trained on the fly from your MongoDB time series, producing multi-step forecasts with confidence intervals in a single API call."
+        },
+        "colors": {
+            "titleHighlight": "text-violet-500",
+            "titleDecoration": "decoration-fuchsia-400",
+            "description": "text-gray-600 dark:text-dark-500",
+            "iconColor": "text-violet-500",
+            "featureDesc": "text-gray-600 dark:text-dark-500"
+        },
+        "features": [
+            {
+                "icon": "CalendarPlus",
+                "title": "High-accuracy forecasts even on irregular or noisy data",
+                "description": "NHITS consistently outperforms classic deep-learning models by delivering stable predictions even when the time series has high volatility or weak seasonality."
+            },
+            {
+                "icon": "ShieldCheck",
+                "title": "Captures long-term trends and short-term patterns at once",
+                "description": "Its hierarchical architecture decomposes the series across multiple temporal scales, learning global behavior and local fluctuations simultaneously."
+            },
+            {
+                "icon": "Activity",
+                "title": "Probabilistic GPU forecasts",
+                "description": "Uses normalization, NHITS on GPU when available, and insample residuals to deliver point forecasts with lower and upper bounds at your chosen confidence level."
+            },
+            {
+                "icon": "Headset",
+                "title": "More stable than LSTM, Transformers, and DeepAR",
+                "description": "Unlike autoregressive models that accumulate error at every step, NHITS predicts directly over the horizon, producing smoother and more reliable long-range forecasts."
+            }
+        ]
+    },
+    "healthService": {
+        "texts": {
+            "title": {
+                "part1": "Forecasting",
+                "part2": "use cases",
+                "part3": ""
+            },
+            "description": "These are some of the key scenarios where NHITS, running on GPU, delivers high-quality forecasts that directly impact your business decisions."
+        },
+        "colors": {
+            "sectionBg": "bg-gray-50 dark:bg-dark-900/30",
+            "titleHighlight": "text-violet-600",
+            "titleDecoration": "decoration-fuchsia-400",
+            "description": "text-gray-600 dark:text-dark-500",
+            "cardBg": "bg-white/70 dark:bg-dark-900/60",
+            "cardHover": "hover:bg-white dark:hover:bg-dark-950 hover:-translate-y-2 hover:shadow-lg hover:shadow-violet-200/80 dark:hover:shadow-dark-850",
+            "serviceDesc": "text-gray-600 dark:text-dark-500"
+        },
+        "services": [
+            {
+                "icon": "ShoppingCart",
+                "iconBg": "bg-rose-50",
+                "iconColor": "text-rose-500",
+                "title": "Sales demand forecasting",
+                "description": "Predict future sales by product, store or channel using NHITS, capturing promotions, seasonality and long-term trends in one deep-learning model."
+            },
+            {
+                "icon": "PackageSearch",
+                "iconBg": "bg-amber-50",
+                "iconColor": "text-amber-500",
+                "title": "Inventory & stock optimization",
+                "description": "Anticipate stock levels, avoid stock-outs and overstock, and align purchase orders with realistic demand scenarios and confidence intervals."
+            },
+            {
+                "icon": "LineChart",
+                "iconBg": "bg-emerald-50",
+                "iconColor": "text-emerald-500",
+                "title": "Revenue & KPI projections",
+                "description": "Generate forward-looking revenue and KPI curves, helping finance and management teams plan budgets, targets and what-if scenarios."
+            },
+            {
+                "icon": "Factory",
+                "iconBg": "bg-sky-50",
+                "iconColor": "text-sky-500",
+                "title": "Supply chain & production planning",
+                "description": "Use multi-step forecasts to align production, logistics and capacity with expected demand, reducing bottlenecks and last-minute firefighting."
+            },
+            {
+                "icon": "Users",
+                "iconBg": "bg-violet-50",
+                "iconColor": "text-violet-500",
+                "title": "Workforce & staffing needs",
+                "description": "Forecast workload over time and translate it into staffing plans, shifts and scheduling decisions, smoothing peaks and underutilization."
+            },
+            {
+                "icon": "Activity",
+                "iconBg": "bg-blue-50",
+                "iconColor": "text-blue-500",
+                "title": "Risk, peaks & anomalies",
+                "description": "Identify potential spikes, drops and anomalous behavior in advance, combining NHITS forecasts with confidence bands and residual analysis."
+            }
+        ]
+    }
+}
