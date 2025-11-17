@@ -10,7 +10,7 @@ import OurDoctorsTeam from '@src/views/landing/landingForecasting/ourDoctorsTeam
 const FORECASTINGLanding: NextPageWithLayout = () => {
   return (
     <>
-      <main className="pt-20">
+      <main className="pt-0">
 
         <HeroBanner />
         <AvailableFacilities />

@@ -1,29 +1,25 @@
 import React from 'react'
 
 import { NextPageWithLayout } from '@src/dtos'
-import AvailableFacilities from '@src/views/landing/landingDoctors/availableFacilities'
-import Footer from '@src/views/landing/landingDoctors/footer'
-import GetYourAppointment from '@src/views/landing/landingDoctors/getYourAppointment'
-import Header from '@src/views/landing/landingDoctors/header'
-import HealthService from '@src/views/landing/landingDoctors/healthService'
-import HeroBanner from '@src/views/landing/landingDoctors/heroBanner'
-import OurClients from '@src/views/landing/landingDoctors/ourClients'
-import OurDoctorsTeam from '@src/views/landing/landingDoctors/ourDoctorsTeam'
-import OurExpertDoctors from '@src/views/landing/landingDoctors/ourExpertDoctors'
+import AvailableFacilities from '@src/views/landing/landingNIMFRAUD/availableFacilities'
+import Footer from '@src/views/landing/landingNIMFRAUD/footer'
+import HealthService from '@src/views/landing/landingNIMFRAUD/healthService'
+import HeroBanner from '@src/views/landing/landingNIMFRAUD/heroBanner'
+import OurDoctorsTeam from '@src/views/landing/landingNIMFRAUD/ourDoctorsTeam'
+
 
 const NIMFRAUDLanding: NextPageWithLayout = () => {
   return (
-    <React.Fragment>
-      <Header />
-      <HeroBanner />
-      <AvailableFacilities />
-      <OurDoctorsTeam />
-      <HealthService />
-      <OurExpertDoctors />
-      <OurClients />
-      <GetYourAppointment />
-      <Footer />
-    </React.Fragment>
+    <>
+      <main className="pt-0">
+
+        <HeroBanner />
+        <AvailableFacilities />
+        <OurDoctorsTeam />
+        <HealthService />
+        <Footer />
+      </main>
+    </>
   )
 }
 
