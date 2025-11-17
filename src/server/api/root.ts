@@ -43,6 +43,7 @@ import { projectPQRAnalysisRouter } from './routers/projectPQRAnalysis'
 import { projectForecastingRouter } from './routers/projectForecasting'
 import { projectForecastingFileRouter } from './routers/projectForecastingFile'
 import { projectForecastingSeriesRouter } from './routers/projectForecastingSeries'
+import { projectFraudTransactionRouter } from './routers/projectFraudTransaction'
 import { organizationRouter } from './routers/organization'
 import { organizationFileRouter } from './routers/organizationFile'
 import { projectChatRouter } from './routers/projectChat'
@@ -99,6 +100,7 @@ export const appRouter = createTRPCRouter({
   projectForecasting: projectForecastingRouter,
   projectForecastingFile: projectForecastingFileRouter,
   projectForecastingSeries: projectForecastingSeriesRouter,
+  projectFraudTransaction: projectFraudTransactionRouter,
   projectChat: projectChatRouter,
   projectMessage: projectMessageRouter,
 })
