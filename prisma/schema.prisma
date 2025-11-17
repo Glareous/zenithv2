@@ -1734,7 +1734,7 @@ model ProjectPQRAnalysis {
 enum ForecastingStatus {
     PROCESSING
     COMPLETED
-    FAIL
+    FAILED
 }
 
 enum TimeUnit {

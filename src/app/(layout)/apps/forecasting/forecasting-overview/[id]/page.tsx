@@ -233,7 +233,7 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
                       className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                         forecasting.status === 'COMPLETED'
                           ? 'bg-green-100 text-green-800'
-                          : forecasting.status === 'FAIL'
+                          : forecasting.status === 'FAILED'
                             ? 'bg-red-100 text-red-800'
                             : 'bg-yellow-100 text-yellow-800'
                       }`}>
@@ -312,7 +312,7 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
         </div>{' '}
       </div>
 
-      {forecasting.status === 'FAIL' && (
+      {forecasting.status === 'FAILED' && (
         <div className="card card-body">
           <div className="space-y-4">
             <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
