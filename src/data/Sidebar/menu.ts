@@ -279,6 +279,30 @@ const menu: MegaMenu[] = [
     ],
   },
   {
+    title: 'Nim Fraud',
+    lang: 'pe-nim-fraud',
+    icon: 'gem',
+    link: '/apps/nim-fraud',
+    separator: false,
+    children: [
+      {
+        title: 'Create-view',
+        link: '/apps/nim-fraud/list',
+        lang: 'Create-view',
+      },
+      {
+        title: 'Landing',
+        link: '/apps/nim-fraud/landing',
+        lang: 'Landing',
+      },
+      {
+        title: 'Documentation',
+        link: '/docs/nim-fraud',
+        lang: 'Documentation',
+      },
+    ],
+  },
+  {
     title: 'API Keys',
     lang: 'pe-api-keys',
     icon: 'box',

@@ -735,20 +735,21 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                   </p>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { value: 'dashboards', label: 'Dashboards' },
-                      { value: 'projects', label: 'Projects' },
-                      { value: 'ecommerce', label: 'Ecommerce' },
+                      /* { value: 'dashboards', label: 'Dashboards' }, */
+                      /*  { value: 'projects', label: 'Projects' },
+                      { value: 'ecommerce', label: 'Ecommerce' }, */
                       { value: 'rrhh', label: 'RRHH' },
-                      { value: 'orders', label: 'Orders' },
+                      /*{ value: 'orders', label: 'Orders' },
                       { value: 'chat', label: 'CHAT' },
                       { value: 'crm', label: 'CRM' },
                       { value: 'agents', label: 'Agents' },
-                      { value: 'models', label: 'Models' },
+                      { value: 'models', label: 'Models' }, */
                       { value: 'pqr', label: 'PQR' },
                       { value: 'forecasting', label: 'Forecasting' },
-                      { value: 'api-keys', label: 'API Keys' },
+                      { value: 'nim-fraud', label: 'Nim Fraud' },
+                      /* { value: 'api-keys', label: 'API Keys' }, */
                       { value: 'actions', label: 'Actions' },
-                      { value: 'phone-numbers', label: 'Phone Numbers' },
+                      /*{ value: 'phone-numbers', label: 'Phone Numbers' },*/
                     ].map((page) => {
                       const allowedPages = watch('allowedPages') || []
                       const isChecked = allowedPages.includes(page.value)
@@ -1161,20 +1162,21 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                   </p>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { value: 'dashboards', label: 'Dashboards' },
-                      { value: 'projects', label: 'Projects' },
-                      { value: 'ecommerce', label: 'Ecommerce' },
+                      /* { value: 'dashboards', label: 'Dashboards' }, */
+                      /*  { value: 'projects', label: 'Projects' },
+                      { value: 'ecommerce', label: 'Ecommerce' }, */
                       { value: 'rrhh', label: 'RRHH' },
-                      { value: 'orders', label: 'Orders' },
+                      /*{ value: 'orders', label: 'Orders' },
                       { value: 'chat', label: 'CHAT' },
                       { value: 'crm', label: 'CRM' },
                       { value: 'agents', label: 'Agents' },
-                      { value: 'models', label: 'Models' },
+                      { value: 'models', label: 'Models' }, */
                       { value: 'pqr', label: 'PQR' },
                       { value: 'forecasting', label: 'Forecasting' },
-                      { value: 'api-keys', label: 'API Keys' },
+                      { value: 'nim-fraud', label: 'Nim Fraud' },
+                      /* { value: 'api-keys', label: 'API Keys' }, */
                       { value: 'actions', label: 'Actions' },
-                      { value: 'phone-numbers', label: 'Phone Numbers' },
+                      /*{ value: 'phone-numbers', label: 'Phone Numbers' },*/
                     ].map((page) => {
                       const allowedPages = watch('allowedPages') || []
                       const isChecked = allowedPages.includes(page.value)
