@@ -4,12 +4,15 @@ import { auth } from "@src/server/auth";
 import { db } from "@src/server/db";
 import { createHash } from "crypto";
 
+// Export db for use in REST endpoints
+export { db };
+
 // Helper function to authenticate user via API key or session
 async function authenticateUser(req: any) {
   // First try session authentication
   const session = await auth();
   if (session?.user?.id) {
-    return session.user;
+    return { user: session.user, isGlobalApiKey: false };
   }
 
   // Try API key authentication
@@ -17,7 +20,7 @@ async function authenticateUser(req: any) {
   if (authHeader?.startsWith('Bearer ak_')) {
     const apiKey = authHeader.replace('Bearer ', '');
     const keyHash = createHash('sha256').update(apiKey).digest('hex');
-    
+
     const userApiKey = await db.userApiKey.findFirst({
       where: {
         keyHash,
@@ -38,25 +41,107 @@ async function authenticateUser(req: any) {
         where: { id: userApiKey.id },
         data: { lastUsedAt: new Date() }
       }).catch(() => {}); // Fire and forget
-      
-      return userApiKey.user;
+
+      return { user: userApiKey.user, isGlobalApiKey: userApiKey.isGlobal };
     }
   }
 
   return null;
 }
 
+/**
+ * Helper function to verify project access based on user role and API key type
+ * @param projectId - The project ID to verify access for
+ * @param user - The authenticated user
+ * @param isGlobalApiKey - Whether the API key is global
+ * @param isAdminApiKey - Whether the API key is admin
+ * @param includeOptions - Optional Prisma include options
+ * @returns The project if access is granted, null otherwise
+ */
+async function verifyProjectAccess(
+  projectId: string,
+  user: any,
+  isGlobalApiKey: boolean,
+  isAdminApiKey: boolean = false,
+  includeOptions?: any
+) {
+  const isSuperAdmin = user.role === 'SUPERADMIN';
+
+  // SUPERADMIN with global API key can access any project
+  if (isGlobalApiKey && isSuperAdmin) {
+    return await db.project.findUnique({
+      where: { id: projectId },
+      ...(includeOptions && { include: includeOptions }),
+    });
+  }
+
+  // Admin API key: Solo proyectos donde es OWNER o ProjectMember
+  if (isAdminApiKey) {
+    const [ownedProject, memberProject, createdProject] = await Promise.all([
+      // Proyectos donde es OWNER de la organización
+      db.project.findFirst({
+        where: {
+          id: projectId,
+          organization: {
+            ownerId: user.id,
+          },
+        },
+        ...(includeOptions && { include: includeOptions }),
+      }),
+      // Proyectos específicos donde es ProjectMember
+      db.projectMember.findFirst({
+        where: {
+          projectId: projectId,
+          userId: user.id,
+        },
+        include: {
+          project: includeOptions
+            ? {
+                include: includeOptions,
+              }
+            : true,
+        },
+      }),
+      // Proyectos que creó (incluso en otras organizaciones)
+      db.project.findFirst({
+        where: {
+          id: projectId,
+          createdById: user.id,
+        },
+        ...(includeOptions && { include: includeOptions }),
+      }),
+    ]);
+
+    return ownedProject || memberProject?.project || createdProject;
+  }
+
+  // Regular access - verify user has access to the project
+  return await db.project.findFirst({
+    where: {
+      id: projectId,
+      organization: {
+        members: {
+          some: { userId: user.id },
+        },
+      },
+    },
+    ...(includeOptions && { include: includeOptions }),
+  });
+}
+
 export const restRouter = createNextRouter(apiContract, {
   // User endpoints
   getUserProfile: async ({ req }: any) => {
-    const user = await authenticateUser(req);
-    
-    if (!user?.id) {
+    const auth = await authenticateUser(req);
+
+    if (!auth?.user?.id) {
       return {
         status: 401,
         body: { error: { message: "Unauthorized" } },
       };
     }
+
+    const user = auth.user;
 
     try {
       const userProfile = await db.user.findUnique({
@@ -97,9 +182,9 @@ export const restRouter = createNextRouter(apiContract, {
   },
 
   updateUserProfile: async ({ req, body }: any) => {
-    const user = await authenticateUser(req);
-    
-    if (!user?.id) {
+    const auth = await authenticateUser(req);
+
+    if (!auth?.user?.id) {
       return {
         status: 401,
         body: { error: { message: "Unauthorized" } },
@@ -108,7 +193,7 @@ export const restRouter = createNextRouter(apiContract, {
 
     try {
       const updatedUser = await db.user.update({
-        where: { id: user.id },
+        where: { id: auth.user.id },
         data: body,
         select: {
           id: true,
@@ -140,9 +225,9 @@ export const restRouter = createNextRouter(apiContract, {
 
   // Project endpoints
   getProjects: async ({ req }: any) => {
-    const user = await authenticateUser(req);
-    
-    if (!user?.id) {
+    const auth = await authenticateUser(req);
+
+    if (!auth?.user?.id) {
       return {
         status: 401,
         body: { error: { message: "Unauthorized" } },
@@ -151,7 +236,7 @@ export const restRouter = createNextRouter(apiContract, {
 
     try {
       const memberships = await db.organizationMember.findMany({
-        where: { userId: user.id },
+        where: { userId: auth.user.id },
         include: {
           organization: {
             include: {
@@ -182,9 +267,9 @@ export const restRouter = createNextRouter(apiContract, {
   },
 
   createProject: async ({ req, body }: any) => {
-    const user = await authenticateUser(req);
-    
-    if (!user?.id) {
+    const auth = await authenticateUser(req);
+
+    if (!auth?.user?.id) {
       return {
         status: 401,
         body: { error: { message: "Unauthorized" } },
@@ -195,7 +280,7 @@ export const restRouter = createNextRouter(apiContract, {
       // Verify user has access to the organization
       const membership = await db.organizationMember.findFirst({
         where: {
-          userId: user.id,
+          userId: auth.user.id,
           organizationId: body.organizationId,
           role: { in: ["OWNER", "ADMIN"] },
         },
@@ -213,7 +298,7 @@ export const restRouter = createNextRouter(apiContract, {
           name: body.name,
           description: body.description,
           organizationId: body.organizationId,
-          createdById: user.id,
+          createdById: auth.user.id,
         },
       });
 
@@ -234,26 +319,20 @@ export const restRouter = createNextRouter(apiContract, {
   },
 
   getProject: async ({ req, params }: any) => {
-    const user = await authenticateUser(req);
-    
-    if (!user?.id) {
+    const authResult = await authenticateUser(req);
+
+    if (!authResult?.user?.id) {
       return {
         status: 401,
         body: { error: { message: "Unauthorized" } },
       };
     }
 
+    const user = authResult.user;
+
     try {
-      const project = await db.project.findFirst({
-        where: {
-          id: params.id,
-          organization: {
-            members: {
-              some: { userId: user.id },
-            },
-          },
-        },
-      });
+      // Verify project access
+      const project = await verifyProjectAccess(params.id, user, authResult.isGlobalApiKey);
 
       if (!project) {
         return {
@@ -280,42 +359,40 @@ export const restRouter = createNextRouter(apiContract, {
 
   // Product endpoints
   getProjectProducts: async ({ req, params }: any) => {
-    const user = await authenticateUser(req);
-    
-    if (!user?.id) {
+    const authResult = await authenticateUser(req);
+
+    if (!authResult?.user?.id) {
       return {
         status: 401,
         body: { error: { message: "Unauthorized" } },
       };
     }
 
-    try {
-      const project = await db.project.findFirst({
-        where: {
-          id: params.id,
-          organization: {
-            members: {
-              some: { userId: user.id },
-            },
-          },
-        },
-        include: {
-          products: true,
-        },
-      });
+    const user = authResult.user;
 
-      if (!project) {
+    try {
+      // Verify project access
+      const projectAccess = await verifyProjectAccess(params.id, user, authResult.isGlobalApiKey);
+
+      if (!projectAccess) {
         return {
           status: 404,
           body: { error: { message: "Project not found" } },
         };
       }
 
-      const products = project.products.map(product => ({
+      const project = await db.project.findUnique({
+        where: { id: params.id },
+        include: {
+          products: true,
+        },
+      });
+
+      const products = project?.products.map(product => ({
         ...product,
         createdAt: product.createdAt.toISOString(),
         updatedAt: product.updatedAt.toISOString(),
-      }));
+      })) || [];
 
       return {
         status: 200,
@@ -330,27 +407,20 @@ export const restRouter = createNextRouter(apiContract, {
   },
 
   createProjectProduct: async ({ req, params, body }: any) => {
-    const user = await authenticateUser(req);
-    
-    if (!user?.id) {
+    const authResult = await authenticateUser(req);
+
+    if (!authResult?.user?.id) {
       return {
         status: 401,
         body: { error: { message: "Unauthorized" } },
       };
     }
 
+    const user = authResult.user;
+
     try {
-      // Verify user has access to the project
-      const project = await db.project.findFirst({
-        where: {
-          id: params.id,
-          organization: {
-            members: {
-              some: { userId: user.id },
-            },
-          },
-        },
-      });
+      // Verify project access (works for both normal users and SUPERADMIN with global API key)
+      const project = await verifyProjectAccess(params.id, user, authResult.isGlobalApiKey);
 
       if (!project) {
         return {
@@ -388,42 +458,40 @@ export const restRouter = createNextRouter(apiContract, {
 
   // Customer endpoints
   getProjectCustomers: async ({ req, params }: any) => {
-    const user = await authenticateUser(req);
-    
-    if (!user?.id) {
+    const authResult = await authenticateUser(req);
+
+    if (!authResult?.user?.id) {
       return {
         status: 401,
         body: { error: { message: "Unauthorized" } },
       };
     }
 
-    try {
-      const project = await db.project.findFirst({
-        where: {
-          id: params.id,
-          organization: {
-            members: {
-              some: { userId: user.id },
-            },
-          },
-        },
-        include: {
-          customers: true,
-        },
-      });
+    const user = authResult.user;
 
-      if (!project) {
+    try {
+      // Verify project access
+      const projectAccess = await verifyProjectAccess(params.id, user, authResult.isGlobalApiKey);
+
+      if (!projectAccess) {
         return {
           status: 404,
           body: { error: { message: "Project not found" } },
         };
       }
 
-      const customers = project.customers.map(customer => ({
+      const project = await db.project.findUnique({
+        where: { id: params.id },
+        include: {
+          customers: true,
+        },
+      });
+
+      const customers = project?.customers.map(customer => ({
         ...customer,
         createdAt: customer.createdAt.toISOString(),
         updatedAt: customer.updatedAt.toISOString(),
-      }));
+      })) || [];
 
       return {
         status: 200,
@@ -439,42 +507,40 @@ export const restRouter = createNextRouter(apiContract, {
 
   // Agent endpoints
   getProjectAgents: async ({ req, params }: any) => {
-    const user = await authenticateUser(req);
-    
-    if (!user?.id) {
+    const authResult = await authenticateUser(req);
+
+    if (!authResult?.user?.id) {
       return {
         status: 401,
         body: { error: { message: "Unauthorized" } },
       };
     }
 
-    try {
-      const project = await db.project.findFirst({
-        where: {
-          id: params.id,
-          organization: {
-            members: {
-              some: { userId: user.id },
-            },
-          },
-        },
-        include: {
-          agents: true,
-        },
-      });
+    const user = authResult.user;
 
-      if (!project) {
+    try {
+      // Verify project access
+      const projectAccess = await verifyProjectAccess(params.id, user, authResult.isGlobalApiKey);
+
+      if (!projectAccess) {
         return {
           status: 404,
           body: { error: { message: "Project not found" } },
         };
       }
 
-      const agents = project.agents.map(agent => ({
+      const project = await db.project.findUnique({
+        where: { id: params.id },
+        include: {
+          agents: true,
+        },
+      });
+
+      const agents = project?.agents.map(agent => ({
         ...agent,
         createdAt: agent.createdAt.toISOString(),
         updatedAt: agent.updatedAt.toISOString(),
-      }));
+      })) || [];
 
       return {
         status: 200,

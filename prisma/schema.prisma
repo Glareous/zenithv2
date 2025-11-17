@@ -1236,18 +1236,23 @@ model UserApiKey {
   keyHash     String   @unique // Hashed version of the API key
   keyPreview  String   // First 8 characters for display (e.g., "ak_12345...")
   isActive    Boolean  @default(true)
+
+  // Global API key configuration (only SUPERADMIN can create isGlobal=true)
+  isGlobal    Boolean  @default(false) // If true, visible/usable by all organizations
   admin       Boolean  @default(false) // Super admin access (only modifiable directly in DB)
+
   lastUsedAt  DateTime?
   expiresAt   DateTime? // Optional expiration
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   // Relations
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
-  
+
   @@index([userId])
   @@index([isActive])
+  @@index([isGlobal])
 }
 
 // Consolidated ProjectAgentWorkflow model - single source of truth for all workflow data

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { createTRPCContext } from '@src/server/api/trpc'
+import { verifyProjectAccess } from '@src/server/api/rest/helpers'
 
 export async function GET(
   req: NextRequest,
@@ -16,26 +17,12 @@ export async function GET(
 
     const { id } = await params
 
-    let project
-
-    // If admin API key, can access any project's members
-    if (ctx.isAdminApiKey) {
-      project = await ctx.db.project.findUnique({
-        where: { id },
-      })
-    } else {
-      // Regular access - verify user has access to the project
-      project = await ctx.db.project.findFirst({
-        where: {
-          id,
-          organization: {
-            members: {
-              some: { userId: user.id },
-            },
-          },
-        },
-      })
-    }
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey
+    )
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })

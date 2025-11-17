@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { createTRPCContext } from '@src/server/api/trpc'
+import { verifyProjectAccess } from '@src/server/api/rest/helpers'
 
 export async function GET(
   req: NextRequest,
@@ -18,36 +19,18 @@ export async function GET(
     }
 
     const { id } = await params
-    let project
 
-    // If admin API key, can access any project's contacts
-    if (ctx.isAdminApiKey) {
-      project = await ctx.db.project.findUnique({
-        where: { id },
-        include: {
-          contacts: {
-            orderBy: { createdAt: 'desc' },
-          },
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey,
+      {
+        contacts: {
+          orderBy: { createdAt: 'desc' },
         },
-      })
-    } else {
-      // Regular access - verify user has access to the project
-      project = await ctx.db.project.findFirst({
-        where: {
-          id,
-          organization: {
-            members: {
-              some: { userId: user.id },
-            },
-          },
-        },
-        include: {
-          contacts: {
-            orderBy: { createdAt: 'desc' },
-          },
-        },
-      })
-    }
+      }
+    )
 
     if (!project) {
       return NextResponse.json(
@@ -56,7 +39,7 @@ export async function GET(
       )
     }
 
-    const contacts = project.contacts.map((contact) => ({
+    const contacts = (project as any).contacts.map((contact: any) => ({
       ...contact,
       createdAt: contact.createdAt.toISOString(),
       updatedAt: contact.updatedAt.toISOString(),

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createTRPCContext } from "@src/server/api/trpc";
+import { verifyProjectAccess } from "@src/server/api/rest/helpers";
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -12,42 +13,23 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     const { id } = await params;
 
-    let project;
-    
-    // If admin API key, can access any project's customers
-    if (ctx.isAdminApiKey) {
-      project = await ctx.db.project.findUnique({
-        where: { id },
-        include: {
-          customers: {
-            orderBy: { createdAt: "desc" },
-          },
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey,
+      {
+        customers: {
+          orderBy: { createdAt: "desc" },
         },
-      });
-    } else {
-      // Regular access - verify user has access to the project
-      project = await ctx.db.project.findFirst({
-        where: {
-          id,
-          organization: {
-            members: {
-              some: { userId: user.id },
-            },
-          },
-        },
-        include: {
-          customers: {
-            orderBy: { createdAt: "desc" },
-          },
-        },
-      });
-    }
+      }
+    );
 
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const customers = project.customers.map(customer => ({
+    const customers = (project as any).customers.map((customer: any) => ({
       ...customer,
       createdAt: customer.createdAt.toISOString(),
       updatedAt: customer.updatedAt.toISOString(),

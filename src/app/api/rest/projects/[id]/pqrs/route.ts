@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { createTRPCContext } from '@src/server/api/trpc'
+import { verifyProjectAccess } from '@src/server/api/rest/helpers'
 
 export async function GET(
   req: NextRequest,
@@ -16,90 +17,26 @@ export async function GET(
 
     const { id } = await params
 
-    let project
-
-    if (ctx.isAdminApiKey) {
-      // Admin API key: Solo proyectos donde es OWNER o ProjectMember
-      const [ownedProject, memberProject, createdProject] = await Promise.all([
-        // Proyectos donde es OWNER de la organización
-        ctx.db.project.findFirst({
-          where: {
-            id,
-            organization: {
-              ownerId: user.id,
-            },
-          },
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey,
+      {
+        pqrs: {
           include: {
-            pqrs: {
-              include: {
-                analysis: true,
-              },
-              orderBy: { createdAt: 'desc' },
-            },
+            analysis: true,
           },
-        }),
-        // Proyectos específicos donde es ProjectMember
-        ctx.db.projectMember.findFirst({
-          where: {
-            projectId: id,
-            userId: user.id,
-          },
-          include: {
-            project: {
-              include: {
-                pqrs: {
-                  include: {
-                    analysis: true,
-                  },
-                  orderBy: { createdAt: 'desc' },
-                },
-              },
-            },
-          },
-        }),
-        // Proyectos que creó (incluso en otras organizaciones)
-        ctx.db.project.findFirst({
-          where: {
-            id,
-            createdById: user.id,
-          },
-          include: {
-            pqrs: {
-              include: {
-                analysis: true,
-              },
-              orderBy: { createdAt: 'desc' },
-            },
-          },
-        }),
-      ])
-
-      project = ownedProject || memberProject?.project || createdProject
-    } else {
-      // Regular access - solo proyectos propios (OWNER)
-      project = await ctx.db.project.findFirst({
-        where: {
-          id,
-          organization: {
-            ownerId: user.id,
-          },
+          orderBy: { createdAt: 'desc' },
         },
-        include: {
-          pqrs: {
-            include: {
-              analysis: true,
-            },
-            orderBy: { createdAt: 'desc' },
-          },
-        },
-      })
-    }
+      }
+    )
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
-    const pqrs = project.pqrs.map((pqr) => ({
+    const pqrs = (project as any).pqrs.map((pqr: any) => ({
       ...pqr,
       createdAt: pqr.createdAt.toISOString(),
       updatedAt: pqr.updatedAt.toISOString(),
@@ -181,51 +118,12 @@ export async function POST(
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
 
-    let project
-
-    if (ctx.isAdminApiKey) {
-      // Admin API key: Solo proyectos donde es OWNER o ProjectMember
-      const [ownedProject, memberProject, createdProject] = await Promise.all([
-        // Proyectos donde es OWNER de la organización
-        ctx.db.project.findFirst({
-          where: {
-            id,
-            organization: {
-              ownerId: user.id,
-            },
-          },
-        }),
-        // Proyectos específicos donde es ProjectMember
-        ctx.db.projectMember.findFirst({
-          where: {
-            projectId: id,
-            userId: user.id,
-          },
-          include: {
-            project: true,
-          },
-        }),
-        // Proyectos que creó (incluso en otras organizaciones)
-        ctx.db.project.findFirst({
-          where: {
-            id,
-            createdById: user.id,
-          },
-        }),
-      ])
-
-      project = ownedProject || memberProject?.project || createdProject
-    } else {
-      // Regular access - solo proyectos propios (OWNER)
-      project = await ctx.db.project.findFirst({
-        where: {
-          id,
-          organization: {
-            ownerId: user.id,
-          },
-        },
-      })
-    }
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey
+    )
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
@@ -307,79 +205,24 @@ export async function PUT(
       )
     }
 
-    let project
-
-    if (ctx.isAdminApiKey) {
-      // Admin API key: Solo proyectos donde es OWNER o ProjectMember
-      const [ownedProject, memberProject, createdProject] = await Promise.all([
-        // Proyectos donde es OWNER de la organización
-        ctx.db.project.findFirst({
-          where: {
-            id,
-            organization: {
-              ownerId: user.id,
-            },
-          },
-          include: {
-            pqrs: {
-              where: { id: pqrId },
-            },
-          },
-        }),
-        // Proyectos específicos donde es ProjectMember
-        ctx.db.projectMember.findFirst({
-          where: {
-            projectId: id,
-            userId: user.id,
-          },
-          include: {
-            project: {
-              include: {
-                pqrs: {
-                  where: { id: pqrId },
-                },
-              },
-            },
-          },
-        }),
-        // Proyectos que creó (incluso en otras organizaciones)
-        ctx.db.project.findFirst({
-          where: {
-            id,
-            createdById: user.id,
-          },
-          include: {
-            pqrs: {
-              where: { id: pqrId },
-            },
-          },
-        }),
-      ])
-
-      project = ownedProject || memberProject?.project || createdProject
-    } else {
-      // Regular access - solo proyectos propios (OWNER)
-      project = await ctx.db.project.findFirst({
-        where: {
-          id,
-          organization: {
-            ownerId: user.id,
-          },
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey,
+      {
+        pqrs: {
+          where: { id: pqrId },
         },
-        include: {
-          pqrs: {
-            where: { id: pqrId },
-          },
-        },
-      })
-    }
+      }
+    )
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
     // Check if PQR exists in this project
-    const existingPqr = project.pqrs[0]
+    const existingPqr = (project as any).pqrs[0]
     if (!existingPqr) {
       return NextResponse.json(
         { error: 'PQR not found in this project' },
@@ -450,79 +293,24 @@ export async function DELETE(
       )
     }
 
-    let project
-
-    if (ctx.isAdminApiKey) {
-      // Admin API key: Solo proyectos donde es OWNER o ProjectMember
-      const [ownedProject, memberProject, createdProject] = await Promise.all([
-        // Proyectos donde es OWNER de la organización
-        ctx.db.project.findFirst({
-          where: {
-            id,
-            organization: {
-              ownerId: user.id,
-            },
-          },
-          include: {
-            pqrs: {
-              where: { id: pqrId },
-            },
-          },
-        }),
-        // Proyectos específicos donde es ProjectMember
-        ctx.db.projectMember.findFirst({
-          where: {
-            projectId: id,
-            userId: user.id,
-          },
-          include: {
-            project: {
-              include: {
-                pqrs: {
-                  where: { id: pqrId },
-                },
-              },
-            },
-          },
-        }),
-        // Proyectos que creó (incluso en otras organizaciones)
-        ctx.db.project.findFirst({
-          where: {
-            id,
-            createdById: user.id,
-          },
-          include: {
-            pqrs: {
-              where: { id: pqrId },
-            },
-          },
-        }),
-      ])
-
-      project = ownedProject || memberProject?.project || createdProject
-    } else {
-      // Regular access - solo proyectos propios (OWNER)
-      project = await ctx.db.project.findFirst({
-        where: {
-          id,
-          organization: {
-            ownerId: user.id,
-          },
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey,
+      {
+        pqrs: {
+          where: { id: pqrId },
         },
-        include: {
-          pqrs: {
-            where: { id: pqrId },
-          },
-        },
-      })
-    }
+      }
+    )
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
     // Check if PQR exists in this project
-    const existingPqr = project.pqrs[0]
+    const existingPqr = (project as any).pqrs[0]
     if (!existingPqr) {
       return NextResponse.json(
         { error: 'PQR not found in this project' },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { createTRPCContext } from '@src/server/api/trpc'
+import { verifyProjectAccess } from '@src/server/api/rest/helpers'
 
 export async function GET(
   req: NextRequest,
@@ -16,64 +17,34 @@ export async function GET(
 
     const { id } = await params
 
-    let project
-
-    // If admin API key, can access any project's agents
-    if (ctx.isAdminApiKey) {
-      project = await ctx.db.project.findUnique({
-        where: { id },
-        include: {
-          agents: {
-            // Solo incluir campos básicos, no la relación project
-            select: {
-              id: true,
-              name: true,
-              type: true,
-              isActive: true,
-              systemInstructions: true,
-              createdAt: true,
-              updatedAt: true,
-              // NO incluir: project: true
-            },
-            orderBy: { createdAt: 'desc' },
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey,
+      {
+        agents: {
+          // Solo incluir campos básicos, no la relación project
+          select: {
+            id: true,
+            name: true,
+            type: true,
+            isActive: true,
+            systemInstructions: true,
+            createdAt: true,
+            updatedAt: true,
+            // NO incluir: project: true
           },
+          orderBy: { createdAt: 'desc' },
         },
-      })
-    } else {
-      // Regular access - verify user has access to the project
-      project = await ctx.db.project.findFirst({
-        where: {
-          id,
-          organization: {
-            members: {
-              some: { userId: user.id },
-            },
-          },
-        },
-        include: {
-          agents: {
-            // Solo incluir campos básicos, no la relación project
-            select: {
-              id: true,
-              name: true,
-              type: true,
-              isActive: true,
-              systemInstructions: true,
-              createdAt: true,
-              updatedAt: true,
-              // NO incluir: project: true
-            },
-            orderBy: { createdAt: 'desc' },
-          },
-        },
-      })
-    }
+      }
+    )
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
-    const agents = project.agents.map((agent) => ({
+    const agents = (project as any).agents.map((agent: any) => ({
       ...agent,
       createdAt: agent.createdAt.toISOString(),
       updatedAt: agent.updatedAt.toISOString(),
@@ -116,16 +87,12 @@ export async function POST(
     }
 
     // Verify user has access to the project
-    const project = await ctx.db.project.findFirst({
-      where: {
-        id,
-        organization: {
-          members: {
-            some: { userId: user.id },
-          },
-        },
-      },
-    })
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey
+    )
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })

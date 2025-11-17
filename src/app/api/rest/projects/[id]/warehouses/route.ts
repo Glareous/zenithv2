@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { createTRPCContext } from '@src/server/api/trpc'
+import { verifyProjectAccess } from '@src/server/api/rest/helpers'
 
 export async function GET(
   req: NextRequest,
@@ -16,106 +17,30 @@ export async function GET(
 
     const { id } = await params
 
-    let project
-
-    if (ctx.isAdminApiKey) {
-      // Admin API key: Solo proyectos donde es OWNER o ProjectMember
-      const [ownedProject, memberProject, createdProject] = await Promise.all([
-        // Proyectos donde es OWNER de la organización
-        ctx.db.project.findFirst({
-          where: {
-            id,
-            organization: {
-              ownerId: user.id,
-            },
-          },
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey,
+      {
+        warehouses: {
           include: {
-            warehouses: {
-              include: {
-                _count: {
-                  select: {
-                    products: true,
-                  },
-                },
-              },
-              orderBy: { warehouseId: 'asc' },
-            },
-          },
-        }),
-        // Proyectos específicos donde es ProjectMember
-        ctx.db.projectMember.findFirst({
-          where: {
-            projectId: id,
-            userId: user.id,
-          },
-          include: {
-            project: {
-              include: {
-                warehouses: {
-                  include: {
-                    _count: {
-                      select: {
-                        products: true,
-                      },
-                    },
-                  },
-                  orderBy: { warehouseId: 'asc' },
-                },
+            _count: {
+              select: {
+                products: true,
               },
             },
           },
-        }),
-        // Proyectos que creó (incluso en otras organizaciones)
-        ctx.db.project.findFirst({
-          where: {
-            id,
-            createdById: user.id,
-          },
-          include: {
-            warehouses: {
-              include: {
-                _count: {
-                  select: {
-                    products: true,
-                  },
-                },
-              },
-              orderBy: { warehouseId: 'asc' },
-            },
-          },
-        }),
-      ])
-
-      project = ownedProject || memberProject?.project || createdProject
-    } else {
-      // Regular access - solo proyectos propios (OWNER)
-      project = await ctx.db.project.findFirst({
-        where: {
-          id,
-          organization: {
-            ownerId: user.id,
-          },
+          orderBy: { warehouseId: 'asc' },
         },
-        include: {
-          warehouses: {
-            include: {
-              _count: {
-                select: {
-                  products: true,
-                },
-              },
-            },
-            orderBy: { warehouseId: 'asc' },
-          },
-        },
-      })
-    }
+      }
+    )
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
-    const warehouses = project.warehouses.map((warehouse) => ({
+    const warehouses = (project as any).warehouses.map((warehouse: any) => ({
       ...warehouse,
       createdAt: warehouse.createdAt.toISOString(),
       updatedAt: warehouse.updatedAt.toISOString(),
@@ -151,51 +76,12 @@ export async function POST(
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
 
-    let project
-
-    if (ctx.isAdminApiKey) {
-      // Admin API key: Solo proyectos donde es OWNER o ProjectMember
-      const [ownedProject, memberProject, createdProject] = await Promise.all([
-        // Proyectos donde es OWNER de la organización
-        ctx.db.project.findFirst({
-          where: {
-            id,
-            organization: {
-              ownerId: user.id,
-            },
-          },
-        }),
-        // Proyectos específicos donde es ProjectMember
-        ctx.db.projectMember.findFirst({
-          where: {
-            projectId: id,
-            userId: user.id,
-          },
-          include: {
-            project: true,
-          },
-        }),
-        // Proyectos que creó (incluso en otras organizaciones)
-        ctx.db.project.findFirst({
-          where: {
-            id,
-            createdById: user.id,
-          },
-        }),
-      ])
-
-      project = ownedProject || memberProject?.project || createdProject
-    } else {
-      // Regular access - solo proyectos propios (OWNER)
-      project = await ctx.db.project.findFirst({
-        where: {
-          id,
-          organization: {
-            ownerId: user.id,
-          },
-        },
-      })
-    }
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey
+    )
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })

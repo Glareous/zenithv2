@@ -175,7 +175,7 @@ const DialogInitializeRequest: React.FC<DialogInitializeRequestProps> = ({
           return {
             ...variable,
             selectedType,
-            userInput: variable.value || '',
+            userInput: '', // Empty input - user enters real value
           }
         }),
       })

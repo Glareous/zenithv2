@@ -32,11 +32,12 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   const authHeader = opts.headers.get('authorization')
   let apiKeyUser = null
   let isAdminApiKey = false
+  let isGlobalApiKey = false
 
   if (authHeader?.startsWith('Bearer ak_')) {
     const apiKey = authHeader.replace('Bearer ', '')
     const keyHash = createHash('sha256').update(apiKey).digest('hex')
-    
+
     const userApiKey = await db.userApiKey.findFirst({
       where: {
         keyHash,
@@ -46,15 +47,17 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
         user: true
       }
     })
-    
+
     // If found, check expiration manually
     if (userApiKey && userApiKey.expiresAt && userApiKey.expiresAt < new Date()) {
       // API key expired, don't authenticate
       apiKeyUser = null
       isAdminApiKey = false
+      isGlobalApiKey = false
     } else if (userApiKey && userApiKey.user) {
       apiKeyUser = userApiKey.user
       isAdminApiKey = userApiKey.admin
+      isGlobalApiKey = userApiKey.isGlobal
       // Update last used timestamp in background
       db.userApiKey.update({
         where: { id: userApiKey.id },
@@ -68,6 +71,7 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     session,
     apiKeyUser,
     isAdminApiKey,
+    isGlobalApiKey,
     ...opts,
   }
 }

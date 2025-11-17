@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { createTRPCContext } from '@src/server/api/trpc'
+import { verifyProjectAccess } from '@src/server/api/rest/helpers'
 
 export async function GET(
   req: NextRequest,
@@ -18,54 +19,27 @@ export async function GET(
     }
 
     const { id } = await params
-    let project
 
-    // If admin API key, can access any project's deals
-    if (ctx.isAdminApiKey) {
-      project = await ctx.db.project.findUnique({
-        where: { id },
-        include: {
-          deals: {
-            include: {
-              customer: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                },
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey,
+      {
+        deals: {
+          include: {
+            customer: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
               },
             },
-            orderBy: { createdAt: 'desc' },
           },
+          orderBy: { createdAt: 'desc' },
         },
-      })
-    } else {
-      // Regular access - verify user has access to the project
-      project = await ctx.db.project.findFirst({
-        where: {
-          id,
-          organization: {
-            members: {
-              some: { userId: user.id },
-            },
-          },
-        },
-        include: {
-          deals: {
-            include: {
-              customer: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                },
-              },
-            },
-            orderBy: { createdAt: 'desc' },
-          },
-        },
-      })
-    }
+      }
+    )
 
     if (!project) {
       return NextResponse.json(
@@ -74,7 +48,7 @@ export async function GET(
       )
     }
 
-    const deals = project.deals.map((deal) => ({
+    const deals = (project as any).deals.map((deal: any) => ({
       ...deal,
       dealDate: deal.dealDate?.toISOString() || null,
       createdAt: deal.createdAt.toISOString(),
@@ -124,16 +98,12 @@ export async function POST(
     }
 
     // Verify user has access to the project
-    const project = await ctx.db.project.findFirst({
-      where: {
-        id,
-        organization: {
-          members: {
-            some: { userId: user.id },
-          },
-        },
-      },
-    })
+    const project = await verifyProjectAccess(
+      id,
+      user,
+      ctx.isGlobalApiKey,
+      ctx.isAdminApiKey
+    )
 
     if (!project) {
       return NextResponse.json(
