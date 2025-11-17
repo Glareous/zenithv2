@@ -116,6 +116,8 @@ export const projectForecastingRouter = createTRPCRouter({
         timeUnit: z.enum(['SECONDS', 'MINUTES', 'HOURS', 'DAYS', 'MONTHS', 'YEARS']),
         description: z.string().optional(),
         status: z.enum(['PROCESSING', 'COMPLETED']).optional(),
+        periodToPredict: z.number().int().positive().optional(),
+        confidenceLevel: z.number().min(80).max(100).optional(),
         projectId: z.string(),
       })
     )
@@ -171,6 +173,8 @@ export const projectForecastingRouter = createTRPCRouter({
         description: z.string().optional(),
         summary: z.string().optional(),
         status: z.enum(['PROCESSING', 'COMPLETED']).optional(),
+        periodToPredict: z.number().int().positive().optional(),
+        confidenceLevel: z.number().min(80).max(100).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

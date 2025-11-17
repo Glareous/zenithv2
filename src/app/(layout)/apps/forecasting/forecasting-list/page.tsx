@@ -29,7 +29,9 @@ const createForecastingSchema = (maxPeriod?: number) => z.object({
     .refine((val) => {
       if (maxPeriod === undefined) return true
       return val <= maxPeriod
-    }, (val) => ({ message: `Period cannot exceed ${maxPeriod} (15% of CSV rows)` })),
+    }, {
+      message: maxPeriod !== undefined ? `Period cannot exceed ${maxPeriod} (15% of CSV rows)` : 'Invalid period'
+    }),
   confidenceLevel: z.number().min(80, 'Confidence level must be at least 80%').max(100, 'Confidence level cannot exceed 100%').optional(),
 })
 
@@ -645,6 +647,17 @@ const ForecastingListPage: NextPageWithLayout = () => {
             </div>
 
             <div className="mb-4">
+              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800 mb-2">
+                  <strong>CSV File Example with 1 Month Interval</strong>
+                </p>
+                <a
+                  href="/example-csv/1 month interval.csv"
+                  download="1_month_interval_example.csv"
+                  className="btn btn-sm btn-outline-primary">
+                  Download Example CSV
+                </a>
+              </div>
               <label className="block mb-2 text-sm font-medium">
                 CSV File {!isEditMode && <span className="text-red-500">*</span>}
                 {isEditMode && selectedForecasting?.files?.[0] && (
