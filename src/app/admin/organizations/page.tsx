@@ -1189,7 +1189,6 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       { value: 'nim-fraud', label: 'Nim Fraud' },
                       /* { value: 'api-keys', label: 'API Keys' }, */
                       { value: 'actions', label: 'Actions' },
-                      { value: 'crm', label: 'CRM' },
                       { value: 'advisor', label: 'Digital Advisor' },
                       { value: 'leads', label: 'Leads' },
                       /*{ value: 'phone-numbers', label: 'Phone Numbers' },*/
