@@ -207,6 +207,8 @@ const NimFraudCreate: NextPageWithLayout = () => {
     if (editTransactionId) {
       updateMutation.mutate({
         id: editTransactionId,
+        ...data,
+        timestamp: new Date(data.timestamp),
       })
     } else {
       createMutation.mutate(transactionData)
