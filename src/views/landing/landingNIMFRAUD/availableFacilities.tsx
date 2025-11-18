@@ -53,7 +53,7 @@ const AvailableFacilities: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-x-space">
 
             {facilities.facilities.map((facility, index) => {
-              const Icon = iconMap[facility.icon]
+              const Icon = iconMap[facility.icon as keyof typeof iconMap]
 
               return (
                 <Link
