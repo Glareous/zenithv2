@@ -102,11 +102,9 @@ enum EmployeeFileCategory {
 }
 
 enum LeadStatus {
-    NEW
-    HOT
-    PENDING
-    LOST
-    CONVERTED_TO_CUSTOMER
+    PROCESSING
+    COMPLETED
+    FAILED
 }
 
 enum Gender {
@@ -1083,11 +1081,19 @@ model ProjectOrdersItems {
 
 // ProjectLead model - for managing leads per project
 model ProjectLead {
-    id          String   @id @default(cuid()) @map("_id")
+    id          String     @id @default(cuid()) @map("_id")
     name        String
     email       String?
     phoneNumber String?
-    status      LeadStatus @default(NEW)
+    status      LeadStatus @default(PROCESSING)
+
+    // Additional fields
+    description String?    @db.String // Optional description
+    summary     String?    @db.String // Summary/analysis shown when status is COMPLETED
+    companyName String?    // Company name
+    gender      Gender?    // Gender (MALE/FEMALE/OTHER)
+    location    String?    // Location/address
+
     projectId   String
     project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
     createdById String
@@ -1097,11 +1103,11 @@ model ProjectLead {
 
     // Relations
     files       ProjectLeadFile[]
-    
+
     // New relation to ProjectContact (optional)
     contactId   String?
     contact     ProjectContact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
-    
+
     @@index([projectId])
     @@index([createdById])
     @@index([contactId])

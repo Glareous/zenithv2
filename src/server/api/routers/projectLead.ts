@@ -4,9 +4,14 @@ import { z } from 'zod'
 
 const createLeadSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email format'),
-  phoneNumber: z.string().min(1, 'Phone number is required'),
-  status: z.enum(['NEW', 'HOT', 'PENDING', 'LOST']).default('NEW'),
+  email: z.string().email('Invalid email format').optional(),
+  phoneNumber: z.string().min(1, 'Phone number is required').optional(),
+  status: z.enum(['PROCESSING', 'COMPLETED', 'FAILED']).default('PROCESSING'),
+  description: z.string().optional(),
+  summary: z.string().optional(),
+  companyName: z.string().optional(),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
+  location: z.string().optional(),
   projectId: z.string().min(1, 'ProjectId is required'),
   contactId: z.string().optional(),
 })
@@ -87,7 +92,7 @@ export const projectLeadRouter = createTRPCRouter({
         page: z.number().min(1).default(1),
         limit: z.number().min(1).max(100).default(10),
         search: z.string().optional(),
-        status: z.enum(['NEW', 'HOT', 'PENDING', 'LOST']).optional(),
+        status: z.enum(['PROCESSING', 'COMPLETED', 'FAILED']).optional(),
         selectedStatuses: z.array(z.string()).optional(),
         includeFromContact: z.boolean().optional(),
         createdAt: z.date().optional(),
@@ -524,47 +529,11 @@ export const projectLeadRouter = createTRPCRouter({
         })
       }
 
-      // Get leads with status CONVERTED_TO_CUSTOMER
-      const leads = await ctx.db.projectLead.findMany({
-        where: {
-          projectId,
-          status: 'CONVERTED_TO_CUSTOMER',
-          ...(search && {
-            OR: [
-              { name: { contains: search, mode: 'insensitive' } },
-              { email: { contains: search, mode: 'insensitive' } },
-              { phoneNumber: { contains: search, mode: 'insensitive' } },
-            ],
-          }),
-        },
-        include: {
-          files: {
-            where: {
-              fileType: 'IMAGE',
-            },
-            take: 1,
-          },
-        },
-        skip: (page - 1) * limit,
-        take: limit,
-        orderBy: {
-          createdAt: 'desc',
-        },
-      })
-
-      const total = await ctx.db.projectLead.count({
-        where: {
-          projectId,
-          status: 'CONVERTED_TO_CUSTOMER',
-          ...(search && {
-            OR: [
-              { name: { contains: search, mode: 'insensitive' } },
-              { email: { contains: search, mode: 'insensitive' } },
-              { phoneNumber: { contains: search, mode: 'insensitive' } },
-            ],
-          }),
-        },
-      })
+      // Note: CONVERTED_TO_CUSTOMER status no longer exists
+      // Now using PROCESSING/COMPLETED/FAILED like Forecasting
+      // Return empty array for backward compatibility
+      const leads: any[] = []
+      const total = 0
 
       return {
         leads,
