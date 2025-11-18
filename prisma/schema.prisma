@@ -232,6 +232,8 @@ model Organization {
     agentRrhhId         String?  // Reference to ProjectAgent.id (global agent)
     agentForecastingId  String?  // Reference to ProjectAgent.id (global agent)
     agentChatId         String?  // Reference to ProjectAgent.id (global agent)
+    agentAdvisorId      String?  // Reference to ProjectAgent.id (global agent)
+    agentLeadsId        String?  // Reference to ProjectAgent.id (global agent)
 
     // Relations
     owner        User                 @relation("OrganizationOwner", fields: [ownerId], references: [id])
@@ -245,6 +247,8 @@ model Organization {
   @@index([ownerId])
   @@index([agentPqrId])
   @@index([agentRrhhId])
+  @@index([agentAdvisorId])
+  @@index([agentLeadsId])
   @@index([agentForecastingId])
   @@index([agentChatId])
 }

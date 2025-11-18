@@ -183,6 +183,8 @@ export const projectAgentRouter = createTRPCRouter({
           agentRrhhId: true,
           agentForecastingId: true,
           agentChatId: true,
+          agentAdvisorId: true,
+          agentLeadsId: true,
         },
       })
 
@@ -192,6 +194,8 @@ export const projectAgentRouter = createTRPCRouter({
         organization?.agentRrhhId,
         organization?.agentForecastingId,
         organization?.agentChatId,
+        organization?.agentAdvisorId,
+        organization?.agentLeadsId,
       ].filter((id): id is string => id !== null && id !== undefined)
 
       const agents = await ctx.db.projectAgent.findMany({
@@ -306,6 +310,8 @@ export const projectAgentRouter = createTRPCRouter({
               agentRrhhId: true,
               agentForecastingId: true,
               agentChatId: true,
+              agentAdvisorId: true,
+              agentLeadsId: true,
             },
           },
         },
@@ -317,7 +323,9 @@ export const projectAgentRouter = createTRPCRouter({
         (userOrganization.organization.agentPqrId === input.id ||
           userOrganization.organization.agentRrhhId === input.id ||
           userOrganization.organization.agentForecastingId === input.id ||
-          userOrganization.organization.agentChatId === input.id)
+          userOrganization.organization.agentChatId === input.id ||
+          userOrganization.organization.agentAdvisorId === input.id ||
+          userOrganization.organization.agentLeadsId === input.id)
 
       // Build where conditions
       const whereConditions: any[] = []
@@ -594,6 +602,8 @@ export const projectAgentRouter = createTRPCRouter({
               { agentRrhhId: input.id },
               { agentForecastingId: input.id },
               { agentChatId: input.id },
+              { agentAdvisorId: input.id },
+              { agentLeadsId: input.id },
             ],
           },
         })
@@ -678,16 +688,25 @@ export const projectAgentRouter = createTRPCRouter({
         })
       }
 
-      // Check if agent is configured as PQR agent in any organization
-      const organizationsUsingAsPQR = await ctx.db.organization.findFirst({
-        where: { agentPqrId: input.id },
+      // Check if agent is configured in any organization
+      const organizationUsing = await ctx.db.organization.findFirst({
+        where: {
+          OR: [
+            { agentPqrId: input.id },
+            { agentRrhhId: input.id },
+            { agentForecastingId: input.id },
+            { agentChatId: input.id },
+            { agentAdvisorId: input.id },
+            { agentLeadsId: input.id },
+          ],
+        },
       })
 
-      if (organizationsUsingAsPQR) {
+      if (organizationUsing) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
           message:
-            'Cannot delete agent. This agent is configured as PQR agent for an organization. Please remove it from the organization first.',
+            'Cannot delete agent. This agent is configured for an organization. Please remove it from the organization first.',
         })
       }
 

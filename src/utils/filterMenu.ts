@@ -8,6 +8,8 @@ interface Organization {
   agentRrhhId?: string | null
   agentForecastingId?: string | null
   agentChatId?: string | null
+  agentAdvisorId?: string | null
+  agentLeadsId?: string | null
 }
 
 /**
@@ -32,12 +34,15 @@ export function filterMenuByAllowedPages(
     Ecommerce: 'ecommerce',
     Rrhh: 'rrhh',
     Orders: 'orders',
-    CHAT: 'chat',
+    Chat: 'chat',
     CRM: 'crm',
     Agents: 'agents',
     Models: 'models',
     PQR: 'pqr',
     FORECASTING: 'forecasting',
+    'Digital Advisor': 'advisor',
+    Leads: 'leads',
+    'Nim Fraud': 'nim-fraud',
     'API Keys': 'api-keys',
     Actions: 'actions',
     'Phone Numbers': 'phone-numbers',
@@ -100,6 +105,18 @@ export function filterMenuByAllowedPages(
           return {
             ...child,
             link: `/apps/agents/default/${organization.agentChatId}/configure`,
+          }
+        }
+        if (child.lang === 'Advisor Agent' && organization.agentAdvisorId) {
+          return {
+            ...child,
+            link: `/apps/agents/default/${organization.agentAdvisorId}/configure`,
+          }
+        }
+        if (child.lang === 'Leads Agent' && organization.agentLeadsId) {
+          return {
+            ...child,
+            link: `/apps/agents/default/${organization.agentLeadsId}/configure`,
           }
         }
         return child
