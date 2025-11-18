@@ -4,8 +4,8 @@ import React, { useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import BreadCrumb from '@src/components/common/BreadCrumb'
+import { Modal } from '@src/components/custom/modal/modal'
 import AgentEditModal from '@src/components/molecules/AgentEditModal'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
@@ -202,11 +202,10 @@ const Agents: React.FC = () => {
       <div className="grid grid-cols-12 gap-x-space">
         {/* Add New Agent Card */}
         <div
-          className={`col-span-12 md:col-span-3 card transition-shadow duration-200 border-2 border-dashed border-gray-300 dark:border-gray-700 ${
-            !createAgentMutation.isPending
-              ? 'cursor-pointer hover:shadow-lg'
-              : 'opacity-75 cursor-not-allowed'
-          }`}
+          className={`col-span-12 md:col-span-3 card transition-shadow duration-200 border-2 border-dashed border-gray-300 dark:border-gray-700 ${!createAgentMutation.isPending
+            ? 'cursor-pointer hover:shadow-lg'
+            : 'opacity-75 cursor-not-allowed'
+            }`}
           onClick={
             createAgentMutation.isPending ? undefined : handleOpenCreateModal
           }>
@@ -265,11 +264,10 @@ const Agents: React.FC = () => {
                   </h6>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        agent.isActive
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                      }`}>
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${agent.isActive
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                        }`}>
                       {agent.isActive ? 'Active' : 'Inactive'}
                     </span>
                     {agent.isGlobal && (
@@ -296,162 +294,151 @@ const Agents: React.FC = () => {
       </div>
 
       {/* Create Agent Modal */}
-      <Dialog
-        open={isCreateModalOpen}
+      <Modal
+        isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        className="relative z-9999">
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="mx-auto max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl">
-            <div className="p-6">
-              <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                Create New Agent
-              </DialogTitle>
+        title="Create New Agent"
+        position='modal-center'
+        content={
+          <>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+              Choose the type of agent you want to create:
+            </p>
 
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                Choose the type of agent you want to create:
-              </p>
-
-              <div className="space-y-3">
-                <button
-                  onClick={() => handleCreateAgent(true)}
-                  disabled={createAgentMutation.isPending}
-                  className="w-full p-4 text-left border-2 border-purple-200 dark:border-purple-800 rounded-lg hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group">
-                  <div className="flex items-start gap-3">
-                    <div className="flex items-center justify-center rounded-full size-10 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
-                      <Users className="size-5" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                        Global Agent
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Visible to all organizations automatically. Cannot be
-                        restricted.
-                      </p>
-                    </div>
+            <div className="space-y-3">
+              <button
+                onClick={() => handleCreateAgent(true)}
+                disabled={createAgentMutation.isPending}
+                className="w-full p-4 text-left border-2 border-purple-200 dark:border-purple-800 rounded-lg hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group">
+                <div className="flex items-start gap-3">
+                  <div className="flex items-center justify-center rounded-full size-10 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
+                    <Users className="size-5" />
                   </div>
-                </button>
-
-                <button
-                  onClick={() => handleCreateAgent(false)}
-                  disabled={createAgentMutation.isPending}
-                  className="w-full p-4 text-left border-2 border-blue-200 dark:border-blue-800 rounded-lg hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group">
-                  <div className="flex items-start gap-3">
-                    <div className="flex items-center justify-center rounded-full size-10 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
-                      <Building2 className="size-5" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                        Specific Agent
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Assign to specific organizations. You can select which
-                        ones after creation.
-                      </p>
-                    </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      Global Agent
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Visible to all organizations automatically. Cannot be
+                      restricted.
+                    </p>
                   </div>
-                </button>
-              </div>
-
-              {createAgentMutation.isPending && (
-                <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <Loader2 className="size-4 animate-spin" />
-                  <span>Creating agent...</span>
                 </div>
-              )}
+              </button>
 
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={() => setIsCreateModalOpen(false)}
-                  disabled={createAgentMutation.isPending}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                  Cancel
-                </button>
-              </div>
+              <button
+                onClick={() => handleCreateAgent(false)}
+                disabled={createAgentMutation.isPending}
+                className="w-full p-4 text-left border-2 border-blue-200 dark:border-blue-800 rounded-lg hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group">
+                <div className="flex items-start gap-3">
+                  <div className="flex items-center justify-center rounded-full size-10 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+                    <Building2 className="size-5" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      Specific Agent
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Assign to specific organizations. You can select which
+                      ones after creation.
+                    </p>
+                  </div>
+                </div>
+              </button>
             </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
+
+            {createAgentMutation.isPending && (
+              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <Loader2 className="size-4 animate-spin" />
+                <span>Creating agent...</span>
+              </div>
+            )}
+          </>
+        }
+        footer={
+          <button
+            onClick={() => setIsCreateModalOpen(false)}
+            disabled={createAgentMutation.isPending}
+            className="btn btn-outline-red">
+            Cancel
+          </button>
+        }
+      />
 
       {/* Organization Assignment Modal */}
-      <Dialog
-        open={isAssignModalOpen}
+      <Modal
+        isOpen={isAssignModalOpen}
         onClose={() => setIsAssignModalOpen(false)}
-        className="relative z-50 hidden">
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="mx-auto max-w-lg w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl">
-            <div className="p-6">
-              <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                Assign Agent to Organizations
-              </DialogTitle>
-
-              {selectedAgent?.isGlobal ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-500 dark:text-gray-400">
-                    This is a global agent. It is automatically visible to all
-                    organizations.
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Select which organizations can access{' '}
-                    <strong>{selectedAgent?.name}</strong>
-                  </p>
-
-                  <div className="max-h-96 overflow-y-auto space-y-2 mb-6">
-                    {organizations.map((org) => (
-                      <label
-                        key={org.id}
-                        className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={selectedOrgIds.includes(org.id)}
-                          onChange={() => toggleOrganization(org.id)}
-                          className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                        />
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-900 dark:text-gray-100">
-                            {org.name}
-                          </p>
-                          {org.description && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              {org.description}
-                            </p>
-                          )}
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-
-                  <div className="flex justify-end gap-3">
-                    <button
-                      onClick={() => setIsAssignModalOpen(false)}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSaveAssignments}
-                      disabled={assignToOrgsMutation.isPending}
-                      className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                      {assignToOrgsMutation.isPending ? (
-                        <>
-                          <Loader2 className="inline-block w-4 h-4 mr-2 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        'Save'
-                      )}
-                    </button>
-                  </div>
-                </>
-              )}
+        title="Assign Agent to Organizations"
+        size="modal-lg"
+        position='modal-center'
+        content={
+          selectedAgent?.isGlobal ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 dark:text-gray-400">
+                This is a global agent. It is automatically visible to all
+                organizations.
+              </p>
             </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
+          ) : (
+            <>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Select which organizations can access{' '}
+                <strong>{selectedAgent?.name}</strong>
+              </p>
+
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {organizations.map((org) => (
+                  <label
+                    key={org.id}
+                    className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={selectedOrgIds.includes(org.id)}
+                      onChange={() => toggleOrganization(org.id)}
+                      className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900 dark:text-gray-100">
+                        {org.name}
+                      </p>
+                      {org.description && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {org.description}
+                        </p>
+                      )}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </>
+          )
+        }
+        footer={
+          !selectedAgent?.isGlobal && (
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setIsAssignModalOpen(false)}
+                className="btn btn-outline-red">
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveAssignments}
+                disabled={assignToOrgsMutation.isPending}
+                className="btn btn-primary">
+                {assignToOrgsMutation.isPending ? (
+                  <>
+                    <Loader2 className="inline-block w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save'
+                )}
+              </button>
+            </div>
+          )
+        }
+      />
     </React.Fragment>
   )
 }

@@ -189,7 +189,7 @@ const menu: MegaMenu[] = [
   {
     title: 'PQR',
     lang: 'pe-pqr',
-    icon: 'users-round',
+    icon: 'text-quote',
     link: '/apps/pqr',
     separator: false,
     children: [
@@ -299,6 +299,64 @@ const menu: MegaMenu[] = [
         title: 'Documentation',
         link: '/docs/nim-fraud',
         lang: 'Documentation',
+      },
+    ],
+  },
+  {
+    title: 'Digital Advisor',
+    lang: 'pe-advisor',
+    icon: 'book-open',
+    link: '/apps/advisor/',
+    separator: false,
+    children: [
+      {
+        title: 'Landing',
+        link: '/apps/advisor/landing',
+        lang: 'Landing',
+      },
+      {
+        title: 'Documentation',
+        link: '/docs/advisor',
+        lang: 'Documentation',
+      },
+      {
+        title: 'Advisor Agent',
+        link: '/apps/agents',
+        lang: 'Advisor Agent',
+      },
+      {
+        title: 'Chat',
+        link: '/apps/chat/default',
+        lang: 'Chat',
+      },
+    ],
+  },
+  {
+    title: 'Leads',
+    lang: 'pe-leads',
+    icon: 'pencil-ruler',
+    link: '/apps/leads/',
+    separator: false,
+    children: [
+      {
+        title: 'Create-view',
+        lang: 'Create-view',
+        link: '/apps/leads/list',
+      },
+      {
+        title: 'Landing',
+        link: '/apps/leads/landing',
+        lang: 'Landing',
+      },
+      {
+        title: 'Documentation',
+        link: '/docs/leads',
+        lang: 'Documentation',
+      },
+      {
+        title: 'Leads Agent',
+        link: '/apps/agents',
+        lang: 'Leads Agent',
       },
     ],
   },

@@ -463,9 +463,8 @@ const CrmLead: React.FC = () => {
                   </div>
 
                   <button
-                    className={`btn btn-icon btn-icon-text ${
-                      showDateFilter ? 'btn btn-primary' : 'btn btn-sub-gray'
-                    }`}
+                    className={`btn btn-icon btn-icon-text ${showDateFilter ? 'btn btn-primary' : 'btn btn-sub-gray'
+                      }`}
                     onClick={() => setShowDateFilter(!showDateFilter)}
                     title="date filter">
                     <Calendar className="size-5" />
@@ -524,7 +523,7 @@ const CrmLead: React.FC = () => {
                 <div className="justify-end gap-2 sm:flex">
                   <button
                     type="button"
-                    className="mt-2 btn btn-primary shrink-0 sm:mt-0 hidden"
+                    className="mt-2 btn btn-primary shrink-0 sm:mt-0"
                     onClick={() => openModal('showAddLeadForm')}>
                     <Plus className="inline-block size-4" />
                     <span className="align-baseline"> Add Lead</span>
@@ -703,7 +702,7 @@ const CrmLead: React.FC = () => {
         itemId={selectedLeadId}
         itemType={
           selectedLeadId &&
-          customersData?.customers?.find((c) => c.id === selectedLeadId)
+            customersData?.customers?.find((c) => c.id === selectedLeadId)
             ? 'customer'
             : 'lead'
         }

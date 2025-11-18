@@ -206,11 +206,53 @@ export const projectFraudTransactionRouter = createTRPCRouter({
       })
     }),
 
-  // Update fraud transaction (mainly for updating fraud detection results)
+  // Update fraud transaction
   update: protectedProcedure
     .input(
       z.object({
         id: z.string(),
+        // DATOS BÁSICOS
+        amount: z.number().optional(),
+        timestamp: z.coerce.date().optional(),
+        // DATOS DEL TARJETAHABIENTE
+        cardType: z.string().optional(),
+        cardLevel: z.string().optional(),
+        customerAge: z.number().int().optional(),
+        accountAgeDays: z.number().int().optional(),
+        customerCountry: z.string().optional(),
+        // DATOS DEL COMERCIO
+        merchantCategory: z.string().optional(),
+        merchantCountry: z.string().optional(),
+        merchantRiskLevel: z.string().optional(),
+        // COMPORTAMIENTO HISTÓRICO
+        daysSinceLastTransaction: z.number().optional(),
+        numTransactionsToday: z.number().int().optional(),
+        numTransactionsThisHour: z.number().int().optional(),
+        avgTransactionAmount30d: z.number().optional(),
+        stdTransactionAmount30d: z.number().optional(),
+        numTransactions30d: z.number().int().optional(),
+        // VELOCIDAD DE TRANSACCIONES
+        amountSpentLast24h: z.number().optional(),
+        numUniqueMerchants24h: z.number().int().optional(),
+        numCountries24h: z.number().int().optional(),
+        // INDICADORES DE RIESGO
+        internationalTransaction: z.boolean().optional(),
+        onlineTransaction: z.boolean().optional(),
+        weekendTransaction: z.boolean().optional(),
+        nightTransaction: z.boolean().optional(),
+        highRiskCountry: z.boolean().optional(),
+        firstTimeMerchant: z.boolean().optional(),
+        // PATRONES ANÓMALOS
+        amountDeviationFromAvg: z.number().optional(),
+        unusualHourForUser: z.boolean().optional(),
+        unusualMerchantCategory: z.boolean().optional(),
+        suddenLocationChange: z.boolean().optional(),
+        // AUTENTICACIÓN
+        authenticationMethod: z.string().optional(),
+        failedAttemptsToday: z.number().int().optional(),
+        cardPresent: z.boolean().optional(),
+        cvvMatch: z.boolean().optional(),
+        // RESULTADO
         isFraud: z.boolean().optional(),
         fraudProbability: z.number().optional(),
         riskScore: z.number().int().optional(),

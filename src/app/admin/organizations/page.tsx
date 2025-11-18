@@ -61,6 +61,8 @@ const organizationSchema = z.object({
   agentRrhhId: z.string().optional(),
   agentForecastingId: z.string().optional(),
   agentChatId: z.string().optional(),
+  agentAdvisorId: z.string().optional(),
+  agentLeadsId: z.string().optional(),
 })
 
 type OrganizationFormData = z.infer<typeof organizationSchema>
@@ -78,7 +80,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
   const [showAgentModal, setShowAgentModal] = useState(false)
   const [selectedAgentType, setSelectedAgentType] = useState<
-    'pqr' | 'rrhh' | 'forecasting' | 'chat' | null
+    'pqr' | 'rrhh' | 'forecasting' | 'chat' | 'advisor' | 'leads' | null
   >(null)
 
   // Check if user is SUPERADMIN
@@ -125,6 +127,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
       agentRrhhId: undefined,
       agentForecastingId: undefined,
       agentChatId: undefined,
+      agentAdvisorId: undefined,
+      agentLeadsId: undefined,
     },
   })
 
@@ -310,6 +314,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
       agentRrhhId: undefined,
       agentForecastingId: undefined,
       agentChatId: undefined,
+      agentAdvisorId: undefined,
+      agentLeadsId: undefined,
     })
     setShowModal(true)
   }
@@ -346,6 +352,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
       agentRrhhId: organization.agentRrhhId || undefined,
       agentForecastingId: organization.agentForecastingId || undefined,
       agentChatId: organization.agentChatId || undefined,
+      agentAdvisorId: organization.agentAdvisorId || undefined,
+      agentLeadsId: organization.agentLeadsId || undefined,
       administrators: existingAdmins,
     })
     setShowModal(true)
@@ -401,6 +409,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           agentRrhhId: data.agentRrhhId || null,
           agentForecastingId: data.agentForecastingId || null,
           agentChatId: data.agentChatId || null,
+          agentAdvisorId: data.agentAdvisorId || null,
+          agentLeadsId: data.agentLeadsId || null,
           administratorsToAdd:
             administratorsToAdd.length > 0 ? administratorsToAdd : undefined,
           administratorsToRemove:
@@ -418,6 +428,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           agentRrhhId: data.agentRrhhId,
           agentForecastingId: data.agentForecastingId,
           agentChatId: data.agentChatId,
+          agentAdvisorId: data.agentAdvisorId,
+          agentLeadsId: data.agentLeadsId,
           custom: true,
           administrators: data.administrators.map((admin) => ({
             firstName: admin.firstName,
@@ -749,6 +761,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       { value: 'nim-fraud', label: 'Nim Fraud' },
                       /* { value: 'api-keys', label: 'API Keys' }, */
                       { value: 'actions', label: 'Actions' },
+                      { value: 'advisor', label: 'Digital Advisor' },
+                      { value: 'leads', label: 'Leads' },
                       /*{ value: 'phone-numbers', label: 'Phone Numbers' },*/
                     ].map((page) => {
                       const allowedPages = watch('allowedPages') || []
@@ -799,7 +813,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
 
                   {(() => {
                     const allowedPages = watch('allowedPages') || []
-                    const agentPages = ['pqr', 'rrhh', 'forecasting', 'chat']
+                    const agentPages = ['pqr', 'rrhh', 'forecasting', 'chat', 'advisor', 'leads']
                     const enabledAgentPages = allowedPages.filter((page) =>
                       agentPages.includes(page)
                     )
@@ -807,7 +821,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                     if (enabledAgentPages.length === 0) {
                       return (
                         <p className="text-sm text-gray-500 italic">
-                          Enable PQR, RRHH, Forecasting, or Chat in Menu
+                          Enable PQR, RRHH, Forecasting, Digital Advisor, Leads, or Chat in Menu
                           Restrictions to assign agents
                         </p>
                       )
@@ -818,10 +832,12 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                         {enabledAgentPages.map((page) => {
                           const agentKey =
                             `agent${page.charAt(0).toUpperCase() + page.slice(1)}Id` as
-                              | 'agentPqrId'
-                              | 'agentRrhhId'
-                              | 'agentForecastingId'
-                              | 'agentChatId'
+                            | 'agentPqrId'
+                            | 'agentRrhhId'
+                            | 'agentForecastingId'
+                            | 'agentChatId'
+                            | 'agentAdvisorId'
+                            | 'agentLeadsId'
                           const selectedAgentId = watch(agentKey)
                           const selectedAgent = allAgents.find(
                             (a) => a.id === selectedAgentId
@@ -851,10 +867,12 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                                 onClick={() => {
                                   setSelectedAgentType(
                                     page as
-                                      | 'pqr'
-                                      | 'rrhh'
-                                      | 'forecasting'
-                                      | 'chat'
+                                    | 'pqr'
+                                    | 'rrhh'
+                                    | 'forecasting'
+                                    | 'chat'
+                                    | 'advisor'
+                                    | 'leads'
                                   )
                                   setShowAgentModal(true)
                                 }}
@@ -933,11 +951,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                           <input
                             type="text"
                             {...register(`administrators.${index}.firstName`)}
-                            className={`form-input ${
-                              errors.administrators?.[index]?.firstName
-                                ? 'border-red-500'
-                                : ''
-                            }`}
+                            className={`form-input ${errors.administrators?.[index]?.firstName
+                              ? 'border-red-500'
+                              : ''
+                              }`}
                             placeholder="John"
                           />
                           {errors.administrators?.[index]?.firstName && (
@@ -954,11 +971,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                           <input
                             type="text"
                             {...register(`administrators.${index}.lastName`)}
-                            className={`form-input ${
-                              errors.administrators?.[index]?.lastName
-                                ? 'border-red-500'
-                                : ''
-                            }`}
+                            className={`form-input ${errors.administrators?.[index]?.lastName
+                              ? 'border-red-500'
+                              : ''
+                              }`}
                             placeholder="Doe"
                           />
                           {errors.administrators?.[index]?.lastName && (
@@ -975,11 +991,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                           <input
                             type="text"
                             {...register(`administrators.${index}.username`)}
-                            className={`form-input ${
-                              errors.administrators?.[index]?.username
-                                ? 'border-red-500'
-                                : ''
-                            }`}
+                            className={`form-input ${errors.administrators?.[index]?.username
+                              ? 'border-red-500'
+                              : ''
+                              }`}
                             placeholder="johndoe"
                           />
                           {errors.administrators?.[index]?.username && (
@@ -996,11 +1011,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                           <input
                             type="email"
                             {...register(`administrators.${index}.email`)}
-                            className={`form-input ${
-                              errors.administrators?.[index]?.email
-                                ? 'border-red-500'
-                                : ''
-                            }`}
+                            className={`form-input ${errors.administrators?.[index]?.email
+                              ? 'border-red-500'
+                              : ''
+                              }`}
                             placeholder="john@example.com"
                           />
                           {errors.administrators?.[index]?.email && (
@@ -1017,11 +1031,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                           <input
                             type="password"
                             {...register(`administrators.${index}.password`)}
-                            className={`form-input ${
-                              errors.administrators?.[index]?.password
-                                ? 'border-red-500'
-                                : ''
-                            }`}
+                            className={`form-input ${errors.administrators?.[index]?.password
+                              ? 'border-red-500'
+                              : ''
+                              }`}
                             placeholder="••••••••"
                           />
                           {errors.administrators?.[index]?.password && (
@@ -1167,7 +1180,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       { value: 'ecommerce', label: 'Ecommerce' }, */
                       { value: 'rrhh', label: 'RRHH' },
                       /*{ value: 'orders', label: 'Orders' },
-                      { value: 'chat', label: 'CHAT' },
+                      { value: 'chat', label: 'Chat' },
                       { value: 'crm', label: 'CRM' },
                       { value: 'agents', label: 'Agents' },
                       { value: 'models', label: 'Models' }, */
@@ -1176,6 +1189,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       { value: 'nim-fraud', label: 'Nim Fraud' },
                       /* { value: 'api-keys', label: 'API Keys' }, */
                       { value: 'actions', label: 'Actions' },
+                      { value: 'advisor', label: 'Digital Advisor' },
+                      { value: 'leads', label: 'Leads' },
                       /*{ value: 'phone-numbers', label: 'Phone Numbers' },*/
                     ].map((page) => {
                       const allowedPages = watch('allowedPages') || []
@@ -1254,7 +1269,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
 
                     {(() => {
                       const allowedPages = watch('allowedPages') || []
-                      const agentPages = ['pqr', 'rrhh', 'forecasting', 'chat']
+                      const agentPages = ['pqr', 'rrhh', 'forecasting', 'chat', 'advisor', 'leads']
                       const enabledAgentPages = allowedPages.filter((page) =>
                         agentPages.includes(page)
                       )
@@ -1262,7 +1277,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       if (enabledAgentPages.length === 0) {
                         return (
                           <p className="text-sm text-gray-500 italic">
-                            Enable PQR, RRHH, Forecasting, or Chat in Menu
+                            Enable PQR, RRHH, Forecasting, Digital Advisor, Leads or Chat in Menu
                             Restrictions to assign agents
                           </p>
                         )
@@ -1273,10 +1288,12 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                           {enabledAgentPages.map((page) => {
                             const agentKey =
                               `agent${page.charAt(0).toUpperCase() + page.slice(1)}Id` as
-                                | 'agentPqrId'
-                                | 'agentRrhhId'
-                                | 'agentForecastingId'
-                                | 'agentChatId'
+                              | 'agentPqrId'
+                              | 'agentRrhhId'
+                              | 'agentForecastingId'
+                              | 'agentChatId'
+                              | 'agentAdvisorId'
+                              | 'agentLeadsId'
                             const selectedAgentId = watch(agentKey)
                             const selectedAgent = allAgents.find(
                               (a) => a.id === selectedAgentId
@@ -1306,10 +1323,12 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                                   onClick={() => {
                                     setSelectedAgentType(
                                       page as
-                                        | 'pqr'
-                                        | 'rrhh'
-                                        | 'forecasting'
-                                        | 'chat'
+                                      | 'pqr'
+                                      | 'rrhh'
+                                      | 'forecasting'
+                                      | 'chat'
+                                      | 'advisor'
+                                      | 'leads'
                                     )
                                     setShowAgentModal(true)
                                   }}
@@ -1366,11 +1385,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                               type="text"
                               {...register(`administrators.${index}.firstName`)}
                               disabled={isExisting}
-                              className={`form-input ${isExisting ? 'bg-gray-100 dark:bg-gray-700' : ''} ${
-                                errors.administrators?.[index]?.firstName
-                                  ? 'border-red-500'
-                                  : ''
-                              }`}
+                              className={`form-input ${isExisting ? 'bg-gray-100 dark:bg-gray-700' : ''} ${errors.administrators?.[index]?.firstName
+                                ? 'border-red-500'
+                                : ''
+                                }`}
                               placeholder="John"
                             />
                             {errors.administrators?.[index]?.firstName && (
@@ -1391,11 +1409,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                               type="text"
                               {...register(`administrators.${index}.lastName`)}
                               disabled={isExisting}
-                              className={`form-input ${isExisting ? 'bg-gray-100 dark:bg-gray-700' : ''} ${
-                                errors.administrators?.[index]?.lastName
-                                  ? 'border-red-500'
-                                  : ''
-                              }`}
+                              className={`form-input ${isExisting ? 'bg-gray-100 dark:bg-gray-700' : ''} ${errors.administrators?.[index]?.lastName
+                                ? 'border-red-500'
+                                : ''
+                                }`}
                               placeholder="Doe"
                             />
                             {errors.administrators?.[index]?.lastName && (
@@ -1416,11 +1433,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                               type="text"
                               {...register(`administrators.${index}.username`)}
                               disabled={isExisting}
-                              className={`form-input ${isExisting ? 'bg-gray-100 dark:bg-gray-700' : ''} ${
-                                errors.administrators?.[index]?.username
-                                  ? 'border-red-500'
-                                  : ''
-                              }`}
+                              className={`form-input ${isExisting ? 'bg-gray-100 dark:bg-gray-700' : ''} ${errors.administrators?.[index]?.username
+                                ? 'border-red-500'
+                                : ''
+                                }`}
                               placeholder="johndoe"
                             />
                             {errors.administrators?.[index]?.username && (
@@ -1441,11 +1457,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                               type="email"
                               {...register(`administrators.${index}.email`)}
                               disabled={isExisting}
-                              className={`form-input ${isExisting ? 'bg-gray-100 dark:bg-gray-700' : ''} ${
-                                errors.administrators?.[index]?.email
-                                  ? 'border-red-500'
-                                  : ''
-                              }`}
+                              className={`form-input ${isExisting ? 'bg-gray-100 dark:bg-gray-700' : ''} ${errors.administrators?.[index]?.email
+                                ? 'border-red-500'
+                                : ''
+                                }`}
                               placeholder="john@example.com"
                             />
                             {errors.administrators?.[index]?.email && (
@@ -1465,11 +1480,10 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                                 {...register(
                                   `administrators.${index}.password`
                                 )}
-                                className={`form-input ${
-                                  errors.administrators?.[index]?.password
-                                    ? 'border-red-500'
-                                    : ''
-                                }`}
+                                className={`form-input ${errors.administrators?.[index]?.password
+                                  ? 'border-red-500'
+                                  : ''
+                                  }`}
                                 placeholder="••••••"
                               />
                               {errors.administrators?.[index]?.password && (
@@ -1518,8 +1532,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                 {isUploadingLogo
                   ? 'Uploading logo...'
                   : isSubmitting ||
-                      createMutation.isPending ||
-                      updateMutation.isPending
+                    createMutation.isPending ||
+                    updateMutation.isPending
                     ? 'Saving...'
                     : isEditMode
                       ? 'Update Organization'
@@ -1543,10 +1557,12 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           if (selectedAgentType) {
             const agentKey =
               `agent${selectedAgentType.charAt(0).toUpperCase() + selectedAgentType.slice(1)}Id` as
-                | 'agentPqrId'
-                | 'agentRrhhId'
-                | 'agentForecastingId'
-                | 'agentChatId'
+              | 'agentPqrId'
+              | 'agentRrhhId'
+              | 'agentForecastingId'
+              | 'agentChatId'
+              | 'agentAdvisorId'
+              | 'agentLeadsId'
             setValue(agentKey, agentId)
           }
           setShowAgentModal(false)
@@ -1555,12 +1571,14 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
         initialSelectedId={
           selectedAgentType
             ? watch(
-                `agent${selectedAgentType.charAt(0).toUpperCase() + selectedAgentType.slice(1)}Id` as
-                  | 'agentPqrId'
-                  | 'agentRrhhId'
-                  | 'agentForecastingId'
-                  | 'agentChatId'
-              )
+              `agent${selectedAgentType.charAt(0).toUpperCase() + selectedAgentType.slice(1)}Id` as
+              | 'agentPqrId'
+              | 'agentRrhhId'
+              | 'agentForecastingId'
+              | 'agentChatId'
+              | 'agentAdvisorId'
+              | 'agentLeadsId'
+            )
             : null
         }
         title={`Select ${selectedAgentType?.toUpperCase()} Agent`}

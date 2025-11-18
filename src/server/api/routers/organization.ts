@@ -62,7 +62,7 @@ export const organizationRouter = createTRPCRouter({
     // Manually fetch agents since we removed Prisma relations to avoid cycles
     const organizationsWithAgents = await Promise.all(
       organizations.map(async (org) => {
-        const [agentPqr, agentRrhh, agentForecasting, agentChat] = await Promise.all([
+        const [agentPqr, agentRrhh, agentForecasting, agentChat, agentAdvisor, agentLeads] = await Promise.all([
           org.agentPqrId
             ? ctx.db.projectAgent.findUnique({
                 where: { id: org.agentPqrId },
@@ -87,6 +87,18 @@ export const organizationRouter = createTRPCRouter({
                 select: { id: true, name: true, isGlobal: true },
               })
             : Promise.resolve(null),
+          org.agentAdvisorId
+            ? ctx.db.projectAgent.findUnique({
+                where: { id: org.agentAdvisorId },
+                select: { id: true, name: true, isGlobal: true },
+              })
+            : Promise.resolve(null),
+          org.agentLeadsId
+            ? ctx.db.projectAgent.findUnique({
+                where: { id: org.agentLeadsId },
+                select: { id: true, name: true, isGlobal: true },
+              })
+            : Promise.resolve(null),
         ])
 
         return {
@@ -95,6 +107,8 @@ export const organizationRouter = createTRPCRouter({
           agentRrhh,
           agentForecasting,
           agentChat,
+          agentAdvisor,
+          agentLeads,
         }
       })
     )
@@ -183,6 +197,8 @@ export const organizationRouter = createTRPCRouter({
         agentRrhhId: z.string().optional(),
         agentForecastingId: z.string().optional(),
         agentChatId: z.string().optional(),
+        agentAdvisorId: z.string().optional(),
+        agentLeadsId: z.string().optional(),
         custom: z.boolean().default(true),
         administrators: z
           .array(
@@ -252,6 +268,8 @@ export const organizationRouter = createTRPCRouter({
           agentRrhhId: input.agentRrhhId,
           agentForecastingId: input.agentForecastingId,
           agentChatId: input.agentChatId,
+          agentAdvisorId: input.agentAdvisorId,
+          agentLeadsId: input.agentLeadsId,
           members: {
             create: {
               userId: ownerUser.id,
@@ -476,6 +494,8 @@ export const organizationRouter = createTRPCRouter({
         agentRrhhId: z.string().nullable().optional(),
         agentForecastingId: z.string().nullable().optional(),
         agentChatId: z.string().nullable().optional(),
+        agentAdvisorId: z.string().nullable().optional(),
+        agentLeadsId: z.string().nullable().optional(),
         administratorsToAdd: z.array(
           z.object({
             firstName: z.string(),
@@ -760,6 +780,8 @@ export const organizationRouter = createTRPCRouter({
             agentRrhhId: true,
             agentForecastingId: true,
             agentChatId: true,
+            agentAdvisorId: true,
+            agentLeadsId: true,
           },
         },
       },
