@@ -10,8 +10,10 @@ import { LAYOUT_DIRECTION } from '@src/components/constants/layout'
 import { NextPageWithLayout } from '@src/dtos'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
+import Flatpickr from 'react-flatpickr'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
+import Select from 'react-select'
 import { ToastContainer, toast } from 'react-toastify'
 import { z } from 'zod'
 
@@ -75,6 +77,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
     (state: RootState) => state.Layout
   )
   const [editTransactionId, setEditTransactionId] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 
   const methods = useForm<FraudTransactionFormData>({
     resolver: zodResolver(fraudTransactionSchema) as any,
@@ -128,6 +131,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
 
   useEffect(() => {
     if (transaction) {
+      setSelectedDate(new Date(transaction.timestamp))
       methods.reset({
         amount: transaction.amount,
         timestamp: new Date(transaction.timestamp).toISOString().slice(0, 16),
@@ -240,6 +244,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
                       type="number"
                       step="0.01"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('amount')}
                     />
                     {methods.formState.errors.amount && (
@@ -250,10 +255,22 @@ const NimFraudCreate: NextPageWithLayout = () => {
                   </div>
                   <div>
                     <label className="block mb-2 text-sm font-medium">Timestamp</label>
-                    <input
-                      type="datetime-local"
+                    <Flatpickr
                       className="form-input"
-                      {...methods.register('timestamp')}
+                      placeholder="Select transaction date and time"
+                      value={selectedDate}
+                      options={{
+                        enableTime: true,
+                        dateFormat: 'Y-m-d H:i',
+                        time_24hr: true,
+                        minuteIncrement: 1,
+                      }}
+                      onChange={(date) => {
+                        if (date.length > 0) {
+                          setSelectedDate(date[0])
+                          methods.setValue('timestamp', date[0].toISOString().slice(0, 16))
+                        }
+                      }}
                     />
                     {methods.formState.errors.timestamp && (
                       <p className="text-red-500 text-xs mt-1">
@@ -268,25 +285,42 @@ const NimFraudCreate: NextPageWithLayout = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div>
                     <label className="block mb-2 text-sm font-medium">Card Type</label>
-                    <select className="form-select" {...methods.register('cardType')}>
-                      <option value="VISA">VISA</option>
-                      <option value="MASTERCARD">MASTERCARD</option>
-                      <option value="AMEX">AMEX</option>
-                    </select>
+                    <Select
+                      value={{
+                        value: methods.watch('cardType'),
+                        label: methods.watch('cardType'),
+                      }}
+                      onChange={(option) => option && methods.setValue('cardType', option.value)}
+                      options={[
+                        { value: 'VISA', label: 'VISA' },
+                        { value: 'MASTERCARD', label: 'MASTERCARD' },
+                        { value: 'AMEX', label: 'AMEX' },
+                      ]}
+                      classNamePrefix="select"
+                    />
                   </div>
                   <div>
                     <label className="block mb-2 text-sm font-medium">Card Level</label>
-                    <select className="form-select" {...methods.register('cardLevel')}>
-                      <option value="CLASSIC">CLASSIC</option>
-                      <option value="GOLD">GOLD</option>
-                      <option value="PLATINUM">PLATINUM</option>
-                    </select>
+                    <Select
+                      value={{
+                        value: methods.watch('cardLevel'),
+                        label: methods.watch('cardLevel'),
+                      }}
+                      onChange={(option) => option && methods.setValue('cardLevel', option.value)}
+                      options={[
+                        { value: 'CLASSIC', label: 'CLASSIC' },
+                        { value: 'GOLD', label: 'GOLD' },
+                        { value: 'PLATINUM', label: 'PLATINUM' },
+                      ]}
+                      classNamePrefix="select"
+                    />
                   </div>
                   <div>
                     <label className="block mb-2 text-sm font-medium">Customer Age</label>
                     <input
                       type="number"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('customerAge')}
                     />
                   </div>
@@ -295,6 +329,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
                     <input
                       type="number"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('accountAgeDays')}
                     />
                   </div>
@@ -313,12 +348,22 @@ const NimFraudCreate: NextPageWithLayout = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div>
                     <label className="block mb-2 text-sm font-medium">Merchant Category</label>
-                    <select className="form-select" {...methods.register('merchantCategory')}>
-                      <option value="grocery_store">Grocery Store</option>
-                      <option value="gas_station">Gas Station</option>
-                      <option value="online">Online</option>
-                      <option value="restaurant">Restaurant</option>
-                    </select>
+                    <Select
+                      value={{
+                        value: methods.watch('merchantCategory'),
+                        label: methods.watch('merchantCategory') === 'grocery_store' ? 'Grocery Store' :
+                               methods.watch('merchantCategory') === 'gas_station' ? 'Gas Station' :
+                               methods.watch('merchantCategory') === 'online' ? 'Online' : 'Restaurant',
+                      }}
+                      onChange={(option) => option && methods.setValue('merchantCategory', option.value)}
+                      options={[
+                        { value: 'grocery_store', label: 'Grocery Store' },
+                        { value: 'gas_station', label: 'Gas Station' },
+                        { value: 'online', label: 'Online' },
+                        { value: 'restaurant', label: 'Restaurant' },
+                      ]}
+                      classNamePrefix="select"
+                    />
                   </div>
                   <div>
                     <label className="block mb-2 text-sm font-medium">Merchant Country</label>
@@ -330,11 +375,19 @@ const NimFraudCreate: NextPageWithLayout = () => {
                   </div>
                   <div>
                     <label className="block mb-2 text-sm font-medium">Merchant Risk Level</label>
-                    <select className="form-select" {...methods.register('merchantRiskLevel')}>
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
+                    <Select
+                      value={{
+                        value: methods.watch('merchantRiskLevel'),
+                        label: methods.watch('merchantRiskLevel').charAt(0).toUpperCase() + methods.watch('merchantRiskLevel').slice(1),
+                      }}
+                      onChange={(option) => option && methods.setValue('merchantRiskLevel', option.value as 'low' | 'medium' | 'high')}
+                      options={[
+                        { value: 'low', label: 'Low' },
+                        { value: 'medium', label: 'Medium' },
+                        { value: 'high', label: 'High' },
+                      ]}
+                      classNamePrefix="select"
+                    />
                   </div>
                 </div>
 
@@ -347,6 +400,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
                       type="number"
                       step="0.1"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('daysSinceLastTransaction')}
                     />
                   </div>
@@ -355,6 +409,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
                     <input
                       type="number"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('numTransactionsToday')}
                     />
                   </div>
@@ -363,6 +418,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
                     <input
                       type="number"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('numTransactionsThisHour')}
                     />
                   </div>
@@ -372,6 +428,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
                       type="number"
                       step="0.01"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('avgTransactionAmount30d')}
                     />
                   </div>
@@ -381,6 +438,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
                       type="number"
                       step="0.01"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('stdTransactionAmount30d')}
                     />
                   </div>
@@ -389,6 +447,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
                     <input
                       type="number"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('numTransactions30d')}
                     />
                   </div>
@@ -403,6 +462,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
                       type="number"
                       step="0.01"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('amountSpentLast24h')}
                     />
                   </div>
@@ -411,6 +471,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
                     <input
                       type="number"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('numUniqueMerchants24h')}
                     />
                   </div>
@@ -419,6 +480,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
                     <input
                       type="number"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('numCountries24h')}
                     />
                   </div>
@@ -486,6 +548,7 @@ const NimFraudCreate: NextPageWithLayout = () => {
                       type="number"
                       step="0.1"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('amountDeviationFromAvg')}
                     />
                   </div>
@@ -520,18 +583,27 @@ const NimFraudCreate: NextPageWithLayout = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div>
                     <label className="block mb-2 text-sm font-medium">Authentication Method</label>
-                    <select className="form-select" {...methods.register('authenticationMethod')}>
-                      <option value="NONE">NONE</option>
-                      <option value="3DS">3DS</option>
-                      <option value="PIN">PIN</option>
-                      <option value="BIOMETRIC">BIOMETRIC</option>
-                    </select>
+                    <Select
+                      value={{
+                        value: methods.watch('authenticationMethod'),
+                        label: methods.watch('authenticationMethod'),
+                      }}
+                      onChange={(option) => option && methods.setValue('authenticationMethod', option.value)}
+                      options={[
+                        { value: 'NONE', label: 'NONE' },
+                        { value: '3DS', label: '3DS' },
+                        { value: 'PIN', label: 'PIN' },
+                        { value: 'BIOMETRIC', label: 'BIOMETRIC' },
+                      ]}
+                      classNamePrefix="select"
+                    />
                   </div>
                   <div>
                     <label className="block mb-2 text-sm font-medium">Failed Attempts Today</label>
                     <input
                       type="number"
                       className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
                       {...methods.register('failedAttemptsToday')}
                     />
                   </div>
