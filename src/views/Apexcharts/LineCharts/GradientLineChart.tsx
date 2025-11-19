@@ -49,12 +49,15 @@ const GradientLineChart = ({
 
   // Process multiple series - combine all unique timestamps
   const { categories, series } = React.useMemo(() => {
+    console.log('🔍 GradientLineChart - seriesData received:', seriesData)
+
     if (seriesData.length === 0) return { categories: [], series: [] }
 
-    // Helper function to normalize timestamp to date only (ignore time)
+    // Helper function to normalize timestamp - keep full timestamp for proper grouping
     const normalizeTimestamp = (ts: string): string => {
       const date = new Date(ts)
-      return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}/${date.getFullYear()}`
+      // Return full ISO string to preserve hours/minutes/seconds
+      return date.toISOString()
     }
 
     // Collect all unique normalized timestamps from all series
@@ -103,11 +106,16 @@ const GradientLineChart = ({
         return entry.values.get(seriesIndex) ?? null
       })
 
+      console.log(`📊 Series "${s.name}" data:`, alignedData)
+
       return {
         name: s.name,
         data: alignedData,
       }
     })
+
+    console.log('✅ Final processed series:', processedSeries)
+    console.log('📅 Final categories:', categories)
 
     return { categories, series: processedSeries }
   }, [seriesData])
@@ -202,8 +210,7 @@ const GradientLineChart = ({
         },
       },
       yaxis: {
-        min: seriesData.length > 0 ? undefined : 0,
-        max: seriesData.length > 0 ? undefined : 10,
+        min: 0,
         labels: {
           formatter: (value: number) => {
             if (value === null || value === undefined) return ''
