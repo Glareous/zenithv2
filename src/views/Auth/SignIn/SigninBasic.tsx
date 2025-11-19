@@ -236,7 +236,7 @@ export default function LoginPage() {
                   />
                 </Link>
               </div>
-              <h4 className="mb-2 font-bold leading-relaxed text-center text-transparent drop-shadow-lg ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-primary-500 vie-purple-500 to-pink-500 bg-clip-text">
+              <h4 className="mb-2 font-bold leading-relaxed text-center text-blue-600">
                 {invitationProject
                   ? `Join "${invitationProject}"`
                   : 'Welcome Back!'}
@@ -250,7 +250,7 @@ export default function LoginPage() {
                   </p>
                 </div>
               )}
-              <p className="mb-5 text-center text-gray-500 dark:text-dark-500">
+              {/* <p className="mb-5 text-center text-gray-500 dark:text-dark-500">
                 Don&apos;t have an account?{' '}
                 <Link
                   href={
@@ -261,7 +261,7 @@ export default function LoginPage() {
                   className="font-medium link link-primary">
                   Sign Up
                 </Link>
-              </p>
+              </p> */}
               <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="grid grid-cols-12 gap-5 mb-5 items-center">
                   <div className="col-span-12">
@@ -325,11 +325,11 @@ export default function LoginPage() {
                           Remember me
                         </label>
                       </div>
-                      <Link
+                      {/* <Link
                         href="/auth/forgot-password-basic"
                         className="block text-sm font-medium underline transition duration-300 ease-linear ltr:text-right rtl:text-left shrink-0 text-primary-500 hover:text-primary-600">
                         Forgot Password?
-                      </Link>
+                      </Link> */}
                     </div>
                   </div>
                   <div className="col-span-12">
@@ -343,13 +343,13 @@ export default function LoginPage() {
                 </div>
               </form>
 
-              <div className="relative my-5 text-center text-gray-500 dark:text-dark-500 before:absolute before:border-gray-200 dark:before:border-dark-800 before:border-dashed before:w-full ltr:before:left-0 rtl:before:right-0 before:top-2.5 before:border-b">
+              {/* <div className="relative my-5 text-center text-gray-500 dark:text-dark-500 before:absolute before:border-gray-200 dark:before:border-dark-800 before:border-dashed before:w-full ltr:before:left-0 rtl:before:right-0 before:top-2.5 before:border-b">
                 <p className="relative inline-block px-2 bg-white dark:bg-dark-900">
                   OR
                 </p>
-              </div>
+              </div> */}
 
-              <div className="flex flex-col gap-2">
+              {/* <div className="flex flex-col gap-2">
                 <button
                   type="button"
                   onClick={() => handleOAuthSignIn('discord')}
@@ -360,7 +360,7 @@ export default function LoginPage() {
                     ? 'Signing in...'
                     : 'Sign In Via Discord'}
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

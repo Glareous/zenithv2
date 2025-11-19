@@ -213,14 +213,14 @@ export default function SigninBasicWithSlug() {
                   </>
                 )}
               </div>
-              <h4 className="mb-2 font-bold leading-relaxed text-center text-transparent drop-shadow-lg ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-primary-500 vie-purple-500 to-pink-500 bg-clip-text">
+              <h4 className="mb-2 font-bold leading-relaxed text-center text-blue-500 drop-shadow-lg">
                 {invitationProject
                   ? `Join "${invitationProject}"`
                   : organization
                     ? `Welcome to ${organization.name}`
                     : 'Welcome Back!'}
               </h4>
-              {invitationProject && (
+              {/* {invitationProject && (
                 <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                   <p className="text-sm text-blue-800 dark:text-blue-200 text-center">
                     You&apos;ve been invited to join the{' '}
@@ -228,7 +228,7 @@ export default function SigninBasicWithSlug() {
                     accept the invitation.
                   </p>
                 </div>
-              )}
+              )} */}
               {organization?.description && (
                 <p className="mb-8 text-sm text-center text-gray-600 dark:text-gray-400">
                   {organization.description}
@@ -297,11 +297,11 @@ export default function SigninBasicWithSlug() {
                           Remember me
                         </label>
                       </div>
-                      <Link
+                      {/* <Link
                         href="/auth/forgot-password-basic"
                         className="block text-sm font-medium underline transition duration-300 ease-linear ltr:text-right rtl:text-left shrink-0 text-primary-500 hover:text-primary-600">
                         Forgot Password?
-                      </Link>
+                      </Link> */}
                     </div>
                   </div>
                   <div className="col-span-12">
@@ -315,13 +315,13 @@ export default function SigninBasicWithSlug() {
                 </div>
               </form>
 
-              <div className="mt-6 text-center">
+              {/* <div className="mt-6 text-center">
                 <Link
                   href="/auth/signin-basic"
                   className="text-sm text-gray-600 hover:text-primary-500 dark:text-gray-400">
                   ← Back to standard login
                 </Link>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
