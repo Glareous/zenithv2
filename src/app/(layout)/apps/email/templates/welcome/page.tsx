@@ -16,7 +16,7 @@ const EmailWelcome: NextPageWithLayout = () => {
         <div className="max-w-[550px] mx-auto border border-[#e5e7eb] rounded-md bg-white">
           <div className="text-center p-8 bg-gradient-to-tr from-purple-400 via-pink-300 to-emerald-300 rounded-t-md">
             <h4 className="text-white text-[22px] mb-2">
-              Welcome to AgenticWeb
+              Welcome to Zenith
             </h4>
             <p className="text-white/80 mb-4 text-[15px]">
               Payroll, benefits, taxes & sustainability for your global team.
@@ -28,8 +28,8 @@ const EmailWelcome: NextPageWithLayout = () => {
               The Admin & Dashboards Templates use globally
             </h6>
             <p className="text-[#6b7280] text-[15px] mb-4">
-              AgenticWeb is a powerful admin dashboard template built with
-              Tailwind CSS. AgenticWeb comes with dozens of functional designs
+              Zenith is a powerful admin dashboard template built with
+              Tailwind CSS. Zenith comes with dozens of functional designs
               to help you get started quickly. With a wide range of beautiful
               and a full-screen layout, it&apos;s a perfect fit for admin
               dashboards, CRM, CMS panels & etc.
@@ -49,7 +49,7 @@ const EmailWelcome: NextPageWithLayout = () => {
         <div className="max-w-[550px] mx-auto border border-[#1d293d] rounded-md bg-[#020618]">
           <div className="text-center p-8 bg-gradient-to-tr from-purple-400 via-pink-300 to-emerald-300 rounded-t-md">
             <h4 className="text-white text-[22px] mb-2">
-              Welcome to AgenticWeb
+              Welcome to Zenith
             </h4>
             <p className="text-white/80 mb-4 text-[15px]">
               Payroll, benefits, taxes & sustainability for your global team.
@@ -61,8 +61,8 @@ const EmailWelcome: NextPageWithLayout = () => {
               The Admin & Dashboards Templates use globally
             </h6>
             <p className="text-[#62748e] text-[15px] mb-4">
-              AgenticWeb is a powerful admin dashboard template built with
-              Tailwind CSS. AgenticWeb comes with dozens of functional designs
+              Zenith is a powerful admin dashboard template built with
+              Tailwind CSS. Zenith comes with dozens of functional designs
               to help you get started quickly. With a wide range of beautiful
               and a full-screen layout, it&apos;s a perfect fit for admin
               dashboards, CRM, CMS panels & etc.

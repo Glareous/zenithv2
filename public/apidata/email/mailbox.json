@@ -4,7 +4,7 @@
         "sender": "Armand Noto",
         "email": "armand@example.com",
         "date": "15 June, 01:22AM",
-        "subject": "Report - AgenticWeb Projects",
+        "subject": "Report - Zenith Projects",
         "message": "Please see the project status in the pdf I attached. The project looks good, and we are confident that we will complete it on time.",
         "avatarImage": "/assets/images/avatar/user-11.png",
         "badges": [
@@ -20,7 +20,7 @@
                 "email": "lena@example.com",
                 "avatarImage": "/assets/images/avatar/user-18.png",
                 "date": "15 June, 02:00AM",
-                "subject": "Re: Report - AgenticWeb Projects",
+                "subject": "Re: Report - Zenith Projects",
                 "message": "Thanks, Armand. The status looks good. Let's discuss the next steps in our upcoming meeting."
             }
         ]
@@ -272,7 +272,7 @@
                 "email": "nathan@example.com",
                 "avatarImage": "/assets/images/avatar/user-18.png",
                 "date": "13 July, 10:40AM",
-                "subject": "Re: Weekly Update on AgenticWeb Admin & Dashboard Projects",
+                "subject": "Re: Weekly Update on Zenith Admin & Dashboard Projects",
                 "message": "Thanks, Sophie! I’ve marked my calendar."
             }
         ]

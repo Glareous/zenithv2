@@ -109,7 +109,7 @@ const HeroBanner: React.FC = () => {
                     </g>
                   </g>
                 </svg>
-                <span className="relative">AgenticWeb</span>
+                <span className="relative">Zenith</span>
               </span>
               Education?
             </h1>

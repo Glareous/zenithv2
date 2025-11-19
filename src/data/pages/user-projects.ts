@@ -26,7 +26,7 @@ const userProjectsData = [
     avatars: [user2, user3],
   },
   {
-    title: 'AgenticWeb - Admin & Dashboards Templates',
+    title: 'Zenith - Admin & Dashboards Templates',
     link: '#!',
     description:
       'An admin dashboard template is a powerful tool that streamlines the process of building a robust and user-friendly admin panel for web applications. Image by ThemeMakker. It provides a pre-designed interface with various components and features to manage and monitor the backend of an application.',

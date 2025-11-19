@@ -8,7 +8,7 @@ import brands12 from '@assets/images/brands/img-13.png'
 const ActiveProjectData = [
   {
     image: brands2,
-    projectName: 'AgenticWeb Admin & Dashboards',
+    projectName: 'Zenith Admin & Dashboards',
     projectType: 'Project Management',
     process: 'w-[64%] text-white progress-bar-wrap bg-green-500',
     Percent: '64%',

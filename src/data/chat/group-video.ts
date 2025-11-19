@@ -54,7 +54,7 @@ const videoGroupChat = [
     roomId: 3,
     avatar: '/assets/images/avatar/user-4.png',
     name: 'Michaela Sutton',
-    message: 'I think this SRBThemes will provide us with some great insights.',
+    message: 'I think this Cognitiva IA will provide us with some great insights.',
     time: '02:14',
   },
   {

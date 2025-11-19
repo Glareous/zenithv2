@@ -162,7 +162,7 @@ const UserProfileOverView: React.FC = () => {
                 <h6 className="font-medium">
                   <i className="ri-twitter-line text-[20px]"></i>
                   <span className="align-middle whitespace-nowrap">
-                    SRBThemes
+                    Cognitiva IA
                   </span>
                 </h6>
               </div>

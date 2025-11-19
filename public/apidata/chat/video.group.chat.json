@@ -1,13 +1,14 @@
 [
-    {   
+    {
         "userId": 1,
         "roomId": 1,
         "avatar": "/assets/images/avatar/user-4.png",
         "name": "Michaela Sutton",
-        "message": "I think this SRBThemes will provide us with some great insights.",
+        "message": "I think this Cognitiva IA will provide us with some great insights.",
         "time": "02:14"
     },
-    {   "userId": 2,
+    {
+        "userId": 2,
         "roomId": 1,
         "avatar": "/assets/images/avatar/user-12.png",
         "name": "John Powers",
@@ -22,7 +23,7 @@
         "message": "It's all clear, no worries😊",
         "time": "04:32"
     },
-    {   
+    {
         "userId": 4,
         "roomId": 1,
         "avatar": "/assets/images/avatar/user-15.png",
@@ -30,7 +31,7 @@
         "message": "Great tips thank you!",
         "time": "08:47"
     },
-    {   
+    {
         "userId": 5,
         "roomId": 1,
         "avatar": "/assets/images/avatar/user-17.png",

@@ -2,7 +2,7 @@ const userMailRecords = [
   {
     id: 1,
     image: '/assets/images/brands/img-05.png',
-    name: 'AgenticWeb',
+    name: 'Zenith',
     email: 'shopia@domiex.com',
   },
   {

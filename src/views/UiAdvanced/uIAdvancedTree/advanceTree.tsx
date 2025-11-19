@@ -10,7 +10,7 @@ interface Folder {
 
 const fileTreeData: Folder[] = [
   {
-    title: 'AgenticWeb-Next Folders',
+    title: 'Zenith-Next Folders',
     children: [
       {
         title: 'dist/',
@@ -139,13 +139,12 @@ const FolderTree: React.FC<FolderTreeProps> = ({ levels }) => {
           className="block px-5 py-1 dark:text-dark-100 cursor-pointer"
           onClick={obj.children ? () => toggleLevel(obj.title) : undefined}>
           <i
-            className={`icon ${
-              obj.children
+            className={`icon ${obj.children
                 ? isOpen
                   ? 'ri-folder-open-line text-yellow-500 mr-1'
                   : 'ri-folder-3-line text-yellow-500 mr-1'
                 : 'ri-file-line text-gray-500 dark:text-dark-500 mr-1'
-            }`}></i>
+              }`}></i>
           {obj.title}
         </div>
         {obj.children && isOpen && (

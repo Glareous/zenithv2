@@ -17,7 +17,7 @@ const AboutUs: React.FC = () => {
             <div className="col-span-12 md:col-span-6 2xl:col-span-4 2xl:col-start-2">
               <div className="relative before:absolute before:inset-0 before:bg-orange-500/10 before:backdrop-blur-lg before:rounded-md before:top-20 thumbnail">
                 <span className="absolute text-2xl font-bold tracking-wide uppercase -rotate-90 text-orange-500/30 -left-3 bottom-14">
-                  AgenticWeb
+                  Zenith
                 </span>
                 <Image
                   src={image5}

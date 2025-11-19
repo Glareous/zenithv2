@@ -62,7 +62,7 @@ const DealOpen: NextPageWithLayout = () => {
                         Closing Date: 18 Jul, 2024
                       </p>
                       <h6>
-                        <Link href="#!">AgenticWeb Admin Role</Link>
+                        <Link href="#!">Zenith Admin Role</Link>
                       </h6>
                       <div className="flex items-center gap-2 mt-3">
                         <Image

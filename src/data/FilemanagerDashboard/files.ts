@@ -20,7 +20,7 @@ const Files = [
   },
   {
     image: video,
-    filename: 'AgenticWeb Intro.mp4',
+    filename: 'Zenith Intro.mp4',
     date: '05 July, 2024',
     size: '44 MB',
   },

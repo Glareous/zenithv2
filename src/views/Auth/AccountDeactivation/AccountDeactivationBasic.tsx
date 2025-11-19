@@ -39,7 +39,7 @@ const AccountDeactivationBasic = () => {
                   Account Deactivation
                 </h4>
                 <p className="mb-6 text-center text-gray-500">
-                  AgenticWeb Security and Privacy
+                  Zenith Security and Privacy
                 </p>
                 <div className="flex gap-3 mb-3">
                   <div className="shrink-0">

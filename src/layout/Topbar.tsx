@@ -127,11 +127,10 @@ const Topbar: React.FC<TopBarProps> = ({
   return (
     <React.Fragment>
       <div
-        className={`main-topbar group/topbar navbar ${
-          scrolled
+        className={`main-topbar group/topbar navbar ${scrolled
             ? 'group-data-[layout=boxed]:top-0 group-data-[layout=semibox]:top-0 nav-sticky'
             : ''
-        }`}>
+          }`}>
         <div className="main-topbar-wrapper group-data-[nav-type=pattern]:!border-primary-400 group-data-[nav-type=pattern]:group-[&.nav-sticky]/topbar:!bg-primary-500 group-data-[nav-type=pattern]:group-[&.nav-sticky]/topbar:!border-primary-400">
           <div className="flex items-center w-full ltr:pr-4 rtl:pl-4">
             {/* Logo */}
@@ -172,11 +171,10 @@ const Topbar: React.FC<TopBarProps> = ({
 
               <button
                 onClick={() => !disableToggle && toggleSidebar()}
-                className={`sidebar-toggle group-data-[layout=horizontal]:lg:hidden ${
-                  disableToggle
+                className={`sidebar-toggle group-data-[layout=horizontal]:lg:hidden ${disableToggle
                     ? 'opacity-50 cursor-not-allowed'
                     : 'cursor-pointer'
-                }`}
+                  }`}
                 title={
                   disableToggle
                     ? 'Toggle disabled in agent view'
@@ -193,7 +191,7 @@ const Topbar: React.FC<TopBarProps> = ({
               <input
                 type="search"
                 className="border-0 w-72 ltr:pl-8 rtl:pr-8 form-input focus:outline-hidden group-data-[nav-type=pattern]:bg-transparent group-data-[nav-type=pattern]:placeholder:text-white/50 group-data-[nav-type=pattern]:text-white"
-                placeholder={`Search for ${organization?.name || 'AgenticWeb'}`}
+                placeholder={`Search for ${organization?.name || 'Zenith'}`}
                 value={searchText}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   searchMenu(e.target.value)
@@ -226,8 +224,8 @@ const Topbar: React.FC<TopBarProps> = ({
                   }
                 }}>
                 {layoutMode === LAYOUT_MODE_TYPES.LIGHT ||
-                layoutMode === LAYOUT_MODE_TYPES.DEFAULT ||
-                layoutMode === LAYOUT_MODE_TYPES.BLACK_WHITE ? (
+                  layoutMode === LAYOUT_MODE_TYPES.DEFAULT ||
+                  layoutMode === LAYOUT_MODE_TYPES.BLACK_WHITE ? (
                   <Moon className="size-4" />
                 ) : (
                   <Sun className={'size-4 '} />
@@ -288,7 +286,7 @@ const Topbar: React.FC<TopBarProps> = ({
                           <div className="grow">
                             <p className="mb-0.5 text-sm">
                               <span className="font-medium">Donna Berlin</span>{' '}
-                              wants to edit AgenticWeb Admin & dashboards
+                              wants to edit Zenith Admin & dashboards
                             </p>
                             <p className="text-xs text-gray-500 dark:text-dark-500">
                               5 min ago

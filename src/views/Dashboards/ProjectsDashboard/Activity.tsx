@@ -115,7 +115,7 @@ const Activity: NextPageWithLayout = () => {
                     className="size-9 shrink-0"
                   />
                   <div className="grow">
-                    <h6 className="mb-1">AgenticWeb Figma File</h6>
+                    <h6 className="mb-1">Zenith Figma File</h6>
                     <p className="text-xs text-gray-500">21 MB</p>
                   </div>
                 </div>

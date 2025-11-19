@@ -1,7 +1,7 @@
 const DefaultInvoice = {
   id: 1,
   invoiceId: 'PEI-15485',
-  companyName: 'SRBThemes',
+  companyName: 'Cognitiva IA',
   companyEmail: 'support@example.com',
   companyPhoneNumber: '+(021) 1452 023 021',
   clientImage: '/assets/images/avatar/user-1.png',

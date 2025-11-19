@@ -13,9 +13,9 @@ const Footer: React.FC = () => {
           <div className="flex flex-wrap justify-between gap-5">
             <div>
               <p className="text-gray-500 dark:text-muted-invoice">
-                &copy; <span>{year}</span> AgenticWeb. Crafted by
+                &copy; <span>{year}</span> Zenith. Crafted by
                 <Link href="#!" className="font-semibold">
-                  SRBThemes
+                  Cognitiva IA
                 </Link>
               </p>
             </div>

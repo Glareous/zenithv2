@@ -74,7 +74,7 @@ const LoadingButtons = () => {
             <button
               onClick={handleClick2}
               className="btn btn-purple btn-icon-text">
-              {!isActive2 ? 'Launching' : 'Welcome to AgenticWeb 😍'}
+              {!isActive2 ? 'Launching' : 'Welcome to Zenith 😍'}
               {loadingButton2 && (
                 <svg
                   className="text-white size-4 animate-spin"

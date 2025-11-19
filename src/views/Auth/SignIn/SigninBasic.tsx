@@ -223,7 +223,7 @@ export default function LoginPage() {
                   <Image
                     src={LogoMain}
                     alt="LogoMain"
-                    className="h-8 mx-auto dark:hidden"
+                    className="h-16 mx-auto dark:hidden"
                     width={175}
                     height={32}
                   />

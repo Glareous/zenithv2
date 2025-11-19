@@ -64,7 +64,7 @@ const SigninBasic: React.FC = () => {
 
     // If either the admin or user credentials are correct
     showAlert(
-      "You've successfully signed in to AgenticWeb!",
+      "You've successfully signed in to Zenith!",
       'bg-green-100 text-green-500'
     )
 

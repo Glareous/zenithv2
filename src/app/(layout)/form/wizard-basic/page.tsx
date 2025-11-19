@@ -346,17 +346,15 @@ const WizardBasic: NextPageWithLayout = () => {
                                       setTogglePassword(!togglePassword)
                                     }>
                                     <svg
-                                      className={`text-gray-500 fill-current size-6 dark:text-dark-500 ${
-                                        !togglePassword ? 'block' : 'hidden'
-                                      }`}
+                                      className={`text-gray-500 fill-current size-6 dark:text-dark-500 ${!togglePassword ? 'block' : 'hidden'
+                                        }`}
                                       xmlns="http://www.w3.org/2000/svg"
                                       viewBox="0 0 24 24">
                                       <path d="M12 19c.946 0 1.81-.103 2.598-.281l-1.757-1.757C12.568 16.983 12.291 17 12 17c-5.351 0-7.424-3.846-7.926-5 .204-.47.674-1.381 1.508-2.297L4.184 8.305c-1.538 1.667-2.121 3.346-2.132 3.379-.069.205-.069.428 0 .633C2.073 12.383 4.367 19 12 19zM12 5c-1.837 0-3.346.396-4.604.981L3.707 2.293 2.293 3.707l18 18 1.414-1.414-3.319-3.319c2.614-1.951 3.547-4.615 3.561-4.657.069-.205.069-.428 0-.633C21.927 11.617 19.633 5 12 5zM16.972 15.558l-2.28-2.28C14.882 12.888 15 12.459 15 12c0-1.641-1.359-3-3-3-.459 0-.888.118-1.277.309L8.915 7.501C9.796 7.193 10.814 7 12 7c5.351 0 7.424 3.846 7.926 5C19.624 12.692 18.76 14.342 16.972 15.558z" />
                                     </svg>
                                     <svg
-                                      className={`text-gray-500 fill-current size-6 dark:text-dark-500 ${
-                                        togglePassword ? 'block' : 'hidden'
-                                      }`}
+                                      className={`text-gray-500 fill-current size-6 dark:text-dark-500 ${togglePassword ? 'block' : 'hidden'
+                                        }`}
                                       xmlns="http://www.w3.org/2000/svg"
                                       viewBox="0 0 24 24">
                                       <path d="M12,9c-1.642,0-3,1.359-3,3c0,1.642,1.358,3,3,3c1.641,0,3-1.358,3-3C15,10.359,13.641,9,12,9z" />
@@ -367,31 +365,28 @@ const WizardBasic: NextPageWithLayout = () => {
                                 <div className="flex items-center h-3 mt-4">
                                   <div className="flex justify-between w-2/3 h-2">
                                     <div
-                                      className={`w-1/3 h-2 rounded-full ltr:mr-1 rtl:ml-1 dark:bg-dark-800 ${
-                                        passwordStrengthText === 'Too weak' ||
-                                        passwordStrengthText ===
+                                      className={`w-1/3 h-2 rounded-full ltr:mr-1 rtl:ml-1 dark:bg-dark-800 ${passwordStrengthText === 'Too weak' ||
+                                          passwordStrengthText ===
                                           'Could be stronger' ||
-                                        passwordStrengthText ===
+                                          passwordStrengthText ===
                                           'Strong password'
                                           ? 'bg-red-400 dark:bg-red-400'
                                           : 'bg-gray-300'
-                                      }`}></div>
+                                        }`}></div>
                                     <div
-                                      className={`w-1/3 h-2 rounded-full ltr:mr-1 rtl:ml-1 dark:bg-dark-800 ${
-                                        passwordStrengthText ===
+                                      className={`w-1/3 h-2 rounded-full ltr:mr-1 rtl:ml-1 dark:bg-dark-800 ${passwordStrengthText ===
                                           'Could be stronger' ||
-                                        passwordStrengthText ===
+                                          passwordStrengthText ===
                                           'Strong password'
                                           ? 'bg-orange-400 dark:bg-orange-400'
                                           : 'bg-gray-300'
-                                      }`}></div>
+                                        }`}></div>
                                     <div
-                                      className={`w-1/3 h-2 rounded-full dark:bg-dark-800 ${
-                                        passwordStrengthText ===
-                                        'Strong password'
+                                      className={`w-1/3 h-2 rounded-full dark:bg-dark-800 ${passwordStrengthText ===
+                                          'Strong password'
                                           ? 'bg-green-400 dark:bg-green-400'
                                           : 'bg-gray-300'
-                                      }`}></div>
+                                        }`}></div>
                                   </div>
                                   <div className="text-sm font-medium leading-none text-gray-500 ltr:ml-3 rtl:mr-3 dark:text-dark-500">
                                     {passwordStrengthText}
@@ -400,7 +395,7 @@ const WizardBasic: NextPageWithLayout = () => {
                                 <p className="mt-5 text-gray-500 dark:text-dark-500">
                                   Exploration for a password strength meter by
                                   <Link href="#!" className="text-primary-500">
-                                    SRBThemes
+                                    Cognitiva IA
                                   </Link>
                                   .
                                 </p>

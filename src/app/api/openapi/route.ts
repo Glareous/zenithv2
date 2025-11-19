@@ -8,8 +8,8 @@ export async function GET() {
     apiContract,
     {
       info: {
-        title: 'AgenticWeb API',
-        description: `REST API for AgenticWeb platform
+        title: 'Zenith API',
+        description: `REST API for Zenith platform
 
 ## Authentication & Authorization
 

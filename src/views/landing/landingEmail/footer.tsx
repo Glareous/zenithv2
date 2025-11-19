@@ -175,11 +175,11 @@ const Footer: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="py-6 text-gray-500 dark:text-dark-500 text-16">
             <p>
-              &copy; {year} AgenticWeb. Crafted & Designed by
+              &copy; {year} Zenith. Crafted & Designed by
               <Link
                 href="#"
                 className="ml-1 font-medium text-gray-200 dark:text-dark-200 link">
-                SRBThemes
+                Cognitiva IA
               </Link>
             </p>
           </div>

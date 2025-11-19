@@ -12,7 +12,7 @@ const typeOptionsData: TypeOptionsDataRecord[] = [
 
 const contributorOptionsData: TypeOptionsDataRecord[] = [
   { id: 'contributorCheckboxAll', label: 'All Select' },
-  { id: 'contributorCheckbox1', label: 'SRBThemes' },
+  { id: 'contributorCheckbox1', label: 'Cognitiva IA' },
   { id: 'contributorCheckbox2', label: 'Thomas Hayes' },
 ]
 

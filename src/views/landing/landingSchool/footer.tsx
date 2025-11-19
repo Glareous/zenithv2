@@ -160,9 +160,9 @@ const Footer: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="py-6 text-center text-gray-500 border-t border-gray-200 border-dashed dark:text-dark-500 dark:border-dark-800 text-16">
             <p>
-              &copy; <span>{currentYear}</span> AgenticWeb. Crafted & Design by
+              &copy; <span>{currentYear}</span> Zenith. Crafted & Design by
               <Link href="#!" className="ml-1 font-semibold link link-orange">
-                SRBThemes
+                Cognitiva IA
               </Link>
             </p>
           </div>

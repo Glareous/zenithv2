@@ -116,7 +116,7 @@ const Favorites: NextPageWithLayout = () => {
             <div className="flex items-center gap-3 p-3 bg-purple-100 border-purple-200 dark:border-purple-500/20 card dark:bg-purple-500/15">
               <div className="grow">
                 <h6 className="mb-1">
-                  <Link href="#!">AgenticWeb Project</Link>
+                  <Link href="#!">Zenith Project</Link>
                 </h6>
                 <p className="text-sm text-gray-500 dark:text-dark-500">
                   1479 Files

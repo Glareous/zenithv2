@@ -4,10 +4,14 @@
     "sender": "Armand Noto",
     "email": "armand@example.com",
     "date": "15 June, 01:22AM",
-    "subject": "Report - AgenticWeb Projects",
+    "subject": "Report - Zenith Projects",
     "message": "Please see the project status in the pdf I attached. The project looks good, and we are confident that we will complete it on time.",
     "avatarImage": "/assets/images/avatar/user-11.png",
-    "badges": ["Inbox", "Team Meetings", "Developers"],
+    "badges": [
+      "Inbox",
+      "Team Meetings",
+      "Developers"
+    ],
     "type": "drafts",
     "replies": [
       {
@@ -16,7 +20,7 @@
         "email": "lena@example.com",
         "avatarImage": "/assets/images/avatar/user-18.png",
         "date": "15 June, 02:00AM",
-        "subject": "Re: Report - AgenticWeb Projects",
+        "subject": "Re: Report - Zenith Projects",
         "message": "Thanks, Armand. The status looks good. Let's discuss the next steps in our upcoming meeting."
       }
     ]
@@ -29,7 +33,10 @@
     "subject": "Happy New Years, Shopia",
     "message": "Thank you shopia for always believing in our subscriptions, as a I give you a voucher that you can use in our application.",
     "avatarImage": "/assets/images/avatar/user-13.png",
-    "badges": ["Developers", "Inbox"],
+    "badges": [
+      "Developers",
+      "Inbox"
+    ],
     "type": "inbox",
     "replies": [
       {
@@ -51,7 +58,10 @@
     "subject": "Photographer for our wedding",
     "message": "Hi Shopia! I took a look at your portfolio and it looks amazing.",
     "avatarImage": "/assets/images/avatar/user-18.png",
-    "badges": ["Photographer", "Inbox"],
+    "badges": [
+      "Photographer",
+      "Inbox"
+    ],
     "type": "sent",
     "replies": [
       {
@@ -74,7 +84,10 @@
     "message": "Hey! You've just got a new subscribe on your channel",
     "avatarText": "BS",
     "avatarColor": "red",
-    "badges": ["Application", "Inbox"],
+    "badges": [
+      "Application",
+      "Inbox"
+    ],
     "type": "inbox",
     "replies": [
       {
@@ -96,7 +109,10 @@
     "subject": "Following up on my proposal",
     "message": "Please see the project status in the pdf I attached. The project looks good, and we are confident that we will complete it on time.",
     "avatarText": "WR",
-    "badges": ["Application", "Inbox"],
+    "badges": [
+      "Application",
+      "Inbox"
+    ],
     "type": "starred",
     "replies": [
       {
@@ -118,7 +134,10 @@
     "subject": "Project Update",
     "message": "Hey team, here is the latest update on the project status.",
     "avatarText": "RG",
-    "badges": ["Developers", "Inbox"],
+    "badges": [
+      "Developers",
+      "Inbox"
+    ],
     "type": "starred",
     "replies": [
       {
@@ -140,7 +159,10 @@
     "subject": "Meeting Reminder",
     "message": "Don't forget about the meeting tomorrow at 10 AM.",
     "avatarImage": "/assets/images/avatar/user-12.png",
-    "badges": ["Team Meetings", "Important"],
+    "badges": [
+      "Team Meetings",
+      "Important"
+    ],
     "type": "sent",
     "replies": [
       {
@@ -161,7 +183,10 @@
     "subject": "Draft - New Marketing Plan",
     "message": "Please review the attached draft of the new marketing plan.",
     "avatarText": "EW",
-    "badges": ["Marketing", "Drafts"],
+    "badges": [
+      "Marketing",
+      "Drafts"
+    ],
     "type": "drafts",
     "replies": [
       {
@@ -182,7 +207,9 @@
     "subject": "Spam Alert",
     "message": "This is a spam email. Please ignore.",
     "avatarImage": "/assets/images/avatar/user-14.png",
-    "badges": ["Spam"],
+    "badges": [
+      "Spam"
+    ],
     "type": "spam",
     "replies": []
   },
@@ -195,7 +222,9 @@
     "message": "This email has been moved to trash.",
     "avatarText": "AC",
     "avatarColor": "red",
-    "badges": ["Trash"],
+    "badges": [
+      "Trash"
+    ],
     "type": "trash",
     "replies": []
   },
@@ -207,7 +236,9 @@
     "subject": "Important Notice",
     "message": "Please read the important notice attached.",
     "avatarImage": "/assets/images/avatar/user-15.png",
-    "badges": ["Important"],
+    "badges": [
+      "Important"
+    ],
     "type": "important",
     "replies": [
       {
@@ -230,7 +261,9 @@
     "message": "Your meeting has been scheduled for next week.",
     "avatarText": "ST",
     "avatarImage": "/assets/images/avatar/user-17.png",
-    "badges": ["Scheduled"],
+    "badges": [
+      "Scheduled"
+    ],
     "type": "scheduled",
     "replies": [
       {
@@ -239,7 +272,7 @@
         "email": "nathan@example.com",
         "avatarImage": "/assets/images/avatar/user-18.png",
         "date": "13 July, 10:40AM",
-        "subject": "Re: Weekly Update on AgenticWeb Admin & Dashboard Projects",
+        "subject": "Re: Weekly Update on Zenith Admin & Dashboard Projects",
         "message": "Thanks, Sophie! I’ve marked my calendar."
       }
     ]

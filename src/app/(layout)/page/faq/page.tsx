@@ -113,7 +113,7 @@ const Faq: NextPageWithLayout = () => {
         <div className="col-span-12">
           <div className="card">
             <div className="card-header">
-              <h6>Video Tutorial by AgenticWeb</h6>
+              <h6>Video Tutorial by Zenith</h6>
             </div>
             <div className="card-body">
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">

@@ -55,8 +55,8 @@ export default function Layout({
   children: React.ReactNode
 }) {
   const title = breadcrumbTitle
-    ? ` ${breadcrumbTitle} | AgenticWeb - Next TS Admin & Dashboard Template `
-    : 'AgenticWeb - Next TS Admin & Dashboard Template'
+    ? ` ${breadcrumbTitle} | Zenith -  AI apps & Dashboard Template `
+    : 'Zenith -  AI apps & Dashboard Template'
   const { status, data: session } = useSession()
   const pathname = usePathname()
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
@@ -74,10 +74,10 @@ export default function Layout({
     ? pathname?.includes('/apps/pqr/pqr-agent/')
       ? pathname?.split('/')[4]  // For PQR agent routes
       : pathname?.includes('/apps/rrhh/rrhh-agent/')
-      ? pathname?.split('/')[4]  // For RRHH agent routes
-      : pathname?.includes('/admin/agents/')
-      ? pathname?.split('/')[3]  // For admin agent routes
-      : pathname?.split('/')[4]   // For regular agent routes
+        ? pathname?.split('/')[4]  // For RRHH agent routes
+        : pathname?.includes('/admin/agents/')
+          ? pathname?.split('/')[3]  // For admin agent routes
+          : pathname?.split('/')[4]   // For regular agent routes
     : null
 
   const {
@@ -304,14 +304,14 @@ export default function Layout({
           <title>{title}</title>
           <meta
             name="description"
-            content="AgenticWeb is a Next TS Admin & Dashboard Template that supports 21 frameworks including HTML, React JS, React TS, Angular 18, Laravel 11, ASP.Net Core 8, MVC 5, Blazor, Node JS, Django, Flask, PHP, CakePHP, Symfony, CodeIgniter, Ajax & Yii and more. Perfect for developers and businesses."
+            content="Zenith is a  AI apps & Dashboard Template that supports 21 frameworks including HTML, React JS, React TS, Angular 18, Laravel 11, ASP.Net Core 8, MVC 5, Blazor, Node JS, Django, Flask, PHP, CakePHP, Symfony, CodeIgniter, Ajax & Yii and more. Perfect for developers and businesses."
           />
-          <meta name="author" content="SRBThemes" />
+          <meta name="author" content="Cognitiva IA" />
           <meta property="og:type" content="website" />
           <meta property="og:url" content="" />
           <meta
             property="og:title"
-            content="AgenticWeb - Next TS Admin & Dashboard Template"
+            content="Zenith -  AI apps & Dashboard Template"
           />
           <meta
             property="og:description"
@@ -320,15 +320,15 @@ export default function Layout({
           <meta property="twitter:url" content="" />
           <meta
             property="twitter:title"
-            content="AgenticWeb - Next TS Admin & Dashboard Template"
+            content="Zenith -  AI apps & Dashboard Template"
           />
           <meta
             property="twitter:description"
-            content="Explore AgenticWeb, an Next TS admin & dashboard template offering support for 21 frameworks. Perfect for building professional, scalable web apps."
+            content="Explore Zenith, an  AI apps & dashboard template offering support for 21 frameworks. Perfect for building professional, scalable web apps."
           />
           <meta
             name="keywords"
-            content="admin dashboard template, admin template, TailwindCSS dashboard, react next admin, Next TS admin, Next TypeScript Admin, 21 frameworks support, responsive dashboard, web application template, dark mode, RTL support, Vue, MVC, Blazor, PHP, Node.js, Django, Flask, Next JS Admin"
+            content="admin dashboard template, admin template, TailwindCSS dashboard, react next admin,  AI apps, Next TypeScript Admin, 21 frameworks support, responsive dashboard, web application template, dark mode, RTL support, Vue, MVC, Blazor, PHP, Node.js, Django, Flask, Next JS Admin"
           />
         </Head>
 
@@ -396,15 +396,15 @@ export default function Layout({
         <title>{title}</title>
         <meta
           name="description"
-          content="AgenticWeb is a Next TS Admin & Dashboard Template that supports 21 frameworks including HTML, React JS, React TS, Angular 18, Laravel 11, ASP.Net Core 8, MVC 5, Blazor, Node JS, Django, Flask, PHP, CakePHP, Symfony, CodeIgniter, Ajax & Yii and more. Perfect for developers and businesses."
+          content="Zenith is a  AI apps & Dashboard Template that supports 21 frameworks including HTML, React JS, React TS, Angular 18, Laravel 11, ASP.Net Core 8, MVC 5, Blazor, Node JS, Django, Flask, PHP, CakePHP, Symfony, CodeIgniter, Ajax & Yii and more. Perfect for developers and businesses."
         />
 
-        <meta name="author" content="SRBThemes" />
+        <meta name="author" content="Cognitiva IA" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="" />
         <meta
           property="og:title"
-          content="AgenticWeb - Next TS Admin & Dashboard Template"
+          content="Zenith -  AI apps & Dashboard Template"
         />
         <meta
           property="og:description"
@@ -413,15 +413,15 @@ export default function Layout({
         <meta property="twitter:url" content="" />
         <meta
           property="twitter:title"
-          content="AgenticWeb - Next TS Admin & Dashboard Template"
+          content="Zenith -  AI apps & Dashboard Template"
         />
         <meta
           property="twitter:description"
-          content="Explore AgenticWeb, an Next TS admin & dashboard template offering support for 21 frameworks. Perfect for building professional, scalable web apps."
+          content="Explore Zenith, an  AI apps & dashboard template offering support for 21 frameworks. Perfect for building professional, scalable web apps."
         />
         <meta
           name="keywords"
-          content="admin dashboard template, admin template, TailwindCSS dashboard, react next admin, Next TS admin, Next TypeScript Admin, 21 frameworks support, responsive dashboard, web application template, dark mode, RTL support, Vue, MVC, Blazor, PHP, Node.js, Django, Flask, Next JS Admin"
+          content="admin dashboard template, admin template, TailwindCSS dashboard, react next admin,  AI apps, Next TypeScript Admin, 21 frameworks support, responsive dashboard, web application template, dark mode, RTL support, Vue, MVC, Blazor, PHP, Node.js, Django, Flask, Next JS Admin"
         />
       </Head>
 

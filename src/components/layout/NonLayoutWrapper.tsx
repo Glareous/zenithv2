@@ -17,8 +17,8 @@ export default function NonLayoutWrapper({ children }: LayoutWrapperProps) {
 
   useEffect(() => {
     document.title = route
-      ? `${route.title} | AgenticWeb - Premium Versatile Admin & Dashboard Template`
-      : 'AgenticWeb - Premium Versatile Admin & Dashboard Template'
+      ? `${route.title} | Zenith - Premium Versatile Admin & Dashboard Template`
+      : 'Zenith - Premium Versatile Admin & Dashboard Template'
   }, [route])
 
   return <Layout2>{children}</Layout2>

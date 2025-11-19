@@ -139,8 +139,8 @@ const Overview1: NextPageWithLayout = () => {
                                   <Image
                                     src={item.productImage}
                                     onError={(e) =>
-                                      (e.currentTarget.src =
-                                        '/assets/images/products/img-13.png')
+                                    (e.currentTarget.src =
+                                      '/assets/images/products/img-13.png')
                                     }
                                     alt="productImage"
                                     className="rounded-sm"
@@ -212,11 +212,10 @@ const Overview1: NextPageWithLayout = () => {
                   </span>
                 </h6>
                 <p className="mt-1 text-gray-500 dark:text-dark-500">{`Card Holder Name: ${clientInvoice?.accountHolderName}`}</p>
-                <p className="mt-1 text-gray-500 dark:text-dark-500">{`Debit Card: XXXX XXXX XXXX ${
-                  clientInvoice
+                <p className="mt-1 text-gray-500 dark:text-dark-500">{`Debit Card: XXXX XXXX XXXX ${clientInvoice
                     ? clientInvoice?.accountNumber.slice(-4)
                     : 'XXXX'
-                }`}</p>
+                  }`}</p>
                 <p className="mt-1 text-gray-500 dark:text-dark-500">{`Expiry Date: ${month}/20${year}`}</p>
                 <p className="mt-1 text-gray-500 dark:text-dark-500">{`Total Amount: $${clientInvoice?.totalAmount.toFixed(
                   2
@@ -226,7 +225,7 @@ const Overview1: NextPageWithLayout = () => {
           </div>
           <div className="flex flex-wrap items-center bg-gray-100 card-footer dark:bg-dark-850 print:bg-gray-100 dark:print:bg-dark-850">
             <h6 className="grow">
-              Thank you for purchasing AgenticWeb Admin & Dashboards
+              Thank you for purchasing Zenith Admin & Dashboards
             </h6>
             <Link href="#!" className="shrink-0">
               {clientInvoice?.companyPhoneNumber}

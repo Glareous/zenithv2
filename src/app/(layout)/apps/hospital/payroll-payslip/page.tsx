@@ -47,7 +47,7 @@ const PayrollPayslip: NextPageWithLayout = () => {
                     height={32}
                   />
                 </div>
-                <h6 className="mb-1">AgenticWeb - Multispeciality Hospital</h6>
+                <h6 className="mb-1">Zenith - Multispeciality Hospital</h6>
                 <p className="mb-1 text-gray-500 dark:text-dark-500">
                   1960 Squaw Valley Rd, Olympic Valley, California, United
                   States - 96146
@@ -175,7 +175,7 @@ const PayrollPayslip: NextPageWithLayout = () => {
                   <span className="font-medium">domiex@example.com</span>
                 </p>
                 <p className="mb-1 text-gray-500 dark:text-dark-500">Regards</p>
-                <p>SRBThemes</p>
+                <p>Cognitiva IA</p>
               </div>
             </div>
           </div>

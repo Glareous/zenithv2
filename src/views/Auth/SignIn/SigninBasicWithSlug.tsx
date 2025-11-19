@@ -199,7 +199,7 @@ export default function SigninBasicWithSlug() {
                     <Image
                       src={LogoMain}
                       alt="LogoMain"
-                      className="h-8 mx-auto dark:hidden"
+                      className="h-14 mx-auto dark:hidden"
                       width={175}
                       height={32}
                     />

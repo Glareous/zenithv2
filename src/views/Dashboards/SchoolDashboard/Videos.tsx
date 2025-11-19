@@ -34,7 +34,7 @@ const Videos: NextPageWithLayout = () => {
               <div className="mt-3">
                 <h6 className="mb-1 truncate">
                   <Link href="#!">
-                    AgenticWeb - Admin & Dashboard Template Introduction
+                    Zenith - Admin & Dashboard Template Introduction
                   </Link>
                 </h6>
                 <p className="text-xs text-gray-500 dark:text-dark-500">

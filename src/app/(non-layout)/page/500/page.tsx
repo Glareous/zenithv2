@@ -41,7 +41,7 @@ const FivezeroZero: NextPageWithLayout = () => {
                 Oops! Internal Server Error
               </h1>
               <p className="max-w-2xl mx-auto my-5 text-gray-500 dark:text-dark-500 text-16">
-                Our servers may have been abducted by AgenticWeb... Please give
+                Our servers may have been abducted by Zenith... Please give
                 us a moment while we search for them.
               </p>
               <Link href="/dashboards/ecommerce" className="btn btn-primary">
