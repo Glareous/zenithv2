@@ -188,9 +188,23 @@ export const projectFraudTransactionRouter = createTRPCRouter({
         })
       }
 
+      // Get organization's fraud detection agent (if exists)
+      const project = await ctx.db.project.findUnique({
+        where: { id: input.projectId },
+        select: {
+          organization: {
+            select: {
+              id: true,
+              // Add agentFraudId when organization model has it
+            },
+          },
+        },
+      })
+
       return await ctx.db.projectFraudTransaction.create({
         data: {
           ...input,
+          agentId: undefined, // Set to organization's fraud agent when available
           createdById: ctx.session.user.id,
         },
         include: {

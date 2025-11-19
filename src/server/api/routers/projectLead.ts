@@ -57,11 +57,24 @@ export const projectLeadRouter = createTRPCRouter({
         }
       }
 
+      // Get organization's Leads agent
+      const project = await ctx.db.project.findUnique({
+        where: { id: projectId },
+        select: {
+          organization: {
+            select: {
+              agentLeadsId: true,
+            },
+          },
+        },
+      })
+
       const lead = await ctx.db.projectLead.create({
         data: {
           ...leadData,
           projectId,
           contactId,
+          agentId: project?.organization?.agentLeadsId,
           createdById: ctx.session.user.id,
         },
         include: {

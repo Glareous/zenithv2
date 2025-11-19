@@ -154,10 +154,23 @@ export const projectForecastingRouter = createTRPCRouter({
 
       const { projectId, ...data } = input
 
+      // Get organization's Forecasting agent
+      const project = await ctx.db.project.findUnique({
+        where: { id: projectId },
+        select: {
+          organization: {
+            select: {
+              agentForecastingId: true,
+            },
+          },
+        },
+      })
+
       return await ctx.db.projectForecasting.create({
         data: {
           ...data,
           projectId,
+          agentId: project?.organization?.agentForecastingId,
           createdById: ctx.session.user.id,
         },
       })

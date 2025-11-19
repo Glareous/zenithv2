@@ -484,6 +484,12 @@ model ProjectAgent {
     cronExecutionLogs AgentCronExecutionLog[] // CRON job execution logs
     organizationAgents OrganizationAgent[] // Organizations this agent is assigned to (when isGlobal=false) - DEPRECATED
 
+    // Agent-processed records
+    pqrs              ProjectPQR[]           @relation("PQRAgent")
+    forecasting       ProjectForecasting[]   @relation("ForecastingAgent")
+    leads             ProjectLead[]          @relation("LeadAgent")
+    fraudTransactions ProjectFraudTransaction[] @relation("FraudAgent")
+
     @@index([projectId])
     @@index([modelId])
     @@index([isGlobal])
@@ -1096,6 +1102,8 @@ model ProjectLead {
 
     projectId   String
     project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    agent       ProjectAgent? @relation("LeadAgent", fields: [agentId], references: [id], onDelete: SetNull)
+    agentId     String?  // Agent assigned from organization's agentLeadsId
     createdById String
     createdBy   User     @relation(fields: [createdById], references: [id])
     createdAt   DateTime @default(now())
@@ -1109,6 +1117,7 @@ model ProjectLead {
     contact     ProjectContact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
 
     @@index([projectId])
+    @@index([agentId])
     @@index([createdById])
     @@index([contactId])
 }
@@ -1724,9 +1733,12 @@ model ProjectPQR {
     // Relations
     project           Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
     projectId         String
+    agent             ProjectAgent?     @relation("PQRAgent", fields: [agentId], references: [id], onDelete: SetNull)
+    agentId           String?           // Agent assigned from organization's agentPqrId
     analysis          ProjectPQRAnalysis? // One-to-one relation with analysis
 
     @@index([projectId])
+    @@index([agentId])
     @@index([documentType])
     @@index([status])
     @@index([createdAt])
@@ -1793,12 +1805,15 @@ model ProjectForecasting {
     // Relations
     project         Project                     @relation(fields: [projectId], references: [id], onDelete: Cascade)
     projectId       String
+    agent           ProjectAgent?               @relation("ForecastingAgent", fields: [agentId], references: [id], onDelete: SetNull)
+    agentId         String?                     // Agent assigned from organization's agentForecastingId
     createdBy       User                        @relation("ForecastingCreated", fields: [createdById], references: [id])
     createdById     String
     files           ProjectForecastingFile[]    // CSV files uploaded
     series          ProjectForecastingSeries[]  // Multiple data series for charts
 
     @@index([projectId])
+    @@index([agentId])
     @@index([status])
     @@index([createdAt])
     @@index([createdById])
@@ -1923,6 +1938,9 @@ model ProjectFraudTransaction {
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
+  agent     ProjectAgent? @relation("FraudAgent", fields: [agentId], references: [id], onDelete: SetNull)
+  agentId   String?       // Agent assigned for fraud detection
+
   createdById String
   createdBy   User   @relation(fields: [createdById], references: [id])
 
@@ -1931,6 +1949,7 @@ model ProjectFraudTransaction {
 
   @@map("ProjectFraudTransaction")
   @@index([projectId])
+  @@index([agentId])
   @@index([createdById])
   @@index([timestamp])
   @@index([isFraud])

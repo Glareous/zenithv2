@@ -77,7 +77,7 @@ const FraudOverviewPage = ({ params }: FraudOverviewPageProps) => {
             <div className="flex gap-2">
               <button
                 onClick={() => refetch()}
-                className="btn btn-outline-primary">
+                className="btn btn-outline-primary hidden">
                 <RefreshCw className="inline-block size-4 mr-1" />
                 Refresh
               </button>
@@ -105,13 +105,12 @@ const FraudOverviewPage = ({ params }: FraudOverviewPageProps) => {
                   <p className="text-sm text-gray-500">Status</p>
                   <p className="text-sm font-medium">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        transaction.status === 'COMPLETED'
-                          ? 'bg-green-100 text-green-800'
-                          : transaction.status === 'FAILED'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${transaction.status === 'COMPLETED'
+                        ? 'bg-green-100 text-green-800'
+                        : transaction.status === 'FAILED'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                        }`}>
                       {transaction.status}
                     </span>
                   </p>
@@ -132,11 +131,10 @@ const FraudOverviewPage = ({ params }: FraudOverviewPageProps) => {
                   <p className="text-sm text-gray-500">Is Fraud</p>
                   <p className="text-sm font-medium">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        transaction.isFraud
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}>
+                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${transaction.isFraud
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-green-100 text-green-800'
+                        }`}>
                       {transaction.isFraud ? 'Yes' : 'No'}
                     </span>
                   </p>
@@ -213,13 +211,12 @@ const FraudOverviewPage = ({ params }: FraudOverviewPageProps) => {
                   <p className="text-sm text-gray-500">Merchant Risk Level</p>
                   <p className="text-sm font-medium">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        transaction.merchantRiskLevel === 'HIGH'
-                          ? 'bg-red-100 text-red-800'
-                          : transaction.merchantRiskLevel === 'MEDIUM'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-green-100 text-green-800'
-                      }`}>
+                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${transaction.merchantRiskLevel === 'HIGH'
+                        ? 'bg-red-100 text-red-800'
+                        : transaction.merchantRiskLevel === 'MEDIUM'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-green-100 text-green-800'
+                        }`}>
                       {transaction.merchantRiskLevel}
                     </span>
                   </p>

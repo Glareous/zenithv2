@@ -135,10 +135,23 @@ export const projectPQRRouter = createTRPCRouter({
 
       const { projectId, ...data } = input
 
+      // Get organization's PQR agent
+      const project = await ctx.db.project.findUnique({
+        where: { id: projectId },
+        select: {
+          organization: {
+            select: {
+              agentPqrId: true,
+            },
+          },
+        },
+      })
+
       return await ctx.db.projectPQR.create({
         data: {
           ...data,
           projectId,
+          agentId: project?.organization?.agentPqrId,
         },
       })
     }),

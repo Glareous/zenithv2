@@ -17,19 +17,21 @@ import { z } from 'zod'
 
 const leadSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email format'),
-  phoneNumber: z.string().min(1, 'Phone number is required'),
-  status: z.enum(['NEW', 'HOT', 'PENDING', 'LOST']),
+  email: z.string().email('Invalid email format').optional(),
+  phoneNumber: z.string().min(1, 'Phone number is required').optional(),
+  description: z.string().optional(),
+  companyName: z.string().optional(),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
+  location: z.string().optional(),
   contactId: z.string().optional(),
 })
 
 type LeadFormData = z.infer<typeof leadSchema>
 
-const statusOptions = [
-  { value: 'NEW', label: 'New' },
-  { value: 'HOT', label: 'Hot' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'LOST', label: 'Lost' },
+const genderOptions = [
+  { value: 'MALE', label: 'Male' },
+  { value: 'FEMALE', label: 'Female' },
+  { value: 'OTHER', label: 'Other' },
 ]
 
 const DEFAULT_AVATAR = '/assets/images/user-avatar.jpg'
@@ -57,6 +59,9 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
   const [existingImageId, setExistingImageId] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [status, setStatus] = useState<{ value: string; label: string } | null>(
+    null
+  )
+  const [gender, setGender] = useState<{ value: string; label: string } | null>(
     null
   )
   const [relatedContact, setRelatedContact] = useState<any>(null)
@@ -111,10 +116,13 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
       name: '',
       email: '',
       phoneNumber: '',
-      status: 'NEW',
+      description: '',
+      companyName: '',
+      gender: undefined,
+      location: '',
       contactId: undefined,
     })
-    setStatus(null)
+    setGender(null)
     setPreview(null)
     setSelectedFile(null)
     setExistingImageId(null)
@@ -124,15 +132,20 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
   useEffect(() => {
     if (editMode && currentLead) {
       setValue('name', currentLead.name)
-      setValue('email', currentLead.email)
-      setValue('phoneNumber', currentLead.phoneNumber)
-      setValue('status', currentLead.status)
+      setValue('email', currentLead.email || '')
+      setValue('phoneNumber', currentLead.phoneNumber || '')
+      setValue('description', currentLead.description || '')
+      setValue('companyName', currentLead.companyName || '')
+      setValue('gender', currentLead.gender || undefined)
+      setValue('location', currentLead.location || '')
       setValue('contactId', currentLead.contactId || undefined)
 
-      setStatus({
-        value: currentLead.status,
-        label: currentLead.status,
-      })
+      if (currentLead.gender) {
+        setGender({
+          value: currentLead.gender,
+          label: currentLead.gender.charAt(0) + currentLead.gender.slice(1).toLowerCase(),
+        })
+      }
 
       if (currentLead.contactId) {
         setRelatedContact(contactData)
@@ -186,14 +199,6 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
     setPreview(null)
     setSelectedFile(null)
     setExistingImageId(null)
-  }
-
-  const handleStatusChange = (
-    selected: { value: string; label: string } | null,
-    onChange: (value: any) => void
-  ) => {
-    setStatus(selected)
-    onChange(selected?.value)
   }
 
   const uploadImageToS3 = async (leadId: string, file: File) => {
@@ -412,32 +417,93 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
                 )}
               </div>
 
+              <div className="col-span-12">
+                <label htmlFor="companyNameInput" className="form-label">
+                  Company Name
+                </label>
+                <input
+                  type="text"
+                  id="companyNameInput"
+                  className="form-input"
+                  placeholder="Company name"
+                  {...register('companyName')}
+                />
+              </div>
+
               <div className="col-span-6">
-                <label htmlFor="statusSelect2" className="form-label">
-                  Status
+                <label htmlFor="genderSelect" className="form-label">
+                  Gender
                 </label>
                 <Controller
-                  name="status"
+                  name="gender"
                   control={control}
                   render={({ field: { onChange, value } }) => (
-                    <select
-                      id="statusSelect2"
-                      className="form-select"
-                      value={value}
-                      onChange={(e) => onChange(e.target.value)}>
-                      <option value="">Select Status</option>
-                      {statusOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                    <Select
+                      value={genderOptions.find((opt) => opt.value === value) || null}
+                      onChange={(option) => {
+                        onChange(option?.value)
+                        setGender(option)
+                      }}
+                      options={genderOptions}
+                      classNamePrefix="select"
+                      placeholder="Select gender"
+                      isClearable
+                    />
                   )}
                 />
-                {errors.status && (
-                  <span className="text-red-500">Status is required</span>
-                )}
               </div>
+
+              <div className="col-span-6">
+                <label htmlFor="locationInput" className="form-label">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  id="locationInput"
+                  className="form-input"
+                  placeholder="City, Country"
+                  {...register('location')}
+                />
+              </div>
+
+              <div className="col-span-12">
+                <label htmlFor="descriptionInput" className="form-label">
+                  Description
+                </label>
+                <textarea
+                  id="descriptionInput"
+                  className="form-input"
+                  rows={3}
+                  placeholder="Lead description..."
+                  {...register('description')}
+                />
+              </div>
+
+              {editMode && currentLead && (
+                <div className="col-span-12">
+                  <label className="form-label">Status</label>
+                  <div className="mt-2">
+                    <span
+                      className={
+                        currentLead.status === 'PROCESSING'
+                          ? 'badge badge-blue'
+                          : currentLead.status === 'COMPLETED'
+                            ? 'badge badge-green'
+                            : currentLead.status === 'FAILED'
+                              ? 'badge badge-red'
+                              : 'badge'
+                      }>
+                      {currentLead.status === 'PROCESSING'
+                        ? 'Processing'
+                        : currentLead.status === 'COMPLETED'
+                          ? 'Completed'
+                          : currentLead.status === 'FAILED'
+                            ? 'Failed'
+                            : currentLead.status}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center justify-end col-span-12 gap-2 mt-5">
                 <button
