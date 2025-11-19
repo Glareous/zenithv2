@@ -7,32 +7,33 @@
     @apply text-base font-body bg-body group-data-[layout=boxed]:m-8 group-data-[layout=boxed]:bg-sky-500 dark:bg-dark-950 dark:text-dark-100;
   }
 
-  :is(h1, h2, h3, h4, h5, h6) {
+  /* Exclude Nextra docs content from these heading overrides */
+  :is(h1, h2, h3, h4, h5, h6):not([class*="nextra"]):not(.nextra-content *):not(article *) {
     @apply font-heading;
     font-weight: var(--font-weight-semibold);
   }
 
-  h1 {
+  h1:not([class*="nextra"]):not(.nextra-content *):not(article *) {
     @apply text-4xl;
   }
 
-  h2 {
+  h2:not([class*="nextra"]):not(.nextra-content *):not(article *) {
     @apply text-3xl;
   }
 
-  h3 {
+  h3:not([class*="nextra"]):not(.nextra-content *):not(article *) {
     @apply text-2xl;
   }
 
-  h4 {
+  h4:not([class*="nextra"]):not(.nextra-content *):not(article *) {
     @apply text-xl;
   }
 
-  h5 {
+  h5:not([class*="nextra"]):not(.nextra-content *):not(article *) {
     @apply text-lg;
   }
 
-  h6 {
+  h6:not([class*="nextra"]):not(.nextra-content *):not(article *) {
     @apply text-base;
   }
 
