@@ -10,7 +10,7 @@
             "description": "A locally-hosted AI agent (OpenAI-compatible) fine-tuned with your organization’s unique culture, values, competencies, and HR policies. Acts as a personalized digital coach for every employee, strategic advisor for HR, and continuous ally in talent development and performance management."
         },
         "images": {
-            "mainHome": "/assets/images/hospital/landing/main-home.png",
+            "mainHome": "/assets/images/hospital/landing/main-rrhh.png",
             "whiteLogo": "/assets/images/logo-white.png",
             "darkLogo": "/assets/images/main-logo.png"
         },
