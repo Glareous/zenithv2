@@ -41,7 +41,7 @@ const HeroBanner: React.FC = () => {
     <>
       {/* ===================== HERO CONTENT ===================== */}
       <section
-        className={`relative pb-0 overflow-hidden pt-44 ${hero.colors.background}`}
+        className={`relative pb-0 overflow-hidden pt-15 ${hero.colors.background}`}
         id="home"
       >
         {/* Floating shapes */}
