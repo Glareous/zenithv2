@@ -18,9 +18,9 @@ export function generateViewport() {
 }
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'AgenticWeb - Next TS Premium Admin & Dashboard Template',
+    title: 'Zenith -  AI apps',
     description:
-      'AgenticWeb is a Premium Admin & Dashboard Template that supports 22 frameworks including HTML, Next TS, Next JS, React JS, React TS, Angular 19, ASP.Net Core 9 + Angular 19, Laravel 12, ASP.Net Core 9, MVC 5, Blazor, Node JS, Django, Flask, PHP, CakePHP, Symfony, CodeIgniter, Ajax & Yii and more. Perfect for developers and businesses.',
+      'Zenith is a Premium Admin & Dashboard Template that supports 22 frameworks including HTML, Next TS, Next JS, React JS, React TS, Angular 19, ASP.Net Core 9 + Angular 19, Laravel 12, ASP.Net Core 9, MVC 5, Blazor, Node JS, Django, Flask, PHP, CakePHP, Symfony, CodeIgniter, Ajax & Yii and more. Perfect for developers and businesses.',
     keywords: [
       'admin dashboard template',
       'admin template',
@@ -41,15 +41,15 @@ export async function generateMetadata(): Promise<Metadata> {
       'CodeIgniter',
     ],
     openGraph: {
-      title: 'AgenticWeb - Next TS Premium Admin & Dashboard Template',
+      title: 'Zenith -  AI apps',
       description:
         'Versatile and responsive admin templates supporting 22 frameworks. Includes features like charts, RTL, LTR, dark light modes, and more.',
       type: 'website',
     },
     twitter: {
-      title: 'AgenticWeb - Next TS Premium Admin & Dashboard Template',
+      title: 'Zenith -  AI apps',
       description:
-        'Explore AgenticWeb, an admin & dashboard template offering support for 22 frameworks. Perfect for building professional, scalable web apps.',
+        'Explore Zenith, an admin & dashboard template offering support for 22 frameworks. Perfect for building professional, scalable web apps.',
     },
   }
 }

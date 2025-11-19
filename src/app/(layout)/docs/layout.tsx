@@ -1,8 +1,8 @@
 import 'nextra-theme-docs/style.css'
 
 export const metadata = {
-  title: 'AgenticWeb Documentation',
-  description: 'Complete documentation for AgenticWeb modules',
+  title: 'Zenith Documentation',
+  description: 'Complete documentation for Zenith modules',
 }
 
 export default function DocsLayout({

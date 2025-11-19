@@ -120,35 +120,35 @@ const Footer: React.FC = () => {
                   <Link
                     href="#!"
                     className="relative inline-block link link-sky before:absolute before:bg-sky-500 before:h-[1px] before:bottom-0 before:transition-all before:duration-300 before:w-0 hover:before:w-full">
-                    Insta by AgenticWeb
+                    Insta by Zenith
                   </Link>
                 </li>
                 <li>
                   <Link
                     href="#!"
                     className="relative inline-block link link-sky before:absolute before:bg-sky-500 before:h-[1px] before:bottom-0 before:transition-all before:duration-300 before:w-0 hover:before:w-full">
-                    AgenticWeb Profile
+                    Zenith Profile
                   </Link>
                 </li>
                 <li>
                   <Link
                     href="#!"
                     className="relative inline-block link link-sky before:absolute before:bg-sky-500 before:h-[1px] before:bottom-0 before:transition-all before:duration-300 before:w-0 hover:before:w-full">
-                    AgenticWeb Reach
+                    Zenith Reach
                   </Link>
                 </li>
                 <li>
                   <Link
                     href="#!"
                     className="relative inline-block link link-sky before:absolute before:bg-sky-500 before:h-[1px] before:bottom-0 before:transition-all before:duration-300 before:w-0 hover:before:w-full">
-                    AgenticWeb Drive
+                    Zenith Drive
                   </Link>
                 </li>
                 <li>
                   <Link
                     href="#!"
                     className="relative inline-block link link-sky before:absolute before:bg-sky-500 before:h-[1px] before:bottom-0 before:transition-all before:duration-300 before:w-0 hover:before:w-full">
-                    AgenticWeb Bot
+                    Zenith Bot
                   </Link>
                 </li>
               </ul>
@@ -197,9 +197,9 @@ const Footer: React.FC = () => {
         </div>
         <div className="container mx-auto mt-12 text-center xl:px-20">
           {/* <p className="text-gray-500 dark:text-dark-500 text-16">
-            &copy; <span>{currentYear}</span> AgenticWeb. Crafted & Design by
+            &copy; <span>{currentYear}</span> Zenith. Crafted & Design by
             <Link href="#!" className="ml-1 font-semibold link link-sky">
-              SRBThemes
+              Cognitiva IA
             </Link>
           </p> */}
         </div>

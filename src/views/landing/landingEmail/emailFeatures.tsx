@@ -20,7 +20,7 @@ const EmailFeatures: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto mb-12 text-center">
             <h2 className="mb-3 leading-normal capitalize">
-              AgenticWeb Email Features
+              Zenith Email Features
             </h2>
             <p className="text-gray-500 dark:text-dark-500 text-16">
               Collaborate with your teammates using our real-time editor to

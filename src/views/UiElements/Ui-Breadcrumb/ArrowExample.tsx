@@ -9,7 +9,7 @@ const ArrowExample = () => {
     <React.Fragment>
       <ul className="breadcrumb *:before:content-['\EA6E']">
         <li className="breadcrumb-item">
-          <Link href="#!">AgenticWeb</Link>
+          <Link href="#!">Zenith</Link>
         </li>
         <li className="breadcrumb-item">
           <Link href="#!">UI</Link>

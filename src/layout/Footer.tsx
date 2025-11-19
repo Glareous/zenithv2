@@ -13,7 +13,7 @@ interface FooterProps {
 }
 
 const Footer: React.FC<FooterProps> = ({ organization }) => {
-  const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || 'AgenticWeb'
+  const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || 'Zenith'
 
   return (
     <React.Fragment>

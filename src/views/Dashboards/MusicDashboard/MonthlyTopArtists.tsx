@@ -65,7 +65,7 @@ const MonthlyTopArtists: NextPageWithLayout = () => {
         />
         <div className="relative card-body">
           <div className="max-w-52">
-            <h5 className="mb-2 capitalize">Check the power Of AgenticWeb</h5>
+            <h5 className="mb-2 capitalize">Check the power Of Zenith</h5>
             <p className="mb-3 text-gray-500 dark:text-dark-500">
               Immerse yourself in a world where music comes alive.
             </p>

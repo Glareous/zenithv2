@@ -22,7 +22,7 @@ const ChatBot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       from: 'bot',
-      text: 'Hello! I am a AgenticWeb chatbot. How can I assist you today?',
+      text: 'Hello! I am a Zenith chatbot. How can I assist you today?',
     },
   ])
   const [botTyping, setBotTyping] = useState<boolean>(false)

@@ -18,7 +18,7 @@ const PrivacyPolicy: NextPageWithLayout = () => {
             <div className="card-body">
               <div className="text-center mb-7">
                 <h5 className="mb-1">
-                  AgenticWeb - Admin & Dashboard Templates
+                  Zenith - Admin & Dashboard Templates
                 </h5>
                 <p className="text-gray-500 dark:text-dark-500">
                   Effective Date: 26 April, 2024

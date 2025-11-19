@@ -136,12 +136,12 @@ const Footer: React.FC = () => {
             </div>
             <div className="text-center">
               <p className="text-gray-500 dark:text-dark-500">
-                &copy; {currentYear} AgenticWeb. Crafted by
+                &copy; {currentYear} Zenith. Crafted by
                 <Link
                   href="#!"
-                  title="SRBThemes"
+                  title="Cognitiva IA"
                   className="ml-1 font-semibold">
-                  SRBThemes
+                  Cognitiva IA
                 </Link>
               </p>
             </div>

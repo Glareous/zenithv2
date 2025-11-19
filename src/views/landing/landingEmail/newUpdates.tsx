@@ -28,7 +28,7 @@ const NewUpdates: React.FC = () => {
               Customers can easily receive new updates
             </h2>
             <p className="text-gray-500 dark:text-dark-500 mb-7 text-16">
-              AgenticWeb enables seamless collaboration with clients and team
+              Zenith enables seamless collaboration with clients and team
               members.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">

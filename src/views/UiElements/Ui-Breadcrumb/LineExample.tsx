@@ -9,7 +9,7 @@ const LineExample = () => {
     <React.Fragment>
       <ul className="breadcrumb *:before:content-['\F1AF']">
         <li className="breadcrumb-item">
-          <Link href="#!">AgenticWeb</Link>
+          <Link href="#!">Zenith</Link>
         </li>
         <li className="breadcrumb-item">
           <Link href="#!">UI</Link>

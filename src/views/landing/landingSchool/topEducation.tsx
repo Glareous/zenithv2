@@ -21,7 +21,7 @@ const TopEducation: React.FC = () => {
               Our Featured
             </span>
             <h2 className="mb-3 leading-normal capitalize">
-              Top Education Offered by AgenticWeb School
+              Top Education Offered by Zenith School
             </h2>
             <p className="text-gray-500 dark:text-dark-500 text-16">
               Our dedicated team of educators and comprehensive curriculum are

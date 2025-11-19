@@ -11,8 +11,8 @@ interface LayoutProps2 {
 
 const Layout2 = ({ children, breadcrumbTitle }: LayoutProps2) => {
   const title = breadcrumbTitle
-    ? ` ${breadcrumbTitle} | AgenticWeb - Admin & Dashboard Template `
-    : 'AgenticWeb - Admin & Dashboard Template'
+    ? ` ${breadcrumbTitle} | Zenith - Admin & Dashboard Template `
+    : 'Zenith - Admin & Dashboard Template'
 
   return (
     <React.Fragment>

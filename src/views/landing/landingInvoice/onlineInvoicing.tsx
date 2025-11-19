@@ -16,7 +16,7 @@ const OnlineInvoicing: React.FC = () => {
           <div className="grid items-center grid-cols-12">
             <div className="col-span-12 lg:col-span-5">
               <h2 className="mb-2 text-2xl leading-normal capitalize sm:text-3xl md:text-4xl">
-                Get paid quickly and easily with AgenticWeb&apos;s online
+                Get paid quickly and easily with Zenith&apos;s online
                 invoicing software and system.
               </h2>
               <p className="mb-5 text-gray-500 dark:text-muted-invoice">

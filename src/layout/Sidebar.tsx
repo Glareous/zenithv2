@@ -240,9 +240,8 @@ const Sidebar = ({
           <>
             <div
               id="main-sidebar"
-              className={`main-sidebar group-data-[layout=boxed]:top-[calc(theme('spacing.topbar')_+_theme('spacing.sidebar-boxed'))]  lg:block ${
-                scrolled ? 'group-data-[layout=boxed]:!top-topbar' : 'scrolled'
-              }`}>
+              className={`main-sidebar group-data-[layout=boxed]:top-[calc(theme('spacing.topbar')_+_theme('spacing.sidebar-boxed'))]  lg:block ${scrolled ? 'group-data-[layout=boxed]:!top-topbar' : 'scrolled'
+                }`}>
               {/* Sidebar content goes here */}
               <div className="sidebar-wrapper">
                 <div>
@@ -368,11 +367,10 @@ const Sidebar = ({
                                     <button
                                       key={project.id}
                                       onClick={() => handleProjectSelect(project)}
-                                      className={`w-full text-left p-2 rounded-md hover:bg-gray-50 ${
-                                        currentProject?.id === project.id
+                                      className={`w-full text-left p-2 rounded-md hover:bg-gray-50 ${currentProject?.id === project.id
                                           ? 'bg-primary-50 text-primary-600'
                                           : ''
-                                      }`}>
+                                        }`}>
                                       <div className="font-medium">
                                         {project.name}
                                       </div>
@@ -451,168 +449,163 @@ const Sidebar = ({
                       </>
                     ) : searchSidebar && searchSidebar.length > 0 ? (
                       searchSidebar.map((item: MegaMenu, index: number) => (
-                          <li
-                            key={index}
-                            className={
-                              item.separator
-                                ? 'menu-title'
-                                : 'relative group-data-[sidebar=small]:mb-3'
-                            }>
-                            {/* Check for separator */}
-                            {!(item.children?.length ?? 0) &&
-                              item.separator && (
-                                <span className="group-data-[sidebar=small]:hidden">
-                                  {item.title}
-                                </span>
-                              )}
+                        <li
+                          key={index}
+                          className={
+                            item.separator
+                              ? 'menu-title'
+                              : 'relative group-data-[sidebar=small]:mb-3'
+                          }>
+                          {/* Check for separator */}
+                          {!(item.children?.length ?? 0) &&
+                            item.separator && (
+                              <span className="group-data-[sidebar=small]:hidden">
+                                {item.title}
+                              </span>
+                            )}
 
-                            {/* If it has children */}
-                            {!item.separator &&
-                              (item.children ?? []).length > 0 && (
-                                <Dropdown
-                                  position={sidebarDropdownPosition}
-                                  trigger="click"
-                                  isActive={
-                                    layoutSidebar !== SIDEBAR_SIZE.SMALL
-                                      ? isActive(item)
-                                      : false
-                                  }
-                                  toggleSidebar={toggleSidebar}
-                                  closeOnOutsideClick={
-                                    layoutType === LAYOUT_TYPES.HORIZONTAL ||
-                                    layoutSidebar === SIDEBAR_SIZE.SMALL
-                                  }
-                                  closeOnOutsideClickSidebar={
-                                    layoutType !== LAYOUT_TYPES.HORIZONTAL
-                                  }>
-                                  <DropdownButton
-                                    colorClass={`nav-link group-data-[sidebar=small]:px-2.5 group-data-[sidebar=small]:py-2.5 group-data-[sidebar=small]:mx-0 group-data-[sidebar=small]:h-10 group-data-[sidebar=small]:w-full group-data-[sidebar=small]:flex group-data-[sidebar=small]:items-center group-data-[sidebar=small]:justify-center ${
-                                      isActive(item) ? 'active' : ''
+                          {/* If it has children */}
+                          {!item.separator &&
+                            (item.children ?? []).length > 0 && (
+                              <Dropdown
+                                position={sidebarDropdownPosition}
+                                trigger="click"
+                                isActive={
+                                  layoutSidebar !== SIDEBAR_SIZE.SMALL
+                                    ? isActive(item)
+                                    : false
+                                }
+                                toggleSidebar={toggleSidebar}
+                                closeOnOutsideClick={
+                                  layoutType === LAYOUT_TYPES.HORIZONTAL ||
+                                  layoutSidebar === SIDEBAR_SIZE.SMALL
+                                }
+                                closeOnOutsideClickSidebar={
+                                  layoutType !== LAYOUT_TYPES.HORIZONTAL
+                                }>
+                                <DropdownButton
+                                  colorClass={`nav-link group-data-[sidebar=small]:px-2.5 group-data-[sidebar=small]:py-2.5 group-data-[sidebar=small]:mx-0 group-data-[sidebar=small]:h-10 group-data-[sidebar=small]:w-full group-data-[sidebar=small]:flex group-data-[sidebar=small]:items-center group-data-[sidebar=small]:justify-center ${isActive(item) ? 'active' : ''
                                     }`}
-                                    arrow={true}>
-                                    <span className="w-6 group-data-[sidebar=small]:w-full group-data-[sidebar=small]:flex group-data-[sidebar=small]:justify-center shrink-0">
-                                      {item.icon &&
-                                        getLucideIcon(
-                                          item.icon,
-                                          'size-4 group-data-[sidebar=small]:size-9 group-data-[sidebar=medium]:size-9'
-                                        )}
-                                    </span>
-                                    <span className="group-data-[sidebar=small]:hidden">
-                                      {item.title}
-                                    </span>
-                                  </DropdownButton>
-
-                                  <DropdownMenu
-                                    handleMenuClick={handleMenuClick}
-                                    sidebar={true}>
-                                    <ul className="dropdown-wrapper">
-                                      {(item.children ?? []).map(
-                                        (
-                                          child: MegaMenu,
-                                          childIndex: number
-                                        ) => (
-                                          <li key={childIndex}>
-                                            {/* Check for nested children */}
-                                            {child.children &&
-                                            child.children.length > 0 ? (
-                                              <Dropdown
-                                                position="top-right"
-                                                trigger="click"
-                                                isActive={isActive(child)}
-                                                closeOnOutsideClick={
-                                                  layoutType ===
-                                                    LAYOUT_TYPES.HORIZONTAL ||
-                                                  layoutSidebar ===
-                                                    SIDEBAR_SIZE.SMALL
-                                                }
-                                                closeOnOutsideClickSidebar={
-                                                  layoutType !==
-                                                  LAYOUT_TYPES.HORIZONTAL
-                                                }>
-                                                <DropdownButton
-                                                  colorClass={`nav-link ${
-                                                    isActive(child)
-                                                      ? 'active'
-                                                      : ''
-                                                  }`}
-                                                  arrow={true}>
-                                                  <span>{child.title}</span>
-                                                </DropdownButton>
-
-                                                <DropdownMenu
-                                                  handleMenuClick={
-                                                    handleMenuClick
-                                                  }
-                                                  sidebar={true}>
-                                                  <ul className="dropdown-wrapper">
-                                                    {child.children.map(
-                                                      (
-                                                        subChild: MegaMenu,
-                                                        subIndex: number
-                                                      ) => (
-                                                        <li key={subIndex}>
-                                                          <Link
-                                                            href={
-                                                              subChild.link
-                                                                ? subChild.link
-                                                                : '#'
-                                                            }
-                                                            className={`${
-                                                              router ===
-                                                              subChild.link
-                                                                ? 'active'
-                                                                : ''
-                                                            }`}>
-                                                            {subChild.title}
-                                                          </Link>
-                                                        </li>
-                                                      )
-                                                    )}
-                                                  </ul>
-                                                </DropdownMenu>
-                                              </Dropdown>
-                                            ) : (
-                                              <Link
-                                                href={child.link || '#'}
-                                                className={` content ${
-                                                  router === child.link
-                                                    ? 'active'
-                                                    : ''
-                                                }`}>
-                                                {t(child.lang)}
-                                              </Link>
-                                            )}
-                                          </li>
-                                        )
-                                      )}
-                                    </ul>
-                                  </DropdownMenu>
-                                </Dropdown>
-                              )}
-
-                            {/* Simple link without children */}
-                            {!item.separator &&
-                              !(item.children?.length ?? 0) &&
-                              item.link && (
-                                <Link
-                                  href={item.link}
-                                  className={`nav-link flex items-center gap-2 group-data-[sidebar=small]:px-2 group-data-[sidebar=small]:py-2 group-data-[sidebar=small]:mx-0 group-data-[sidebar=small]:h-10 group-data-[sidebar=small]:w-full group-data-[sidebar=small]:justify-center ${
-                                    router === item.link ? 'active' : ''
-                                  }`}>
-                                  <span className="group-data-[sidebar=small]:w-full group-data-[sidebar=small]:flex group-data-[sidebar=small]:justify-center">
+                                  arrow={true}>
+                                  <span className="w-6 group-data-[sidebar=small]:w-full group-data-[sidebar=small]:flex group-data-[sidebar=small]:justify-center shrink-0">
                                     {item.icon &&
                                       getLucideIcon(
                                         item.icon,
-                                        'size-4 group-data-[sidebar=small]:size-5 group-data-[sidebar=medium]:size-9'
+                                        'size-4 group-data-[sidebar=small]:size-9 group-data-[sidebar=medium]:size-9'
                                       )}
                                   </span>
                                   <span className="group-data-[sidebar=small]:hidden">
                                     {item.title}
                                   </span>
-                                </Link>
-                              )}
-                          </li>
-                        ))
+                                </DropdownButton>
+
+                                <DropdownMenu
+                                  handleMenuClick={handleMenuClick}
+                                  sidebar={true}>
+                                  <ul className="dropdown-wrapper">
+                                    {(item.children ?? []).map(
+                                      (
+                                        child: MegaMenu,
+                                        childIndex: number
+                                      ) => (
+                                        <li key={childIndex}>
+                                          {/* Check for nested children */}
+                                          {child.children &&
+                                            child.children.length > 0 ? (
+                                            <Dropdown
+                                              position="top-right"
+                                              trigger="click"
+                                              isActive={isActive(child)}
+                                              closeOnOutsideClick={
+                                                layoutType ===
+                                                LAYOUT_TYPES.HORIZONTAL ||
+                                                layoutSidebar ===
+                                                SIDEBAR_SIZE.SMALL
+                                              }
+                                              closeOnOutsideClickSidebar={
+                                                layoutType !==
+                                                LAYOUT_TYPES.HORIZONTAL
+                                              }>
+                                              <DropdownButton
+                                                colorClass={`nav-link ${isActive(child)
+                                                    ? 'active'
+                                                    : ''
+                                                  }`}
+                                                arrow={true}>
+                                                <span>{child.title}</span>
+                                              </DropdownButton>
+
+                                              <DropdownMenu
+                                                handleMenuClick={
+                                                  handleMenuClick
+                                                }
+                                                sidebar={true}>
+                                                <ul className="dropdown-wrapper">
+                                                  {child.children.map(
+                                                    (
+                                                      subChild: MegaMenu,
+                                                      subIndex: number
+                                                    ) => (
+                                                      <li key={subIndex}>
+                                                        <Link
+                                                          href={
+                                                            subChild.link
+                                                              ? subChild.link
+                                                              : '#'
+                                                          }
+                                                          className={`${router ===
+                                                              subChild.link
+                                                              ? 'active'
+                                                              : ''
+                                                            }`}>
+                                                          {subChild.title}
+                                                        </Link>
+                                                      </li>
+                                                    )
+                                                  )}
+                                                </ul>
+                                              </DropdownMenu>
+                                            </Dropdown>
+                                          ) : (
+                                            <Link
+                                              href={child.link || '#'}
+                                              className={` content ${router === child.link
+                                                  ? 'active'
+                                                  : ''
+                                                }`}>
+                                              {t(child.lang)}
+                                            </Link>
+                                          )}
+                                        </li>
+                                      )
+                                    )}
+                                  </ul>
+                                </DropdownMenu>
+                              </Dropdown>
+                            )}
+
+                          {/* Simple link without children */}
+                          {!item.separator &&
+                            !(item.children?.length ?? 0) &&
+                            item.link && (
+                              <Link
+                                href={item.link}
+                                className={`nav-link flex items-center gap-2 group-data-[sidebar=small]:px-2 group-data-[sidebar=small]:py-2 group-data-[sidebar=small]:mx-0 group-data-[sidebar=small]:h-10 group-data-[sidebar=small]:w-full group-data-[sidebar=small]:justify-center ${router === item.link ? 'active' : ''
+                                  }`}>
+                                <span className="group-data-[sidebar=small]:w-full group-data-[sidebar=small]:flex group-data-[sidebar=small]:justify-center">
+                                  {item.icon &&
+                                    getLucideIcon(
+                                      item.icon,
+                                      'size-4 group-data-[sidebar=small]:size-5 group-data-[sidebar=medium]:size-9'
+                                    )}
+                                </span>
+                                <span className="group-data-[sidebar=small]:hidden">
+                                  {item.title}
+                                </span>
+                              </Link>
+                            )}
+                        </li>
+                      ))
                     ) : (
                       ''
                     )}

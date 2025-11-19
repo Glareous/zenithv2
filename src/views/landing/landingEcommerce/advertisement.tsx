@@ -9,7 +9,7 @@ const Advertisement: React.FC = () => {
         <div className="absolute animate-marquee whitespace-nowrap will-change-transform">
           <h1 className="font-bold uppercase text-gray-500/10 dark:text-dark-500/20 text-8xl">
             &nbsp;Mens Fashion Winter Deal || Girls Fashion || Brand Clothes
-            Fashion || Up to 50% Discount in AgenticWeb Fashion
+            Fashion || Up to 50% Discount in Zenith Fashion
           </h1>
         </div>
       </div>

@@ -65,7 +65,7 @@ const SigninCreative: React.FC = () => {
     }
     // If all validations pass
     showAlert(
-      "You've successfully signed in to AgenticWeb!",
+      "You've successfully signed in to Zenith!",
       'bg-green-100 text-green-500'
     )
 

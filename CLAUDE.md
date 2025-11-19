@@ -41,7 +41,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Application Domain
 
-**AgenticWeb** is a multi-tenant SaaS platform for creating and managing AI-powered sales agents that operate via multiple communication channels. The platform follows a hierarchical structure:
+**Zenith** is a multi-tenant SaaS platform for creating and managing AI-powered sales agents that operate via multiple communication channels. The platform follows a hierarchical structure:
 
 1. **Organizations** - Top-level tenant (created on user signup)
 2. **Projects** - Containers for related products and agents
