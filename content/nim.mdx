@@ -1,0 +1,451 @@
+import { Callout, Steps, Tabs, FileTree } from 'nextra/components'
+
+# 🔒 NIM (Network Intrusion Management) Module
+
+<Callout type="info" emoji="ℹ️">
+  **Security & Fraud Detection System** - Monitor, detect, and prevent fraudulent transactions and security threats in real-time with advanced AI-powered analysis.
+</Callout>
+
+<br />
+## What is NIM?
+<br />
+The **NIM (Network Intrusion Management)** module is a comprehensive security and fraud detection system designed to identify suspicious transactions, monitor network activities, and protect your organization from fraudulent behavior and security threats.
+
+<br />
+
+### Security & Fraud Detection
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+  <div className="card card-body">
+    <h4 className="text-lg font-semibold mb-2">🚨 Fraud Detection</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Identify and flag suspicious transactions automatically
+    </p>
+  </div>
+  <div className="card card-body">
+    <h4 className="text-lg font-semibold mb-2">🔍 Real-time Monitoring</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Continuous surveillance of all transactions and activities
+    </p>
+  </div>
+  <div className="card card-body">
+    <h4 className="text-lg font-semibold mb-2">🤖 AI Analysis</h4>
+    <p className="text-sm text-gray-600 dark:text-gray-400">
+      Machine learning algorithms for pattern detection
+    </p>
+  </div>
+</div>
+
+<br />
+
+## ✨ Key Features
+
+<Tabs items={['Transaction Tracking', 'Fraud Detection', 'Security Management']}>
+  <Tabs.Tab>
+    ### Complete Transaction Monitoring
+    <br />
+    - ✅ Transaction ID tracking
+    - ✅ Amount and currency monitoring
+    - ✅ User identification
+    - ✅ Location tracking (IP address, city)
+    - ✅ Device information capture
+    - ✅ Timestamp logging
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ### Advanced Fraud Detection
+<br />
+    - 🚨 Automated fraud flagging
+    - 📊 Status tracking (PROCESSING/COMPLETED/FAILED)
+    - 💬 Detailed fraud reason documentation
+    - ⚡ Real-time alerts
+    - 🔍 Pattern recognition
+    - 📈 Risk scoring
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ### Security Tools
+    <br />
+
+    - 🔒 Access control and permissions
+    - 📝 Audit trail logging
+    - 🔄 Full CRUD operations
+    - 🎯 Incident response workflow
+    - 📊 Security analytics
+    - 🤖 AI-powered threat detection
+
+  </Tabs.Tab>
+</Tabs>
+
+<br />
+
+## 🚀 Getting Started
+
+<Steps>
+
+### Navigate to NIM/Fraud Detection
+
+Go to the Fraud Detection page from the sidebar menu under **SECURITY → Fraud Detection**
+
+### Review Flagged Transactions
+
+View all suspicious transactions that have been automatically flagged by the system
+
+### Investigate Transaction
+
+Click on a transaction to view complete details:
+
+- Transaction amount and ID
+- User information
+- Location and device data
+- Fraud indicators
+- AI analysis results
+
+### Update Status
+
+Change status as you investigate:
+
+- **PROCESSING** - Currently under review
+- **COMPLETED** - Investigation finished, action taken
+- **FAILED** - False positive or cleared
+
+### Document Findings
+
+Add detailed notes about fraud reasons and investigation results
+
+</Steps>
+
+<br />
+## 📊 Fraud Transaction Structure
+
+```typescript
+interface FraudTransaction {
+  id: string
+  transactionId: string // External transaction ID
+  amount: number // Transaction amount
+  currency: string // Currency code (USD, EUR, etc.)
+  userId: string // User who made the transaction
+  ipAddress: string // User's IP address
+  city?: string // Transaction location
+  deviceInfo?: string // Device information
+  fraudReason?: string // Reason flagged as fraud
+  status: 'PROCESSING' | 'COMPLETED' | 'FAILED'
+  projectId: string
+  agentId?: string // Fraud detection agent
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
+<Callout type="warning" emoji="⚠️">
+  All fraud transactions are logged and monitored. Investigation is required for all flagged transactions to ensure security.
+</Callout>
+
+<br />
+
+## 🎯 Transaction Status Flow
+
+<div className="card">
+  <div className="card-body">
+    <div className="overflow-x-auto">
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Description</th>
+            <th>Action Required</th>
+            <th>Indicator</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="font-semibold">PROCESSING</td>
+            <td>Under active investigation</td>
+            <td>Review and analyze transaction</td>
+            <td>
+              <span className="badge badge-warning">🟡 Investigating</span>
+            </td>
+          </tr>
+          <tr>
+            <td className="font-semibold">COMPLETED</td>
+            <td>Investigation finished, fraud confirmed</td>
+            <td>Action taken, case closed</td>
+            <td>
+              <span className="badge badge-error">🔴 Confirmed Fraud</span>
+            </td>
+          </tr>
+          <tr>
+            <td className="font-semibold">FAILED</td>
+            <td>False positive, legitimate transaction</td>
+            <td>Whitelist user/pattern if needed</td>
+            <td>
+              <span className="badge badge-success">🟢 Cleared</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<br />
+
+## 🔧 Common Operations
+
+<Tabs items={['Review Transaction', 'Investigate', 'Update Status', 'Report']}>
+  <Tabs.Tab>
+    ### Reviewing Flagged Transactions
+    <br />
+
+    1. Navigate to **Fraud Detection** page
+    2. View list of all flagged transactions
+    3. Sort by date, amount, or status
+    4. Filter by status (Processing/Completed/Failed)
+    5. Click on transaction for details
+
+    <Callout type="info">
+    New transactions appear automatically when flagged by AI
+    </Callout>
+
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    ### Investigating a Transaction
+    <br />
+
+    1. Click **View** button (👁️ eye icon)
+    2. Review transaction details:
+       - Amount and currency
+       - User information
+       - IP address and location
+       - Device information
+       - Time and date
+    3. Check for suspicious patterns
+    4. Cross-reference with user history
+    5. Analyze AI fraud indicators
+
+    <Callout>
+    Document all findings in the fraudReason field
+    </Callout>
+
+  </Tabs.Tab>
+
+<Tabs.Tab>
+  ### Updating Transaction Status
+  <br />
+  1. Locate the transaction in the list
+  2. Click **Edit** button (✏️ pencil icon)
+  3. Update status based on findings:
+     - **COMPLETED** if fraud confirmed
+     - **FAILED** if false positive
+     - Keep **PROCESSING** if more investigation needed
+  4. Add detailed fraud reason
+  5. Save changes
+
+  <Callout>
+  Always document the reason for status changes
+  </Callout>
+</Tabs.Tab>
+
+  <Tabs.Tab>
+    ### Generating Reports
+    <br />
+
+    1. Filter transactions by date range
+    2. Select status (Confirmed fraud, False positives, etc.)
+    3. Export transaction list
+    4. Analyze fraud patterns
+    5. Update security policies as needed
+
+    <Callout type="error" emoji="📊">
+    Regular reporting helps identify trends and improve detection
+    </Callout>
+
+  </Tabs.Tab>
+</Tabs>
+
+<br />
+
+## 🚨 Fraud Indicators
+
+<br />
+
+### Common Fraud Patterns:
+
+<div className="card">
+  <div className="card-body">
+    <div className="space-y-4">
+      <div>
+        <h4 className="font-semibold mb-2 flex items-center gap-2">
+          <span className="badge badge-error">HIGH RISK</span> Unusual Transaction Amount
+        </h4>
+        <p className="text-sm">Transaction significantly higher than user's average</p>
+      </div>
+      <div>
+        <h4 className="font-semibold mb-2 flex items-center gap-2">
+          <span className="badge badge-error">HIGH RISK</span> Multiple Locations
+        </h4>
+        <p className="text-sm">Transactions from different cities/countries in short time</p>
+      </div>
+      <div>
+        <h4 className="font-semibold mb-2 flex items-center gap-2">
+          <span className="badge badge-warning">MEDIUM RISK</span> New Device
+        </h4>
+        <p className="text-sm">Transaction from previously unknown device</p>
+      </div>
+      <div>
+        <h4 className="font-semibold mb-2 flex items-center gap-2">
+          <span className="badge badge-warning">MEDIUM RISK</span> Suspicious IP
+        </h4>
+        <p className="text-sm">IP address from high-risk country or known proxy</p>
+      </div>
+      <div>
+        <h4 className="font-semibold mb-2 flex items-center gap-2">
+          <span className="badge badge-info">LOW RISK</span> Velocity Check
+        </h4>
+        <p className="text-sm">Multiple transactions in rapid succession</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br />
+
+## 🔐 Project Integration
+
+<Callout type="info" emoji="🏢">
+  The NIM module is **project-scoped** for secure fraud management.
+</Callout>
+<br />
+
+### Key Points:
+
+<br />
+
+- ✅ Each fraud case belongs to a specific project
+- ✅ AI agents automatically assigned from organization
+- ✅ Transactions isolated per project for security
+- ✅ Only authorized project members can access fraud data
+- ✅ Complete audit trail maintained
+
+<br />
+
+## 🛠️ API Reference
+
+The module uses **tRPC** for type-safe API calls:
+
+```typescript
+// Get all fraud transactions for a project
+projectFraudTransaction.getByProject({
+  projectId: string,
+  status?: 'PROCESSING' | 'COMPLETED' | 'FAILED',
+  page?: number,
+  limit?: number
+})
+
+// Create a new fraud transaction (usually automated)
+projectFraudTransaction.create({
+  transactionId,
+  amount,
+  currency,
+  userId,
+  ipAddress,
+  city,
+  deviceInfo,
+  fraudReason,
+  status,
+  projectId
+})
+
+// Update fraud transaction investigation
+projectFraudTransaction.update({
+  id: string,
+  status,
+  fraudReason
+})
+
+// Delete fraud transaction record
+projectFraudTransaction.delete({ id: string })
+
+// Get transaction by ID
+projectFraudTransaction.getById({ id: string })
+```
+
+<br />
+
+## ✅ Best Practices
+
+<br />
+
+1. **Timely Investigation** - Review flagged transactions within 24 hours
+2. **Detailed Documentation** - Always document fraud reasons and investigation findings
+3. **Pattern Recognition** - Look for patterns across multiple transactions
+4. **Regular Reviews** - Periodically review false positives to improve detection
+5. **Update Policies** - Adjust fraud rules based on investigation results
+6. **User Communication** - Contact users for verification when needed
+
+<br />
+
+## 🛡️ Security Best Practices
+
+<br />
+
+### Protecting Your Organization:
+
+- **Multi-factor Analysis** - Never rely on single indicator
+- **User Verification** - Contact users for high-value transactions
+- **Regular Audits** - Review fraud detection accuracy monthly
+- **Team Training** - Keep security team updated on fraud trends
+- **Policy Updates** - Adjust thresholds based on business needs
+- **Data Privacy** - Handle user data according to privacy regulations
+
+<br />
+
+## ❓ Troubleshooting
+
+<Callout type="warning">
+  ### "Please select a project first" **Solution**: Select a project from the
+  project selector before accessing the Fraud Detection module.
+</Callout>
+
+<Callout type="warning">
+  ### Too many false positives **Solution**:
+  - Review and adjust fraud detection thresholds
+  - Whitelist trusted users or patterns
+  - Analyze common characteristics of false positives
+  - Update AI model training data
+</Callout>
+
+<Callout type="warning">
+  ### Transaction not appearing in list **Solution**:
+  1. Verify you're viewing the correct project
+  2. Check status filters
+  3. Refresh the page
+  4. Ensure transaction was properly flagged
+</Callout>
+
+<Callout type="warning">
+  ### Cannot update transaction status **Solution**:
+  - Verify you have edit permissions
+  - Check that transaction ID is valid
+  - Ensure you're providing fraud reason
+  - Try refreshing the page
+</Callout>
+
+<br />
+
+## 🆘 Support
+
+<br />
+Need help with the NIM/Fraud Detection module?
+
+- 🔒 Contact your security administrator
+- 👨‍💼 Reach out to your system administrator
+- 🤖 Check the AI Agent section for automated assistance
+- 📄 Review your organization's security policies
+- 📧 Contact fraud prevention team for escalations
+
+<br />
+
+<Callout type="default" emoji="📅">
+  *Last updated: {new Date().toLocaleDateString()}*
+</Callout>
