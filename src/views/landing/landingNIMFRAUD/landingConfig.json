@@ -10,7 +10,7 @@
             "description": "Official NVIDIA reference architecture using Graph Neural Networks, RAPIDS acceleration and Dynamo-Triton inference. Delivers up to 40% higher accuracy, sub-10ms latency and full SHAP explainability. Production-ready with NVIDIA AI Enterprise."
         },
         "images": {
-            "mainHome": "/assets/images/hospital/landing/main-home.png",
+            "mainHome": "/assets/images/hospital/landing/main-fraud.png",
             "whiteLogo": "/assets/images/logo-white.png",
             "darkLogo": "/assets/images/main-logo.png"
         },

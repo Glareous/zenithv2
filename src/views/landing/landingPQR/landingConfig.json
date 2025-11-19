@@ -10,7 +10,7 @@
             "description": "Our proprietary AI model (gtt-oos-20B) instantly analyzes every incoming PQR: detects active fraud, identity theft, legal actions, high emotional distress, and VIP clients. Automatically prioritizes, assigns SLA, and provides full transparency with clear explanations. Real-time protection for your clients and your business reputation."
         },
         "images": {
-            "mainHome": "/assets/images/hospital/landing/main-home.png",
+            "mainHome": "/assets/images/hospital/landing/main-pqr.png",
             "whiteLogo": "/assets/images/logo-white.png",
             "darkLogo": "/assets/images/main-logo.png"
         },

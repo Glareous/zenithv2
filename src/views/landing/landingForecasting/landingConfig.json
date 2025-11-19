@@ -10,7 +10,7 @@
             "description": "Upload your time series and let a GPU-powered NHITS model, built with neuralforecast and PyTorch, generate multi-step forecasts with probabilistic intervals. Designed for high-frequency signals and large-scale deployments."
         },
         "images": {
-            "mainHome": "/assets/images/hospital/landing/main-home.png",
+            "mainHome": "/assets/images/hospital/landing/main-forecasting.png",
             "whiteLogo": "/assets/images/logo-white.png",
             "darkLogo": "/assets/images/main-logo.png"
         },
