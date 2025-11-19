@@ -267,7 +267,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ handleModal }) => {
             </h6>
             <p className="text-gray-500 dark:text-dark-500">
               For more information, visit our website or contact us at
-              SRBThemes. We can’t wait to see you there!
+              Cognitiva IA. We can’t wait to see you there!
             </p>
           </div>
         </div>

@@ -135,7 +135,7 @@ const ToolTipMap: React.FC = () => {
             pointerEvents: 'none',
           }}>
           <h6 className="mb-2">{hovered} - Country</h6>
-          <p className="text-xs">Get better UX with SRBThemes.</p>
+          <p className="text-xs">Get better UX with Cognitiva IA.</p>
         </div>
       )}
     </div>

@@ -298,7 +298,7 @@ const InvoiceCreate: NextPageWithLayout = () => {
         'PEI'
       )
       newInvoice.companyEmail = 'support@example.com'
-      newInvoice.companyName = 'SRBThemes'
+      newInvoice.companyName = 'Cognitiva IA'
       newInvoice.companyPhoneNumber = '+(021) 1452 023 021'
       newInvoice.content = 'Front End Development'
       newInvoice.country = 'New York'
@@ -531,7 +531,7 @@ const InvoiceCreate: NextPageWithLayout = () => {
                   <input
                     type="email"
                     id="clientEmail"
-                    placeholder="srbThemes@gmail.com"
+                    placeholder="Cognitiva IA@gmail.com"
                     className="form-input"
                     {...register('clientEmail', {
                       required: 'Client Name is required.',
@@ -578,11 +578,10 @@ const InvoiceCreate: NextPageWithLayout = () => {
                     id="invoiceIDInput"
                     className="form-input"
                     disabled
-                    value={`#${
-                      invoiceList
+                    value={`#${invoiceList
                         ? getRecordId(invoiceList, 'invoiceId', 'PEI')
                         : 'PEI-0001'
-                    }`}
+                      }`}
                   />
                 </div>
                 <div className="col-span-12 md:col-span-6 lg:col-span-3">

@@ -101,7 +101,7 @@ const ContactUsTwo: NextPageWithLayout = () => {
                 className="mx-auto rounded-md shadow-lg size-32 shrink-0"
               />
               <div className="mt-5 text-center grow">
-                <h5 className="mb-1">SRBThemes</h5>
+                <h5 className="mb-1">Cognitiva IA</h5>
                 <p className="mb-3 text-gray-500 dark:text-dark-500">
                   IT Company
                 </p>

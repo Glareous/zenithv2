@@ -70,7 +70,7 @@ const ContactUs: NextPageWithLayout = () => {
                   className="rounded-md size-14 shrink-0"
                 />
                 <div className="grow">
-                  <h6>SRBThemes</h6>
+                  <h6>Cognitiva IA</h6>
                   <p className="mb-3 text-gray-500 dark:text-dark-500">
                     IT Company
                   </p>

@@ -69,7 +69,7 @@ const UserNotesContent: React.FC = () => {
                 <h6 className="font-medium">
                   <Globe className="inline-block text-gray-500 ltr:mr-2 rtl:ml-2 dark:text-dark-500 size-4"></Globe>
                   <Link href="#!" className="align-middle whitespace-nowrap">
-                    www.srbthemes.com
+                    www.Cognitiva IA.com
                   </Link>
                 </h6>
                 <h6 className="font-medium">
@@ -91,7 +91,7 @@ const UserNotesContent: React.FC = () => {
                 <h6 className="font-medium">
                   <i className="ri-twitter-line text-[20px] inline-block text-gray-500 ltr:mr-2 rtl:ml-2 dark:text-dark-500 size-4"></i>
                   <span className="align-middle whitespace-nowrap">
-                    SRBThemes
+                    Cognitiva IA
                   </span>
                 </h6>
               </div>

@@ -29,11 +29,10 @@ const OrderTrack: NextPageWithLayout = () => {
                 <Link
                   href="#"
                   onClick={() => setActiveTab(1)}
-                  className={`nav-item ${
-                    activeTab === 1
+                  className={`nav-item ${activeTab === 1
                       ? 'bg-gray-100 text-gray-800 dark:bg-dark-800 dark:text-dark-50'
                       : 'text-gray-500 dark:text-dark-500 hover:text-primary-500 dark:hover:text-primary-500'
-                  }`}>
+                    }`}>
                   Overview
                 </Link>
               </li>
@@ -41,11 +40,10 @@ const OrderTrack: NextPageWithLayout = () => {
                 <Link
                   href="#"
                   onClick={() => setActiveTab(2)}
-                  className={`nav-item ${
-                    activeTab === 2
+                  className={`nav-item ${activeTab === 2
                       ? 'bg-gray-100 text-gray-800 dark:bg-dark-800 dark:text-dark-50'
                       : 'text-gray-500 dark:text-dark-500 hover:text-primary-500 dark:hover:text-primary-500'
-                  }`}>
+                    }`}>
                   Map View
                 </Link>
               </li>
@@ -86,7 +84,7 @@ const OrderTrack: NextPageWithLayout = () => {
                     <p className="mb-1 text-gray-500 dark:text-dark-500">
                       Courier Partner
                     </p>
-                    <h6>SRBThemes</h6>
+                    <h6>Cognitiva IA</h6>
                   </div>
                   <div className="col-span-12 md:col-span-6 xl:col-span-3">
                     <p className="mb-1 text-gray-500 dark:text-dark-500">
@@ -151,7 +149,7 @@ const OrderTrack: NextPageWithLayout = () => {
                     <p className="mb-1 text-gray-500 dark:text-dark-500">
                       Courier Partner
                     </p>
-                    <h6>SRBThemes</h6>
+                    <h6>Cognitiva IA</h6>
                   </div>
                   <div>
                     <p className="mb-1 text-gray-500 dark:text-dark-500">
