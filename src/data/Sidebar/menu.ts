@@ -297,7 +297,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'Documentation',
-        link: '/docs/nim-fraud',
+        link: '/docs/nim',
         lang: 'Documentation',
       },
     ],
@@ -350,7 +350,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'Documentation',
-        link: '/docs/leads',
+        link: '/docs/lead',
         lang: 'Documentation',
       },
       {
