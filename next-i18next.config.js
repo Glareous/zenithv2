@@ -16,6 +16,6 @@ module.exports = {
       'ko',
       'pt',
     ], // Define your supported languages here
-    defaultLocale: 'en', // Set your default language
+    defaultLocale: 'en', // Set your default languagess
   },
 }
