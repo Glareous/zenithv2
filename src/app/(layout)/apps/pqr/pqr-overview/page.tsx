@@ -42,7 +42,10 @@ const PQROverviewContent = () => {
     data: pqr,
     isLoading,
     refetch,
-  } = api.projectPQR.getById.useQuery({ id: pqrId || '' }, { enabled: !!pqrId })
+  } = api.projectPQR.getById.useQuery(
+    { id: pqrId || '' },
+    { enabled: !!pqrId }
+  )
 
   const {
     register,
@@ -185,11 +188,10 @@ const PQROverviewContent = () => {
                     {pqr.documentNumber}
                   </span>
                   <span
-                    className={`badge ${
-                      pqr.status === 'COMPLETED'
-                        ? 'badge-success'
-                        : 'badge-warning'
-                    }`}>
+                    className={`badge ${pqr.status === 'COMPLETED'
+                      ? 'badge-success'
+                      : 'badge-warning'
+                      }`}>
                     {pqr.status}
                   </span>
                 </div>
@@ -268,111 +270,180 @@ const PQROverviewContent = () => {
             </div>
           </div>
         </div>
-        <div className="card">
-          <div className="card-body space-y-5">
-            <div className="space-y-3">
-              <h5>Analysis</h5>
-              <p className="text-gray-600 dark:text-gray-400">
-                High-priority billing complaint with 75% business risk. Customer
-                is frustrated about overcharge and requests immediate refund.
-                Urgent action required to prevent customer churn.
-              </p>
-            </div>
-
-            {/* Analysis Table - MOCKUP DATA (Horizontal Layout) */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-xs uppercase bg-gray-50 dark:bg-dark-850">
-                  <tr>
-                    <th className="px-3 py-3 text-center">Type</th>
-                    <th className="px-3 py-3 text-center">Priority</th>
-                    <th className="px-3 py-3 text-center">Risk</th>
-                    <th className="px-3 py-3 text-center">SLA</th>
-                    <th className="px-3 py-3 text-center">Sentiment</th>
-                    <th className="px-3 py-3 text-center">Emotion</th>
-                    <th className="px-3 py-3 text-center">Topic</th>
-                    <th className="px-3 py-3 text-center">PTS</th>
-                    <th className="px-3 py-3 text-center">Override</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-t border-gray-200 dark:border-dark-700">
-                    <td className="px-3 py-4 text-center">
-                      <span className="badge badge-primary">COMPLAINT</span>
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <span className="badge badge-danger">HIGH</span>
-                    </td>
-                    <td className="px-3 py-4">
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="font-semibold text-red-600">75%</span>
-                        <div className="w-20 h-2 bg-gray-200 rounded-full dark:bg-dark-700">
-                          <div
-                            className="h-2 bg-red-600 rounded-full"
-                            style={{ width: '75%' }}
-                          />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <span className="badge badge-warning">AT_RISK</span>
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <span className="badge badge-danger">NEGATIVE</span>
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <span className="badge badge-warning">FRUSTRATED</span>
-                    </td>
-                    <td className="px-3 py-4 text-center font-medium">
-                      Billing & Payment
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <span className="">85</span>
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <span className="badge badge-success">No</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Keywords Section */}
-            <div className="flex items-start gap-3">
-              <span className="font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                Keywords:
-              </span>
-              <div className="flex flex-wrap gap-1">
-                <span className="badge badge-secondary badge-sm">payment</span>
-                <span className="badge badge-secondary badge-sm">
-                  overcharge
-                </span>
-                <span className="badge badge-secondary badge-sm">refund</span>
-                <span className="badge badge-secondary badge-sm">billing</span>
-              </div>
-            </div>
-
-            {/* Full Analysis Text */}
-            <div className="mt-4">
-              <h6 className="mb-2 text-gray-700 dark:text-gray-300">
-                Detailed Analysis
-              </h6>
-              <div className="p-4 bg-gray-50 dark:bg-dark-850 rounded-lg">
-                <p className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
-                  The customer has expressed significant frustration regarding a
-                  billing discrepancy. The analysis indicates a high-priority
-                  complaint with substantial business risk (75%). The customer
-                  mentions being overcharged on their last invoice and requests
-                  an immediate refund. The negative sentiment and frustrated
-                  emotional state suggest this issue requires urgent attention
-                  to prevent customer churn. The SLA is currently at risk, and
-                  immediate action is recommended to address the billing error
-                  and restore customer confidence.
+        {/* Analysis Section - Only show when status is COMPLETED and analysis exists */}
+        {pqr.status === 'COMPLETED' && pqr.analysis && (
+          <div className="card">
+            <div className="card-body space-y-5">
+              <div className="space-y-3">
+                <h5>Analysis</h5>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {pqr.analysis.analysis.split('\n')[0]}
                 </p>
+              </div>
+
+              {/* Analysis Table - Real Data */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-xs uppercase bg-gray-50 dark:bg-dark-850">
+                    <tr>
+                      <th className="px-3 py-3 text-center">Type</th>
+                      <th className="px-3 py-3 text-center">Priority</th>
+                      <th className="px-3 py-3 text-center">Risk</th>
+                      <th className="px-3 py-3 text-center">SLA</th>
+                      <th className="px-3 py-3 text-center">Sentiment</th>
+                      <th className="px-3 py-3 text-center">Emotion</th>
+                      <th className="px-3 py-3 text-center">Topic</th>
+                      {pqr.analysis.pts && (
+                        <th className="px-3 py-3 text-center">PTS</th>
+                      )}
+                      <th className="px-3 py-3 text-center">Override</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-t border-gray-200 dark:border-dark-700">
+                      <td className="px-3 py-4 text-center">
+                        <span
+                          className={`badge ${
+                            pqr.analysis.type === 'COMPLAINT'
+                              ? 'badge-danger'
+                              : pqr.analysis.type === 'CLAIM'
+                                ? 'badge-warning'
+                                : 'badge-primary'
+                          }`}>
+                          {pqr.analysis.type}
+                        </span>
+                      </td>
+                      <td className="px-3 py-4 text-center">
+                        <span
+                          className={`badge ${
+                            pqr.analysis.priority === 'CRITICAL' ||
+                            pqr.analysis.priority === 'HIGH'
+                              ? 'badge-danger'
+                              : pqr.analysis.priority === 'MEDIUM'
+                                ? 'badge-warning'
+                                : 'badge-success'
+                          }`}>
+                          {pqr.analysis.priority}
+                        </span>
+                      </td>
+                      <td className="px-3 py-4">
+                        <div className="flex flex-col items-center gap-1">
+                          <span
+                            className={`font-semibold ${
+                              parseInt(pqr.analysis.risk) >= 75
+                                ? 'text-red-600'
+                                : parseInt(pqr.analysis.risk) >= 50
+                                  ? 'text-orange-600'
+                                  : parseInt(pqr.analysis.risk) >= 25
+                                    ? 'text-yellow-600'
+                                    : 'text-green-600'
+                            }`}>
+                            {pqr.analysis.risk}
+                          </span>
+                          <div className="w-20 h-2 bg-gray-200 rounded-full dark:bg-dark-700">
+                            <div
+                              className={`h-2 rounded-full ${
+                                parseInt(pqr.analysis.risk) >= 75
+                                  ? 'bg-red-600'
+                                  : parseInt(pqr.analysis.risk) >= 50
+                                    ? 'bg-orange-600'
+                                    : parseInt(pqr.analysis.risk) >= 25
+                                      ? 'bg-yellow-600'
+                                      : 'bg-green-600'
+                              }`}
+                              style={{
+                                width: pqr.analysis.risk,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-4 text-center">
+                        <span
+                          className={`badge ${
+                            pqr.analysis.sla === 'BREACHED'
+                              ? 'badge-danger'
+                              : pqr.analysis.sla === 'AT_RISK'
+                                ? 'badge-warning'
+                                : 'badge-success'
+                          }`}>
+                          {pqr.analysis.sla}
+                        </span>
+                      </td>
+                      <td className="px-3 py-4 text-center">
+                        <span
+                          className={`badge ${
+                            pqr.analysis.sentiment === 'NEGATIVE'
+                              ? 'badge-danger'
+                              : pqr.analysis.sentiment === 'NEUTRAL'
+                                ? 'badge-secondary'
+                                : 'badge-success'
+                          }`}>
+                          {pqr.analysis.sentiment}
+                        </span>
+                      </td>
+                      <td className="px-3 py-4 text-center">
+                        <span className="badge badge-secondary">
+                          {pqr.analysis.emotion}
+                        </span>
+                      </td>
+                      <td className="px-3 py-4 text-center font-medium">
+                        {pqr.analysis.topic}
+                      </td>
+                      {pqr.analysis.pts && (
+                        <td className="px-3 py-4 text-center">
+                          <span className="">{pqr.analysis.pts}</span>
+                        </td>
+                      )}
+                      <td className="px-3 py-4 text-center">
+                        <span
+                          className={`badge ${
+                            pqr.analysis.override
+                              ? 'badge-warning'
+                              : 'badge-success'
+                          }`}>
+                          {pqr.analysis.override ? 'Yes' : 'No'}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Keywords Section */}
+              {pqr.analysis.keywords && (
+                <div className="flex items-start gap-3">
+                  <span className="font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                    Keywords:
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {pqr.analysis.keywords
+                      .split(',')
+                      .map((keyword, index) => (
+                        <span
+                          key={index}
+                          className="badge badge-secondary badge-sm">
+                          {keyword.trim()}
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Full Analysis Text */}
+              <div className="mt-4">
+                <h6 className="mb-2 text-gray-700 dark:text-gray-300">
+                  Detailed Analysis
+                </h6>
+                <div className="p-4 bg-gray-50 dark:bg-dark-850 rounded-lg">
+                  <p className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
+                    {pqr.analysis.analysis}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Edit Modal */}
