@@ -42,6 +42,11 @@ enum ChatStatus {
     ARCHIVED
 }
 
+enum ChatType {
+    EMPLOYEE  // Chat with employees (current default)
+    ADVISOR   // Direct chat with advisor agent (user-to-agent)
+}
+
 enum MessageMediaType {
     TEXT
     IMAGE
@@ -532,6 +537,7 @@ model Chat {
     userId          String   // Identifier for the user chatting (can be external user or employee ID)
 
     // Chat metadata
+    chatType        ChatType @default(EMPLOYEE) // Type of chat: EMPLOYEE or ADVISOR
     status          ChatStatus @default(ACTIVE)
     startedAt       DateTime @default(now())
     endedAt         DateTime?
@@ -542,13 +548,15 @@ model Chat {
     agent           ProjectAgent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
     agentId         String
     employee        ProjectEmployee?    @relation(fields: [employeeId], references: [id], onDelete: SetNull)
-    employeeId      String?             // Optional: Link to employee if chat is for an employee
+    employeeId      String?             // Optional: Link to employee if chat is for an employee (NULL for ADVISOR chats)
     messages        Message[]
 
     @@index([agentId])
     @@index([userId])
     @@index([employeeId])
     @@index([status])
+    @@index([chatType])
+    @@index([userId, chatType]) // For querying user's chats by type
 }
 
 // Message model - individual messages in a chat

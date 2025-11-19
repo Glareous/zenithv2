@@ -6,14 +6,17 @@ import Image from 'next/image'
 
 import { api } from '@src/trpc/react'
 import { Bot, ChevronsLeft, Phone, Send, Video } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import { toast } from 'react-toastify'
 import SimpleBar from 'simplebar-react'
 import { Socket, io } from 'socket.io-client'
 
 interface UserChatBoardProps {
   selectedChatId: string | null
-  selectedEmployeeId: string | null
-  onBack: () => void
+  selectedEmployeeId?: string | null  // Optional for ADVISOR type
+  onBack?: () => void                 // Optional for desktop view
+  chatType?: 'EMPLOYEE' | 'ADVISOR'   // Type of chat
+  showEmployeeInfo?: boolean          // Show employee info in header
 }
 
 interface Message {
@@ -30,6 +33,8 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
   selectedChatId,
   selectedEmployeeId,
   onBack,
+  chatType = 'EMPLOYEE',
+  showEmployeeInfo = true,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const socketRef = useRef<Socket | null>(null)
@@ -38,6 +43,7 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
   const [isTyping, setIsTyping] = useState(false)
   const [isSending, setIsSending] = useState(false)
 
+  const { data: session } = useSession()
   const utils = api.useUtils()
 
   // Get chat details
@@ -69,13 +75,18 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
   const markAsReadMutation = api.projectMessage.markAsRead.useMutation({
     onSuccess: () => {
       // Invalidate chat list to update unread count badges
-      utils.projectChat.getByEmployeeId.invalidate()
+      if (chatType === 'EMPLOYEE') {
+        utils.projectChat.getByEmployeeId.invalidate()
+      } else {
+        utils.projectChat.getByUserId.invalidate()
+      }
     },
   })
 
   // Initialize WebSocket connection
   useEffect(() => {
     if (!selectedChatId) return
+    if (!chat) return // Wait for chat data to be loaded
 
     // Clear realtime messages when changing chat
     setRealtimeMessages([])
@@ -96,10 +107,10 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
 
     socket.on('connect', () => {
       console.log('WebSocket connected:', socket.id)
-      // Join the chat room
+      // Join the chat room with the correct userId from the chat
       socket.emit('join-chat', {
         chatId: selectedChatId,
-        userId: selectedEmployeeId,
+        userId: chat.userId, // Use chat.userId instead of selectedEmployeeId
       })
     })
 
@@ -118,7 +129,11 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
       }
 
       // Invalidate chat list to update last message preview and unread count
-      utils.projectChat.getByEmployeeId.invalidate()
+      if (chatType === 'EMPLOYEE') {
+        utils.projectChat.getByEmployeeId.invalidate()
+      } else {
+        utils.projectChat.getByUserId.invalidate()
+      }
     })
 
     // Listen for typing indicators
@@ -139,7 +154,7 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
       }
       socket.disconnect()
     }
-  }, [selectedChatId, selectedEmployeeId, refetchMessages])
+  }, [selectedChatId, chat])
 
   // Combine initial messages with realtime messages
   const allMessages = [
@@ -219,9 +234,11 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
             <div className="text-center">
               <p className="text-lg">Select a chat to view messages</p>
               <p className="text-sm mt-2">
-                {selectedEmployeeId
-                  ? 'Choose a chat from the list or create a new one'
-                  : 'Select an employee first'}
+                {chatType === 'ADVISOR'
+                  ? 'Create a new chat to start conversation with your advisor'
+                  : selectedEmployeeId
+                    ? 'Choose a chat from the list or create a new one'
+                    : 'Select an employee first'}
               </p>
             </div>
           </div>
@@ -254,12 +271,34 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
     )
   }
 
+  // User info for messages (EMPLOYEE uses employee, ADVISOR uses session user)
+  const userName = chatType === 'ADVISOR'
+    ? session?.user?.name || 'User'
+    : chat.employee
+      ? `${chat.employee.firstName} ${chat.employee.lastName}`
+      : chat.userId
+
+  const userInitials = chatType === 'ADVISOR'
+    ? session?.user?.name
+      ? session.user.name.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()
+      : 'U'
+    : chat.employee
+      ? `${chat.employee.firstName.charAt(0)}${chat.employee.lastName.charAt(0)}`
+      : chat.userId.substring(0, 2).toUpperCase()
+
+  const userImage = chatType === 'ADVISOR'
+    ? session?.user?.image || null
+    : chat.employee?.image || null
+
+  // Employee info for header (only used in EMPLOYEE type)
   const employeeName = chat.employee
     ? `${chat.employee.firstName} ${chat.employee.lastName}`
     : chat.userId
   const employeeInitials = chat.employee
     ? `${chat.employee.firstName.charAt(0)}${chat.employee.lastName.charAt(0)}`
     : chat.userId.substring(0, 2).toUpperCase()
+
+  // Agent info
   const agentInitials = chat.agent?.name
     ? chat.agent.name.substring(0, 2).toUpperCase()
     : 'AI'
@@ -271,36 +310,65 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
         <div className="card-body">
           {/* Header */}
           <div className="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-dark-800">
-            <button
-              onClick={onBack}
-              className="xl:hidden p-2 hover:bg-gray-100 dark:hover:bg-dark-850 rounded-lg transition">
-              <ChevronsLeft className="size-5" />
-            </button>
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="xl:hidden p-2 hover:bg-gray-100 dark:hover:bg-dark-850 rounded-lg transition">
+                <ChevronsLeft className="size-5" />
+              </button>
+            )}
 
             <div className="flex items-center gap-3 grow">
-              <div className="relative flex items-center justify-center font-semibold bg-gray-100 rounded-full dark:bg-dark-850 size-12 shrink-0">
-                {chat.employee?.image ? (
-                  <Image
-                    src={chat.employee.image}
-                    alt={employeeName}
-                    className="rounded-full size-12 object-cover"
-                    width={48}
-                    height={48}
-                  />
-                ) : (
-                  <span>{employeeInitials}</span>
-                )}
-                {chat.status === 'ACTIVE' && (
-                  <span className="absolute bottom-0 right-0 bg-green-500 border-2 border-white dark:border-dark-900 rounded-full size-3"></span>
-                )}
-              </div>
+              {showEmployeeInfo ? (
+                <>
+                  <div className="relative flex items-center justify-center font-semibold bg-gray-100 rounded-full dark:bg-dark-850 size-12 shrink-0">
+                    {chat.employee?.image ? (
+                      <Image
+                        src={chat.employee.image}
+                        alt={employeeName}
+                        className="rounded-full size-12 object-cover"
+                        width={48}
+                        height={48}
+                      />
+                    ) : (
+                      <span>{employeeInitials}</span>
+                    )}
+                    {chat.status === 'ACTIVE' && (
+                      <span className="absolute bottom-0 right-0 bg-green-500 border-2 border-white dark:border-dark-900 rounded-full size-3"></span>
+                    )}
+                  </div>
 
-              <div className="grow">
-                <h6 className="mb-0.5">{employeeName}</h6>
-                <p className="text-sm text-gray-500 dark:text-dark-500">
-                  {chat.agent?.name || 'Chat Agent'}
-                </p>
-              </div>
+                  <div className="grow">
+                    <h6 className="mb-0.5">{employeeName}</h6>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="relative flex items-center justify-center font-semibold bg-gradient-to-br from-primary-500 to-purple-500 rounded-full size-12 shrink-0">
+                    {agentImage ? (
+                      <Image
+                        src={agentImage}
+                        alt={chat.agent?.name || 'Advisor'}
+                        className="rounded-full size-12 object-cover"
+                        width={48}
+                        height={48}
+                      />
+                    ) : (
+                      <span className="text-white">{agentInitials}</span>
+                    )}
+                    {chat.status === 'ACTIVE' && (
+                      <span className="absolute bottom-0 right-0 bg-green-500 border-2 border-white dark:border-dark-900 rounded-full size-3"></span>
+                    )}
+                  </div>
+
+                  <div className="grow">
+                    <h6 className="mb-0.5">{chat.agent?.name || 'Digital Advisor'}</h6>
+                    <p className="text-sm text-gray-500 dark:text-dark-500">
+                      AI Assistant
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Audio/Video call buttons (disabled for now) */}
@@ -331,16 +399,16 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
                       {/* Avatar - show on left for USER, right for AGENT */}
                       {!isAgent && (
                         <div className="flex items-center justify-center font-semibold bg-gray-100 rounded-full dark:bg-dark-850 size-8 shrink-0">
-                          {chat.employee?.image ? (
+                          {userImage ? (
                             <Image
-                              src={chat.employee.image}
-                              alt={employeeName}
+                              src={userImage}
+                              alt={userName}
                               className="rounded-full size-8 object-cover"
                               width={32}
                               height={32}
                             />
                           ) : (
-                            <span className="text-xs">{employeeInitials}</span>
+                            <span className="text-xs">{userInitials}</span>
                           )}
                         </div>
                       )}

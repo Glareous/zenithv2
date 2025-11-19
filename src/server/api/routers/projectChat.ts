@@ -6,6 +6,7 @@ const createChatSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
   agentId: z.string().min(1, 'Agent ID is required'),
   employeeId: z.string().optional(),
+  chatType: z.enum(['EMPLOYEE', 'ADVISOR']).default('EMPLOYEE'),
   metadata: z.any().optional(),
 })
 
@@ -21,7 +22,7 @@ export const projectChatRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createChatSchema)
     .mutation(async ({ ctx, input }) => {
-      const { agentId, userId, employeeId, metadata } = input
+      const { agentId, userId, employeeId, chatType, metadata } = input
 
       // Verify agent exists and user has access
       const agent = await ctx.db.projectAgent.findFirst({
@@ -78,6 +79,7 @@ export const projectChatRouter = createTRPCRouter({
           userId,
           agentId,
           employeeId,
+          chatType,
           status: 'ACTIVE',
           metadata: metadata || {},
         },
@@ -180,12 +182,13 @@ export const projectChatRouter = createTRPCRouter({
         userId: z.string(),
         agentId: z.string().optional(),
         status: z.enum(['ACTIVE', 'CLOSED', 'ARCHIVED']).optional(),
+        chatType: z.enum(['EMPLOYEE', 'ADVISOR']).optional(),
         page: z.number().min(1).default(1),
         limit: z.number().min(1).max(100).default(20),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { userId, agentId, status, page, limit } = input
+      const { userId, agentId, status, chatType, page, limit } = input
       const skip = (page - 1) * limit
 
       const where: any = {
@@ -216,6 +219,10 @@ export const projectChatRouter = createTRPCRouter({
         where.status = status
       }
 
+      if (chatType) {
+        where.chatType = chatType
+      }
+
       const [chats, totalCount] = await Promise.all([
         ctx.db.chat.findMany({
           where,
@@ -229,8 +236,19 @@ export const projectChatRouter = createTRPCRouter({
             },
             _count: {
               select: {
-                messages: true,
+                messages: {
+                  where: {
+                    type: 'AGENT',
+                    isRead: false,
+                  },
+                },
               },
+            },
+            messages: {
+              orderBy: {
+                timestamp: 'desc',
+              },
+              take: 1,
             },
           },
           skip,

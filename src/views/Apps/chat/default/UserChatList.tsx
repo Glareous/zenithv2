@@ -12,33 +12,48 @@ import { toast } from 'react-toastify'
 import SimpleBar from 'simplebar-react'
 
 interface UserChatListProps {
-  selectedEmployeeId: string | null
+  selectedEmployeeId?: string | null  // Optional for ADVISOR type
   selectedChatId: string | null
   onSelectChat: (chatId: string) => void
+  chatType?: 'EMPLOYEE' | 'ADVISOR'   // Type of chat
+  userId?: string                      // Current user ID for ADVISOR chats
 }
 
 const UserChatList: React.FC<UserChatListProps> = ({
   selectedEmployeeId,
   selectedChatId,
   onSelectChat,
+  chatType = 'EMPLOYEE',
+  userId,
 }) => {
   const { currentProject } = useSelector((state: RootState) => state.Project)
   const [searchValue, setSearchValue] = useState('')
 
-  // Get chats for selected employee
+  // Get chats - either by employee or by user (for ADVISOR)
   const {
     data: chatsData,
     isLoading,
     refetch,
-  } = api.projectChat.getByEmployeeId.useQuery(
-    {
-      employeeId: selectedEmployeeId || '',
-      status: 'ACTIVE',
-    },
-    {
-      enabled: !!selectedEmployeeId,
-    }
-  )
+  } = chatType === 'EMPLOYEE'
+    ? api.projectChat.getByEmployeeId.useQuery(
+        {
+          employeeId: selectedEmployeeId || '',
+          status: 'ACTIVE',
+        },
+        {
+          enabled: !!selectedEmployeeId,
+        }
+      )
+    : api.projectChat.getByUserId.useQuery(
+        {
+          userId: userId || '',
+          status: 'ACTIVE',
+          chatType: 'ADVISOR',
+        },
+        {
+          enabled: !!userId,
+        }
+      )
 
   // Get project to access organization
   const { data: project } = api.project.getById.useQuery(
@@ -71,38 +86,68 @@ const UserChatList: React.FC<UserChatListProps> = ({
   })
 
   const handleCreateNewChat = () => {
-    if (!selectedEmployeeId) {
-      toast.error('Please select an employee first')
-      return
-    }
+    if (chatType === 'EMPLOYEE') {
+      if (!selectedEmployeeId) {
+        toast.error('Please select an employee first')
+        return
+      }
 
-    if (!organization?.agentChatId) {
-      toast.error('No chat agent configured for this organization')
-      return
-    }
+      if (!organization?.agentChatId) {
+        toast.error('No chat agent configured for this organization')
+        return
+      }
 
-    if (!employee) {
-      toast.error('Employee not found')
-      return
-    }
+      if (!employee) {
+        toast.error('Employee not found')
+        return
+      }
 
-    createChatMutation.mutate({
-      userId: employee.employeeId,
-      agentId: organization.agentChatId,
-      employeeId: selectedEmployeeId,
-      metadata: {
-        employeeName: `${employee.firstName} ${employee.lastName}`,
-        source: 'web',
-      },
-    })
+      createChatMutation.mutate({
+        userId: employee.employeeId,
+        agentId: organization.agentChatId,
+        employeeId: selectedEmployeeId,
+        chatType: 'EMPLOYEE',
+        metadata: {
+          employeeName: `${employee.firstName} ${employee.lastName}`,
+          source: 'web',
+        },
+      })
+    } else {
+      // ADVISOR chat
+      if (!userId) {
+        toast.error('User not authenticated')
+        return
+      }
+
+      if (!organization?.agentAdvisorId) {
+        toast.error('No advisor agent configured for this organization')
+        return
+      }
+
+      createChatMutation.mutate({
+        userId: userId,
+        agentId: organization.agentAdvisorId,
+        chatType: 'ADVISOR',
+        metadata: {
+          source: 'web-advisor',
+        },
+      })
+    }
   }
 
   const chats = chatsData?.chats || []
 
   // Filter chats by search
-  const filteredChats = chats.filter((chat) => {
+  const filteredChats = chats.filter((chat: any) => {
     if (!searchValue.trim()) return true
     const searchLower = searchValue.toLowerCase()
+
+    // For ADVISOR chats, only search by userId
+    if (chatType === 'ADVISOR') {
+      return chat.userId.toLowerCase().includes(searchLower)
+    }
+
+    // For EMPLOYEE chats, search by userId and employee name
     return (
       chat.userId.toLowerCase().includes(searchLower) ||
       chat.employee?.firstName?.toLowerCase().includes(searchLower) ||
@@ -110,7 +155,7 @@ const UserChatList: React.FC<UserChatListProps> = ({
     )
   })
 
-  if (!selectedEmployeeId) {
+  if (chatType === 'EMPLOYEE' && !selectedEmployeeId) {
     return (
       <div className="col-span-12 xl:col-span-4 2xl:col-span-3 card">
         <div className="card-body">
@@ -148,7 +193,10 @@ const UserChatList: React.FC<UserChatListProps> = ({
               className="w-full btn btn-primary flex items-center justify-center gap-2"
               onClick={handleCreateNewChat}
               disabled={
-                createChatMutation.isPending || !organization?.agentChatId
+                createChatMutation.isPending ||
+                (chatType === 'EMPLOYEE'
+                  ? !organization?.agentChatId
+                  : !organization?.agentAdvisorId)
               }>
               {createChatMutation.isPending ? (
                 'Creating...'
@@ -169,14 +217,23 @@ const UserChatList: React.FC<UserChatListProps> = ({
             <SimpleBar className="max-h-[calc(100vh_-_22.5rem)] -mx-space">
               <ul className="flex flex-col gap-3">
                 {filteredChats && filteredChats.length > 0 ? (
-                  filteredChats.map((chat) => {
+                  filteredChats.map((chat: any) => {
                     const isActive = selectedChatId === chat.id
-                    const employeeName = chat.employee
-                      ? `${chat.employee.firstName} ${chat.employee.lastName}`
-                      : chat.userId
-                    const initials = chat.employee
-                      ? `${chat.employee.firstName.charAt(0)}${chat.employee.lastName.charAt(0)}`
-                      : chat.userId.substring(0, 2).toUpperCase()
+
+                    // For ADVISOR chats, use agent name; for EMPLOYEE, use employee name
+                    const displayName =
+                      chatType === 'ADVISOR'
+                        ? chat.agent?.name || 'Digital Advisor'
+                        : chat.employee
+                          ? `${chat.employee.firstName} ${chat.employee.lastName}`
+                          : chat.userId
+
+                    const initials =
+                      chatType === 'ADVISOR'
+                        ? chat.agent?.name?.substring(0, 2).toUpperCase() || 'AI'
+                        : chat.employee
+                          ? `${chat.employee.firstName.charAt(0)}${chat.employee.lastName.charAt(0)}`
+                          : chat.userId.substring(0, 2).toUpperCase()
 
                     return (
                       <li key={chat.id} onClick={() => onSelectChat(chat.id)}>
@@ -184,11 +241,15 @@ const UserChatList: React.FC<UserChatListProps> = ({
                           className={`${
                             isActive ? 'active' : ''
                           } flex items-center gap-2 px-space py-2.5 hover:bg-gray-50 dark:hover:bg-dark-850 [&.active]:bg-primary-500/10 transition ease-linear duration-300 group/item w-full text-left`}>
-                          <div className="relative flex items-center justify-center font-semibold transition duration-200 ease-linear bg-gray-100 rounded-full dark:bg-dark-850 size-10 shrink-0">
-                            {chat.employee?.image ? (
+                          <div className={`relative flex items-center justify-center font-semibold transition duration-200 ease-linear rounded-full size-10 shrink-0 ${
+                            chatType === 'ADVISOR'
+                              ? 'bg-gradient-to-br from-primary-500 to-purple-500 text-white'
+                              : 'bg-gray-100 dark:bg-dark-850'
+                          }`}>
+                            {chatType === 'EMPLOYEE' && chat.employee?.image ? (
                               <Image
                                 src={chat.employee.image}
-                                alt={employeeName}
+                                alt={displayName}
                                 className="rounded-full size-10 object-cover"
                                 width={40}
                                 height={40}
@@ -201,7 +262,7 @@ const UserChatList: React.FC<UserChatListProps> = ({
                             )}
                           </div>
                           <div className="overflow-hidden grow">
-                            <h6 className="mb-0.5 truncate">{employeeName}</h6>
+                            <h6 className="mb-0.5 truncate">{displayName}</h6>
                             <p
                               className={`text-sm truncate ${
                                 chat._count?.messages > 0

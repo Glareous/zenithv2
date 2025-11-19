@@ -326,7 +326,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'Chat',
-        link: '/apps/chat/default',
+        link: '/apps/advisor/chat',
         lang: 'Chat',
       },
     ],

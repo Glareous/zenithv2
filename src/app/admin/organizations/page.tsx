@@ -752,7 +752,6 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       { value: 'ecommerce', label: 'Ecommerce' }, */
                       { value: 'rrhh', label: 'RRHH' },
                       /*{ value: 'orders', label: 'Orders' },
-                      { value: 'chat', label: 'CHAT' },
                       { value: 'crm', label: 'CRM' },
                       { value: 'agents', label: 'Agents' },
                       { value: 'models', label: 'Models' }, */
@@ -763,6 +762,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       { value: 'actions', label: 'Actions' },
                       { value: 'advisor', label: 'Digital Advisor' },
                       { value: 'leads', label: 'Leads' },
+                      { value: 'chat', label: 'Chat' },
+
                       /*{ value: 'phone-numbers', label: 'Phone Numbers' },*/
                     ].map((page) => {
                       const allowedPages = watch('allowedPages') || []
@@ -1180,7 +1181,6 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       { value: 'ecommerce', label: 'Ecommerce' }, */
                       { value: 'rrhh', label: 'RRHH' },
                       /*{ value: 'orders', label: 'Orders' },
-                      { value: 'chat', label: 'Chat' },
                       { value: 'crm', label: 'CRM' },
                       { value: 'agents', label: 'Agents' },
                       { value: 'models', label: 'Models' }, */
@@ -1191,6 +1191,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       { value: 'actions', label: 'Actions' },
                       { value: 'advisor', label: 'Digital Advisor' },
                       { value: 'leads', label: 'Leads' },
+                      { value: 'chat', label: 'Chat' },
+
                       /*{ value: 'phone-numbers', label: 'Phone Numbers' },*/
                     ].map((page) => {
                       const allowedPages = watch('allowedPages') || []
