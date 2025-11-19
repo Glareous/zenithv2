@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react'
 
 import { Plus, X } from 'lucide-react'
 import { toast } from 'react-toastify'
+import Link from "next/link";
 
 import { type RichTextEditorRef } from '@/components/molecules/RichTextEditor'
 
@@ -142,11 +143,11 @@ const ModalWebhookConfig: React.FC<ModalWebhookConfigProps> = ({
               <p className="text-sm text-gray-500 mr-1">
                 Webhook URL endpoint - Test it in our
               </p>
-              <a
+              <Link
                 href="/docs"
                 className="text-sm text-primary-500 hover:text-primary-600 underline">
                 API docs
-              </a>
+              </Link>
             </div>
             <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-4">
               <div className="flex items-center justify-between">
