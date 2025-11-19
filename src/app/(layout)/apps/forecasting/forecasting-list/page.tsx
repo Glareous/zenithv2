@@ -55,6 +55,7 @@ const ForecastingListPage: NextPageWithLayout = () => {
   const [showModal, setShowModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showFormatModal, setShowFormatModal] = useState(false)
+  const [showExamplesModal, setShowExamplesModal] = useState(false)
   const [selectedForecasting, setSelectedForecasting] = useState<any>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isEditMode, setIsEditMode] = useState(false)
@@ -174,6 +175,51 @@ const ForecastingListPage: NextPageWithLayout = () => {
       fileInputRef.current.value = ''
     }
     reset()
+  }
+
+  // Handle example download
+  const handleDownloadExample = (filename: string) => {
+    const link = document.createElement('a')
+    link.href = `/example-csv/${filename}`
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    toast.success(`Downloading ${filename}`)
+  }
+
+  // Handle example use
+  const handleUseExample = async (filename: string, timeInterval: number, timeUnit: string) => {
+    try {
+      // Fetch the CSV file
+      const response = await fetch(`/example-csv/${filename}`)
+      if (!response.ok) throw new Error('Failed to fetch example CSV')
+
+      const blob = await response.blob()
+      const file = new File([blob], filename, { type: 'text/csv' })
+
+      // Set the file as selected
+      setSelectedFile(file)
+
+      // Count CSV rows
+      await countCsvRows(file)
+
+      // Update form values
+      reset({
+        timeInterval,
+        timeUnit: timeUnit as any,
+        periodToPredict: 2,
+        confidenceLevel: undefined,
+      })
+
+      // Close examples modal
+      setShowExamplesModal(false)
+
+      toast.success(`Example "${filename}" loaded successfully`)
+    } catch (error) {
+      console.error('Error loading example:', error)
+      toast.error('Failed to load example CSV')
+    }
   }
 
   const deleteMutationForCleanup = api.projectForecasting.delete.useMutation()
@@ -425,11 +471,10 @@ const ForecastingListPage: NextPageWithLayout = () => {
           const status = cell.getValue()
           return (
             <span
-              className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                status === 'COMPLETED'
+              className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${status === 'COMPLETED'
                   ? 'bg-green-100 text-green-800'
                   : 'bg-yellow-100 text-yellow-800'
-              }`}>
+                }`}>
               {status}
             </span>
           )
@@ -647,17 +692,6 @@ const ForecastingListPage: NextPageWithLayout = () => {
             </div>
 
             <div className="mb-4">
-              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800 mb-2">
-                  <strong>CSV File Example with 1 Month Interval</strong>
-                </p>
-                <a
-                  href="/example-csv/1 month interval.csv"
-                  download="1_month_interval_example.csv"
-                  className="btn btn-sm btn-outline-primary">
-                  Download Example CSV
-                </a>
-              </div>
               <label className="block mb-2 text-sm font-medium">
                 CSV File {!isEditMode && <span className="text-red-500">*</span>}
                 {isEditMode && selectedForecasting?.files?.[0] && (
@@ -692,6 +726,13 @@ const ForecastingListPage: NextPageWithLayout = () => {
                   }>
                   <Upload className="inline-block size-4 mr-1" />
                   {isEditMode ? 'Upload New CSV' : 'Upload CSV'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowExamplesModal(true)}
+                  className="btn btn-outline-primary"
+                  disabled={isSubmitting || createMutation.isPending || updateMutation.isPending}>
+                  Use Example
                 </button>
                 {selectedFile && (
                   <button
@@ -763,8 +804,8 @@ const ForecastingListPage: NextPageWithLayout = () => {
                   updateMutation.isPending
                 }>
                 {isSubmitting ||
-                createMutation.isPending ||
-                updateMutation.isPending
+                  createMutation.isPending ||
+                  updateMutation.isPending
                   ? isEditMode
                     ? 'Updating...'
                     : 'Creating...'
@@ -868,6 +909,106 @@ const ForecastingListPage: NextPageWithLayout = () => {
             onClick={() => setShowFormatModal(false)}
             className="btn btn-primary">
             Got it
+          </button>
+        }
+      />
+
+      {/* Examples Modal */}
+      <Modal
+        isOpen={showExamplesModal}
+        onClose={() => setShowExamplesModal(false)}
+        title="CSV Examples"
+        size="modal-md"
+        position="modal-center"
+        content={
+          <div className="space-y-6">
+            {/* Example 1 */}
+            <div className="flex gap-4 items-start">
+              <div className="w-28 h-28 bg-gray-200 dark:bg-dark-700 rounded-lg flex-shrink-0 flex items-center justify-center">
+                <span className="text-4xl">📊</span>
+              </div>
+              <div className="flex-1">
+                <h6 className="text-lg font-semibold mb-1">Hourly Sales Data</h6>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                  Frecuencia: 1 Hour
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => handleDownloadExample('1 hour interval.csv')}>
+                    DOWNLOAD
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => handleUseExample('1 hour interval.csv', 1, 'HOURS')}>
+                    USE
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Example 2 */}
+            <div className="flex gap-4 items-start">
+              <div className="w-28 h-28 bg-gray-200 dark:bg-dark-700 rounded-lg flex-shrink-0 flex items-center justify-center">
+                <span className="text-4xl">📈</span>
+              </div>
+              <div className="flex-1">
+                <h6 className="text-lg font-semibold mb-1">Daily Revenue Data</h6>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                  Frecuencia: 1 Day
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => handleDownloadExample('1 day interval.csv')}>
+                    DOWNLOAD
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => handleUseExample('1 day interval.csv', 1, 'DAYS')}>
+                    USE
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Example 3 */}
+            <div className="flex gap-4 items-start">
+              <div className="w-28 h-28 bg-gray-200 dark:bg-dark-700 rounded-lg flex-shrink-0 flex items-center justify-center">
+                <span className="text-4xl">📅</span>
+              </div>
+              <div className="flex-1">
+                <h6 className="text-lg font-semibold mb-1">Monthly Product Sales</h6>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                  Frecuencia: 1 Month
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => handleDownloadExample('1 month interval.csv')}>
+                    DOWNLOAD
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => handleUseExample('1 month interval.csv', 1, 'MONTHS')}>
+                    USE
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+        footer={
+          <button
+            onClick={() => setShowExamplesModal(false)}
+            className="btn btn-outline-secondary">
+            Cancel
           </button>
         }
       />
