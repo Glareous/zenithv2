@@ -759,7 +759,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       { value: 'forecasting', label: 'Forecasting' },
                       { value: 'nim-fraud', label: 'Nim Fraud' },
                       /* { value: 'api-keys', label: 'API Keys' }, */
-                      { value: 'actions', label: 'Actions' },
+                      /* { value: 'actions', label: 'Actions' }, */
                       { value: 'advisor', label: 'Digital Advisor' },
                       { value: 'leads', label: 'Leads' },
                       { value: 'chat', label: 'Chat' },
@@ -1188,7 +1188,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       { value: 'forecasting', label: 'Forecasting' },
                       { value: 'nim-fraud', label: 'Nim Fraud' },
                       /* { value: 'api-keys', label: 'API Keys' }, */
-                      { value: 'actions', label: 'Actions' },
+                      /* { value: 'actions', label: 'Actions' }, */
                       { value: 'advisor', label: 'Digital Advisor' },
                       { value: 'leads', label: 'Leads' },
                       { value: 'chat', label: 'Chat' },

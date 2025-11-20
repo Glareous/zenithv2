@@ -136,6 +136,7 @@ export default function Layout({
   const currentMenu = session?.user?.role === 'SUPERADMIN' ? adminMenu : menu
   const [searchSidebar, setSearchSidebar] = useState<MegaMenu[]>(currentMenu)
   const [searchValue, setSearchValue] = useState<string>('')
+  const [baseFilteredMenu, setBaseFilteredMenu] = useState<MegaMenu[]>(currentMenu)
 
   // Update menu when session or organization changes
   useEffect(() => {
@@ -150,6 +151,7 @@ export default function Layout({
       )
     }
 
+    setBaseFilteredMenu(newMenu)
     setSearchSidebar(newMenu)
   }, [session?.user?.role, userOrganization])
   const handleThemeSidebarSize = useCallback(() => {
@@ -217,7 +219,7 @@ export default function Layout({
     setSearchValue(value)
 
     if (value.trim() !== '') {
-      const filteredMenu: MegaMenu[] = menu.filter((megaItem: MegaMenu) => {
+      const filteredMenu: MegaMenu[] = baseFilteredMenu.filter((megaItem: MegaMenu) => {
         // Filter the first level: MegaMenu
         const isMegaMenuMatch =
           megaItem.title.toLowerCase().includes(value.toLowerCase()) ||
@@ -253,7 +255,7 @@ export default function Layout({
 
       setSearchSidebar(filteredMenu)
     } else {
-      setSearchSidebar(menu)
+      setSearchSidebar(baseFilteredMenu)
     }
   }
 
