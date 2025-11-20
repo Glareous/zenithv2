@@ -196,12 +196,12 @@ const menu: MegaMenu[] = [
       {
         title: 'Create-view',
         link: '/apps/pqr/pqr-list',
-        lang: 'Create-view',
+        lang: 'Add/Edit/View',
       },
       {
         title: 'Landing',
         link: '/apps/pqr/landing',
-        lang: 'Landing',
+        lang: 'Landing page',
       },
       {
         title: 'Documentation',
@@ -225,12 +225,12 @@ const menu: MegaMenu[] = [
       {
         title: 'Create-view',
         link: '/apps/forecasting/forecasting-list',
-        lang: 'Create-view',
+        lang: 'Add/Edit/View',
       },
       {
         title: 'Landing',
         link: '/apps/forecasting/landing',
-        lang: 'Landing',
+        lang: 'Landing page',
       },
       {
         title: 'Documentation',
@@ -244,6 +244,30 @@ const menu: MegaMenu[] = [
       },
     ],
   },
+    {
+    title: 'NVIDIA - NIM FRAUD',
+    lang: 'pe-nim-fraud',
+    icon: 'gem',
+    link: '/apps/nim-fraud',
+    separator: false,
+    children: [
+      {
+        title: 'Create-view',
+        link: '/apps/nim-fraud/list',
+        lang: 'Add/Edit/View',
+      },
+      {
+        title: 'Landing',
+        link: '/apps/nim-fraud/landing',
+        lang: 'Landing page',
+      },
+      {
+        title: 'Documentation',
+        link: '/docs/nim',
+        lang: 'Documentation',
+      },
+    ],
+  },
   {
     title: 'RRHH',
     lang: 'pe-rrhh',
@@ -253,13 +277,13 @@ const menu: MegaMenu[] = [
     children: [
       {
         title: 'Create-view',
-        lang: 'Create-view',
+        lang: 'Add/Edit/View',
         link: '/apps/rrhh/rrhh-list',
       },
       {
         title: 'Landing',
         link: '/apps/rrhh/landing',
-        lang: 'Landing',
+        lang: 'Landing page',
       },
       {
         title: 'Documentation',
@@ -278,32 +302,9 @@ const menu: MegaMenu[] = [
       },
     ],
   },
+
   {
-    title: 'Nim Fraud',
-    lang: 'pe-nim-fraud',
-    icon: 'gem',
-    link: '/apps/nim-fraud',
-    separator: false,
-    children: [
-      {
-        title: 'Create-view',
-        link: '/apps/nim-fraud/list',
-        lang: 'Create-view',
-      },
-      {
-        title: 'Landing',
-        link: '/apps/nim-fraud/landing',
-        lang: 'Landing',
-      },
-      {
-        title: 'Documentation',
-        link: '/docs/nim',
-        lang: 'Documentation',
-      },
-    ],
-  },
-  {
-    title: 'Digital Advisor',
+    title: 'DIGITAL ADVISOR',
     lang: 'pe-advisor',
     icon: 'book-open',
     link: '/apps/advisor/',
@@ -312,7 +313,7 @@ const menu: MegaMenu[] = [
       {
         title: 'Landing',
         link: '/apps/advisor/landing',
-        lang: 'Landing',
+        lang: 'Landing page',
       },
       {
         title: 'Documentation',
@@ -332,7 +333,7 @@ const menu: MegaMenu[] = [
     ],
   },
   {
-    title: 'Leads',
+    title: 'LEADS',
     lang: 'pe-leads',
     icon: 'pencil-ruler',
     link: '/apps/leads/',
@@ -340,13 +341,13 @@ const menu: MegaMenu[] = [
     children: [
       {
         title: 'Create-view',
-        lang: 'Create-view',
+        lang: 'Add/Edit/View',
         link: '/apps/leads/list',
       },
       {
         title: 'Landing',
         link: '/apps/leads/landing',
-        lang: 'Landing',
+        lang: 'Landing page',
       },
       {
         title: 'Documentation',
