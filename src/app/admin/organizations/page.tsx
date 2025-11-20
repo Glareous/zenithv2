@@ -60,7 +60,8 @@ const organizationSchema = z.object({
   agentPqrId: z.string().optional(),
   agentRrhhId: z.string().optional(),
   agentForecastingId: z.string().optional(),
-  agentChatId: z.string().optional(),
+  agentRrhhChatId: z.string().optional(),
+  agentAdvisorChatId: z.string().optional(),
   agentAdvisorId: z.string().optional(),
   agentLeadsId: z.string().optional(),
 })
@@ -80,7 +81,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
   const [showAgentModal, setShowAgentModal] = useState(false)
   const [selectedAgentType, setSelectedAgentType] = useState<
-    'pqr' | 'rrhh' | 'forecasting' | 'chat' | 'advisor' | 'leads' | null
+    'pqr' | 'rrhh' | 'forecasting' | 'advisor' | 'leads' | 'rrhhChat' | 'advisorChat' | null
   >(null)
 
   // Check if user is SUPERADMIN
@@ -126,7 +127,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
       agentPqrId: undefined,
       agentRrhhId: undefined,
       agentForecastingId: undefined,
-      agentChatId: undefined,
+      agentRrhhChatId: undefined,
+      agentAdvisorChatId: undefined,
       agentAdvisorId: undefined,
       agentLeadsId: undefined,
     },
@@ -313,7 +315,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
       agentPqrId: undefined,
       agentRrhhId: undefined,
       agentForecastingId: undefined,
-      agentChatId: undefined,
+      agentRrhhChatId: undefined,
+      agentAdvisorChatId: undefined,
       agentAdvisorId: undefined,
       agentLeadsId: undefined,
     })
@@ -351,7 +354,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
       agentPqrId: organization.agentPqrId || undefined,
       agentRrhhId: organization.agentRrhhId || undefined,
       agentForecastingId: organization.agentForecastingId || undefined,
-      agentChatId: organization.agentChatId || undefined,
+      agentRrhhChatId: organization.agentRrhhChatId || undefined,
+      agentAdvisorChatId: organization.agentAdvisorChatId || undefined,
       agentAdvisorId: organization.agentAdvisorId || undefined,
       agentLeadsId: organization.agentLeadsId || undefined,
       administrators: existingAdmins,
@@ -408,7 +412,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           agentPqrId: data.agentPqrId || null,
           agentRrhhId: data.agentRrhhId || null,
           agentForecastingId: data.agentForecastingId || null,
-          agentChatId: data.agentChatId || null,
+          agentRrhhChatId: data.agentRrhhChatId || null,
+          agentAdvisorChatId: data.agentAdvisorChatId || null,
           agentAdvisorId: data.agentAdvisorId || null,
           agentLeadsId: data.agentLeadsId || null,
           administratorsToAdd:
@@ -427,7 +432,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           agentPqrId: data.agentPqrId,
           agentRrhhId: data.agentRrhhId,
           agentForecastingId: data.agentForecastingId,
-          agentChatId: data.agentChatId,
+          agentRrhhChatId: data.agentRrhhChatId,
+          agentAdvisorChatId: data.agentAdvisorChatId,
           agentAdvisorId: data.agentAdvisorId,
           agentLeadsId: data.agentLeadsId,
           custom: true,
@@ -762,7 +768,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       /* { value: 'actions', label: 'Actions' }, */
                       { value: 'advisor', label: 'Digital Advisor' },
                       { value: 'leads', label: 'Leads' },
-                      { value: 'chat', label: 'Chat' },
+                      /* { value: 'chat', label: 'Chat' }, */
 
                       /*{ value: 'phone-numbers', label: 'Phone Numbers' },*/
                     ].map((page) => {
@@ -814,7 +820,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
 
                   {(() => {
                     const allowedPages = watch('allowedPages') || []
-                    const agentPages = ['pqr', 'rrhh', 'forecasting', 'chat', 'advisor', 'leads']
+                    const agentPages = ['pqr', 'rrhh', 'forecasting', 'advisor', 'leads']
                     const enabledAgentPages = allowedPages.filter((page) =>
                       agentPages.includes(page)
                     )
@@ -822,68 +828,106 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                     if (enabledAgentPages.length === 0) {
                       return (
                         <p className="text-sm text-gray-500 italic">
-                          Enable PQR, RRHH, Forecasting, Digital Advisor, Leads, or Chat in Menu
+                          Enable PQR, RRHH, Forecasting, Digital Advisor, or Leads in Menu
                           Restrictions to assign agents
                         </p>
                       )
                     }
 
+                    // Map pages to their agent configs
+                    const pageAgentConfigs: { page: string; agents: Array<{ key: string; label: string; type: string }> }[] = []
+
+                    enabledAgentPages.forEach((page) => {
+                      if (page === 'rrhh') {
+                        pageAgentConfigs.push({
+                          page: 'rrhh',
+                          agents: [
+                            { key: 'agentRrhhId', label: 'RRHH Agent', type: 'rrhh' },
+                            { key: 'agentRrhhChatId', label: 'RRHH Chat Agent', type: 'rrhhChat' }
+                          ]
+                        })
+                      } else if (page === 'advisor') {
+                        pageAgentConfigs.push({
+                          page: 'advisor',
+                          agents: [
+                            { key: 'agentAdvisorId', label: 'Advisor Agent', type: 'advisor' },
+                            { key: 'agentAdvisorChatId', label: 'Advisor Chat Agent', type: 'advisorChat' }
+                          ]
+                        })
+                      } else if (page === 'pqr') {
+                        pageAgentConfigs.push({
+                          page: 'pqr',
+                          agents: [
+                            { key: 'agentPqrId', label: 'PQR Agent', type: 'pqr' }
+                          ]
+                        })
+                      } else if (page === 'forecasting') {
+                        pageAgentConfigs.push({
+                          page: 'forecasting',
+                          agents: [
+                            { key: 'agentForecastingId', label: 'Forecasting Agent', type: 'forecasting' }
+                          ]
+                        })
+                      } else if (page === 'leads') {
+                        pageAgentConfigs.push({
+                          page: 'leads',
+                          agents: [
+                            { key: 'agentLeadsId', label: 'Leads Agent', type: 'leads' }
+                          ]
+                        })
+                      }
+                    })
+
                     return (
                       <div className="space-y-3">
-                        {enabledAgentPages.map((page) => {
-                          const agentKey =
-                            `agent${page.charAt(0).toUpperCase() + page.slice(1)}Id` as
-                            | 'agentPqrId'
-                            | 'agentRrhhId'
-                            | 'agentForecastingId'
-                            | 'agentChatId'
-                            | 'agentAdvisorId'
-                            | 'agentLeadsId'
-                          const selectedAgentId = watch(agentKey)
-                          const selectedAgent = allAgents.find(
-                            (a) => a.id === selectedAgentId
-                          )
+                        {pageAgentConfigs.flatMap((config) =>
+                          config.agents.map((agentConfig) => {
+                            const agentKey = agentConfig.key as
+                              | 'agentPqrId'
+                              | 'agentRrhhId'
+                              | 'agentForecastingId'
+                              | 'agentRrhhChatId'
+                              | 'agentAdvisorChatId'
+                              | 'agentAdvisorId'
+                              | 'agentLeadsId'
+                            const selectedAgentId = watch(agentKey)
+                            const selectedAgent = allAgents.find(
+                              (a) => a.id === selectedAgentId
+                            )
 
-                          return (
-                            <div
-                              key={page}
-                              className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md">
-                              <div className="flex-1">
-                                <span className="text-sm font-medium capitalize">
-                                  {page} Agent
-                                </span>
-                                {selectedAgent && (
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    Selected: {selectedAgent.name}
-                                    {selectedAgent.isGlobal && (
-                                      <span className="ml-1 text-green-600">
-                                        (Global)
-                                      </span>
-                                    )}
-                                  </p>
-                                )}
+                            return (
+                              <div
+                                key={agentConfig.key}
+                                className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md">
+                                <div className="flex-1">
+                                  <span className="text-sm font-medium">
+                                    {agentConfig.label}
+                                  </span>
+                                  {selectedAgent && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                      Selected: {selectedAgent.name}
+                                      {selectedAgent.isGlobal && (
+                                        <span className="ml-1 text-green-600">
+                                          (Global)
+                                        </span>
+                                      )}
+                                    </p>
+                                  )}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedAgentType(agentConfig.type as any)
+                                    setShowAgentModal(true)
+                                  }}
+                                  className="btn btn-outline-primary btn-md flex items-center">
+                                  <CirclePlus className="w-4 h-4 mr-1" />
+                                  Select
+                                </button>
                               </div>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedAgentType(
-                                    page as
-                                    | 'pqr'
-                                    | 'rrhh'
-                                    | 'forecasting'
-                                    | 'chat'
-                                    | 'advisor'
-                                    | 'leads'
-                                  )
-                                  setShowAgentModal(true)
-                                }}
-                                className="btn btn-outline-primary btn-md flex items-center">
-                                <CirclePlus className="w-4 h-4 mr-1" />
-                                Select
-                              </button>
-                            </div>
-                          )
-                        })}
+                            )
+                          })
+                        )}
                       </div>
                     )
                   })()}
@@ -1191,7 +1235,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       /* { value: 'actions', label: 'Actions' }, */
                       { value: 'advisor', label: 'Digital Advisor' },
                       { value: 'leads', label: 'Leads' },
-                      { value: 'chat', label: 'Chat' },
+                      /* { value: 'chat', label: 'Chat' }, */
 
                       /*{ value: 'phone-numbers', label: 'Phone Numbers' },*/
                     ].map((page) => {
@@ -1271,7 +1315,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
 
                     {(() => {
                       const allowedPages = watch('allowedPages') || []
-                      const agentPages = ['pqr', 'rrhh', 'forecasting', 'chat', 'advisor', 'leads']
+                      const agentPages = ['pqr', 'rrhh', 'forecasting', 'advisor', 'leads']
                       const enabledAgentPages = allowedPages.filter((page) =>
                         agentPages.includes(page)
                       )
@@ -1279,68 +1323,106 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       if (enabledAgentPages.length === 0) {
                         return (
                           <p className="text-sm text-gray-500 italic">
-                            Enable PQR, RRHH, Forecasting, Digital Advisor, Leads or Chat in Menu
+                            Enable PQR, RRHH, Forecasting, Digital Advisor, or Leads in Menu
                             Restrictions to assign agents
                           </p>
                         )
                       }
 
+                      // Map pages to their agent configs
+                      const pageAgentConfigs: { page: string; agents: Array<{ key: string; label: string; type: string }> }[] = []
+
+                      enabledAgentPages.forEach((page) => {
+                        if (page === 'rrhh') {
+                          pageAgentConfigs.push({
+                            page: 'rrhh',
+                            agents: [
+                              { key: 'agentRrhhId', label: 'RRHH Agent', type: 'rrhh' },
+                              { key: 'agentRrhhChatId', label: 'RRHH Chat Agent', type: 'rrhhChat' }
+                            ]
+                          })
+                        } else if (page === 'advisor') {
+                          pageAgentConfigs.push({
+                            page: 'advisor',
+                            agents: [
+                              { key: 'agentAdvisorId', label: 'Advisor Agent', type: 'advisor' },
+                              { key: 'agentAdvisorChatId', label: 'Advisor Chat Agent', type: 'advisorChat' }
+                            ]
+                          })
+                        } else if (page === 'pqr') {
+                          pageAgentConfigs.push({
+                            page: 'pqr',
+                            agents: [
+                              { key: 'agentPqrId', label: 'PQR Agent', type: 'pqr' }
+                            ]
+                          })
+                        } else if (page === 'forecasting') {
+                          pageAgentConfigs.push({
+                            page: 'forecasting',
+                            agents: [
+                              { key: 'agentForecastingId', label: 'Forecasting Agent', type: 'forecasting' }
+                            ]
+                          })
+                        } else if (page === 'leads') {
+                          pageAgentConfigs.push({
+                            page: 'leads',
+                            agents: [
+                              { key: 'agentLeadsId', label: 'Leads Agent', type: 'leads' }
+                            ]
+                          })
+                        }
+                      })
+
                       return (
                         <div className="space-y-3">
-                          {enabledAgentPages.map((page) => {
-                            const agentKey =
-                              `agent${page.charAt(0).toUpperCase() + page.slice(1)}Id` as
-                              | 'agentPqrId'
-                              | 'agentRrhhId'
-                              | 'agentForecastingId'
-                              | 'agentChatId'
-                              | 'agentAdvisorId'
-                              | 'agentLeadsId'
-                            const selectedAgentId = watch(agentKey)
-                            const selectedAgent = allAgents.find(
-                              (a) => a.id === selectedAgentId
-                            )
+                          {pageAgentConfigs.flatMap((config) =>
+                            config.agents.map((agentConfig) => {
+                              const agentKey = agentConfig.key as
+                                | 'agentPqrId'
+                                | 'agentRrhhId'
+                                | 'agentForecastingId'
+                                | 'agentRrhhChatId'
+                                | 'agentAdvisorChatId'
+                                | 'agentAdvisorId'
+                                | 'agentLeadsId'
+                              const selectedAgentId = watch(agentKey)
+                              const selectedAgent = allAgents.find(
+                                (a) => a.id === selectedAgentId
+                              )
 
-                            return (
-                              <div
-                                key={page}
-                                className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800">
-                                <div className="flex-1">
-                                  <span className="text-sm font-medium capitalize">
-                                    {page} Agent
-                                  </span>
-                                  {selectedAgent && (
-                                    <p className="text-xs text-gray-500 mt-1">
-                                      Selected: {selectedAgent.name}
-                                      {selectedAgent.isGlobal && (
-                                        <span className="ml-1 text-green-600">
-                                          (Global)
-                                        </span>
-                                      )}
-                                    </p>
-                                  )}
+                              return (
+                                <div
+                                  key={agentConfig.key}
+                                  className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800">
+                                  <div className="flex-1">
+                                    <span className="text-sm font-medium">
+                                      {agentConfig.label}
+                                    </span>
+                                    {selectedAgent && (
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        Selected: {selectedAgent.name}
+                                        {selectedAgent.isGlobal && (
+                                          <span className="ml-1 text-green-600">
+                                            (Global)
+                                          </span>
+                                        )}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedAgentType(agentConfig.type as any)
+                                      setShowAgentModal(true)
+                                    }}
+                                    className="btn btn-md btn-outline-primary flex items-center">
+                                    <CirclePlus className="w-4 h-4 mr-1" />
+                                    Select
+                                  </button>
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedAgentType(
-                                      page as
-                                      | 'pqr'
-                                      | 'rrhh'
-                                      | 'forecasting'
-                                      | 'chat'
-                                      | 'advisor'
-                                      | 'leads'
-                                    )
-                                    setShowAgentModal(true)
-                                  }}
-                                  className="btn btn-md btn-outline-primary flex items-center">
-                                  <CirclePlus className="w-4 h-4 mr-1" />
-                                  Select
-                                </button>
-                              </div>
-                            )
-                          })}
+                              )
+                            })
+                          )}
                         </div>
                       )
                     })()}
@@ -1557,31 +1639,51 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
         agents={allAgents.filter((a) => a.isGlobal)}
         onSelect={(agentId) => {
           if (selectedAgentType) {
-            const agentKey =
-              `agent${selectedAgentType.charAt(0).toUpperCase() + selectedAgentType.slice(1)}Id` as
+            const agentKeyMap: Record<string,
               | 'agentPqrId'
               | 'agentRrhhId'
               | 'agentForecastingId'
-              | 'agentChatId'
+              | 'agentRrhhChatId'
+              | 'agentAdvisorChatId'
               | 'agentAdvisorId'
-              | 'agentLeadsId'
-            setValue(agentKey, agentId)
+              | 'agentLeadsId'> = {
+              pqr: 'agentPqrId',
+              rrhh: 'agentRrhhId',
+              forecasting: 'agentForecastingId',
+              rrhhChat: 'agentRrhhChatId',
+              advisorChat: 'agentAdvisorChatId',
+              advisor: 'agentAdvisorId',
+              leads: 'agentLeadsId'
+            }
+            const agentKey = agentKeyMap[selectedAgentType]
+            if (agentKey) {
+              setValue(agentKey, agentId)
+            }
           }
           setShowAgentModal(false)
           setSelectedAgentType(null)
         }}
         initialSelectedId={
-          selectedAgentType
-            ? watch(
-              `agent${selectedAgentType.charAt(0).toUpperCase() + selectedAgentType.slice(1)}Id` as
+          selectedAgentType ? (() => {
+            const agentKeyMap: Record<string,
               | 'agentPqrId'
               | 'agentRrhhId'
               | 'agentForecastingId'
-              | 'agentChatId'
+              | 'agentRrhhChatId'
+              | 'agentAdvisorChatId'
               | 'agentAdvisorId'
-              | 'agentLeadsId'
-            )
-            : null
+              | 'agentLeadsId'> = {
+              pqr: 'agentPqrId',
+              rrhh: 'agentRrhhId',
+              forecasting: 'agentForecastingId',
+              rrhhChat: 'agentRrhhChatId',
+              advisorChat: 'agentAdvisorChatId',
+              advisor: 'agentAdvisorId',
+              leads: 'agentLeadsId'
+            }
+            const key = agentKeyMap[selectedAgentType]
+            return key ? watch(key) : null
+          })() : null
         }
         title={`Select ${selectedAgentType?.toUpperCase()} Agent`}
         buttonText="Assign Agent"

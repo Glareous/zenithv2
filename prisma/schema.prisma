@@ -234,7 +234,8 @@ model Organization {
     agentPqrId          String?  // Reference to ProjectAgent.id (global agent)
     agentRrhhId         String?  // Reference to ProjectAgent.id (global agent)
     agentForecastingId  String?  // Reference to ProjectAgent.id (global agent)
-    agentChatId         String?  // Reference to ProjectAgent.id (global agent)
+    agentRrhhChatId     String?  // Reference to ProjectAgent.id (global agent for RRHH chat)
+    agentAdvisorChatId  String?  // Reference to ProjectAgent.id (global agent for Advisor chat)
     agentAdvisorId      String?  // Reference to ProjectAgent.id (global agent)
     agentLeadsId        String?  // Reference to ProjectAgent.id (global agent)
 
@@ -253,7 +254,8 @@ model Organization {
   @@index([agentAdvisorId])
   @@index([agentLeadsId])
   @@index([agentForecastingId])
-  @@index([agentChatId])
+  @@index([agentRrhhChatId])
+  @@index([agentAdvisorChatId])
 }
 
 // Junction table for organization members with roles

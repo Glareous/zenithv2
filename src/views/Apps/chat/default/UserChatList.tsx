@@ -61,7 +61,7 @@ const UserChatList: React.FC<UserChatListProps> = ({
     { enabled: !!currentProject?.id }
   )
 
-  // Get organization to access agentChatId
+  // Get organization to access chat agent IDs
   const { data: organization } = api.organization.getById.useQuery(
     { id: project?.organization?.id || '' },
     { enabled: !!project?.organization?.id }
@@ -92,8 +92,8 @@ const UserChatList: React.FC<UserChatListProps> = ({
         return
       }
 
-      if (!organization?.agentChatId) {
-        toast.error('No chat agent configured for this organization')
+      if (!organization?.agentRrhhChatId) {
+        toast.error('No RRHH chat agent configured for this organization')
         return
       }
 
@@ -104,7 +104,7 @@ const UserChatList: React.FC<UserChatListProps> = ({
 
       createChatMutation.mutate({
         userId: employee.employeeId,
-        agentId: organization.agentChatId,
+        agentId: organization.agentRrhhChatId,
         employeeId: selectedEmployeeId,
         chatType: 'EMPLOYEE',
         metadata: {
@@ -119,14 +119,14 @@ const UserChatList: React.FC<UserChatListProps> = ({
         return
       }
 
-      if (!organization?.agentAdvisorId) {
-        toast.error('No advisor agent configured for this organization')
+      if (!organization?.agentAdvisorChatId) {
+        toast.error('No advisor chat agent configured for this organization')
         return
       }
 
       createChatMutation.mutate({
         userId: userId,
-        agentId: organization.agentAdvisorId,
+        agentId: organization.agentAdvisorChatId,
         chatType: 'ADVISOR',
         metadata: {
           source: 'web-advisor',
@@ -195,8 +195,8 @@ const UserChatList: React.FC<UserChatListProps> = ({
               disabled={
                 createChatMutation.isPending ||
                 (chatType === 'EMPLOYEE'
-                  ? !organization?.agentChatId
-                  : !organization?.agentAdvisorId)
+                  ? !organization?.agentRrhhChatId
+                  : !organization?.agentAdvisorChatId)
               }>
               {createChatMutation.isPending ? (
                 'Creating...'

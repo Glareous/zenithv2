@@ -7,7 +7,8 @@ interface Organization {
   agentPqrId?: string | null
   agentRrhhId?: string | null
   agentForecastingId?: string | null
-  agentChatId?: string | null
+  agentRrhhChatId?: string | null
+  agentAdvisorChatId?: string | null
   agentAdvisorId?: string | null
   agentLeadsId?: string | null
 }
@@ -101,10 +102,16 @@ export function filterMenuByAllowedPages(
             link: `/apps/agents/default/${organization.agentForecastingId}/configure`,
           }
         }
-        if (child.lang === 'Chat Agent' && organization.agentChatId) {
+        if (child.lang === 'RRHH Chat Agent' && organization.agentRrhhChatId) {
           return {
             ...child,
-            link: `/apps/agents/default/${organization.agentChatId}/configure`,
+            link: `/apps/agents/default/${organization.agentRrhhChatId}/configure`,
+          }
+        }
+        if (child.lang === 'Advisor Chat Agent' && organization.agentAdvisorChatId) {
+          return {
+            ...child,
+            link: `/apps/agents/default/${organization.agentAdvisorChatId}/configure`,
           }
         }
         if (child.lang === 'Advisor Agent' && organization.agentAdvisorId) {

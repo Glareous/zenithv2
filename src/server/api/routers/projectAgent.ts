@@ -182,7 +182,8 @@ export const projectAgentRouter = createTRPCRouter({
           agentPqrId: true,
           agentRrhhId: true,
           agentForecastingId: true,
-          agentChatId: true,
+          agentRrhhChatId: true,
+          agentAdvisorChatId: true,
           agentAdvisorId: true,
           agentLeadsId: true,
         },
@@ -193,7 +194,8 @@ export const projectAgentRouter = createTRPCRouter({
         organization?.agentPqrId,
         organization?.agentRrhhId,
         organization?.agentForecastingId,
-        organization?.agentChatId,
+        organization?.agentRrhhChatId,
+        organization?.agentAdvisorChatId,
         organization?.agentAdvisorId,
         organization?.agentLeadsId,
       ].filter((id): id is string => id !== null && id !== undefined)
@@ -309,7 +311,8 @@ export const projectAgentRouter = createTRPCRouter({
               agentPqrId: true,
               agentRrhhId: true,
               agentForecastingId: true,
-              agentChatId: true,
+              agentRrhhChatId: true,
+              agentAdvisorChatId: true,
               agentAdvisorId: true,
               agentLeadsId: true,
             },
@@ -323,7 +326,8 @@ export const projectAgentRouter = createTRPCRouter({
         (userOrganization.organization.agentPqrId === input.id ||
           userOrganization.organization.agentRrhhId === input.id ||
           userOrganization.organization.agentForecastingId === input.id ||
-          userOrganization.organization.agentChatId === input.id ||
+          userOrganization.organization.agentRrhhChatId === input.id ||
+          userOrganization.organization.agentAdvisorChatId === input.id ||
           userOrganization.organization.agentAdvisorId === input.id ||
           userOrganization.organization.agentLeadsId === input.id)
 
@@ -601,7 +605,8 @@ export const projectAgentRouter = createTRPCRouter({
               { agentPqrId: input.id },
               { agentRrhhId: input.id },
               { agentForecastingId: input.id },
-              { agentChatId: input.id },
+              { agentRrhhChatId: input.id },
+              { agentAdvisorChatId: input.id },
               { agentAdvisorId: input.id },
               { agentLeadsId: input.id },
             ],
@@ -695,7 +700,8 @@ export const projectAgentRouter = createTRPCRouter({
             { agentPqrId: input.id },
             { agentRrhhId: input.id },
             { agentForecastingId: input.id },
-            { agentChatId: input.id },
+            { agentRrhhChatId: input.id },
+            { agentAdvisorChatId: input.id },
             { agentAdvisorId: input.id },
             { agentLeadsId: input.id },
           ],
