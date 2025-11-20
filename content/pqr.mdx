@@ -1,315 +1,231 @@
-import { Callout, FileTree, Steps, Tabs } from 'nextra/components'
+import { Callout } from 'nextra/components'
 
-# 📋 PQR Management Module
 
-<Callout type="info" emoji="ℹ️">
-  **Customer Service Management System** - Handle Peticiones (Requests), Quejas
-  (Complaints), and Reclamos (Claims) efficiently in one centralized platform.
+
+<br />
+
+### ⚡ AI-Powered PQR Prioritization System  
+#### System Design & Technical Documentation
+
+<br />
+
+The AI-Powered PQR Prioritization System analyzes, classifies, and prioritizes each incoming PQR using a fine-tuned in-house AI model optimized for operational, legal, and fraud-risk detection.
+
+This ensures critical cases receive immediate attention while providing full transparency and fair decision-making.
+
+<br />
+
+
+
+### 🧩 System Architecture
+
+<br />
+
+<Callout type="info">
+The platform was engineered to be fast, modular, scalable, and enterprise-grade.
 </Callout>
 
 <br />
-## What is PQR?
-<br />
-The **PQR (Peticiones, Quejas y Reclamos)** module is a comprehensive customer
-service management system designed to handle customer requests, complaints, and
-claims efficiently.
+
+The architecture consists of four layers:
+
+- **Frontend (React + Next.js)** — User interface for creating and reviewing PQRs  
+- **Backend (Python)** — Business logic, AI orchestration, and SLA rules  
+- **AI Engine** — Local model running on NVIDIA L40S GPU  
+- **Database (MongoDB)** — Persistent storage and historical analytics  
 
 <br />
 
-### Three Types of Cases
 
-<div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
-  <div className="card card-body">
-    <h4 className="text-lg font-semibold mb-2">📝 Peticiones</h4>
-    <p className="text-sm text-gray-600 dark:text-gray-400">
-      Customer inquiries or service requests
-    </p>
-  </div>
-  <div className="card card-body">
-    <h4 className="text-lg font-semibold mb-2">😟 Quejas</h4>
-    <p className="text-sm text-gray-600 dark:text-gray-400">
-      Customer complaints about products or services
-    </p>
-  </div>
-  <div className="card card-body">
-    <h4 className="text-lg font-semibold mb-2">⚖️ Reclamos</h4>
-    <p className="text-sm text-gray-600 dark:text-gray-400">
-      Formal claims for compensation or issue resolution
-    </p>
-  </div>
-</div>
 
-## ✨ Key Features
-
-<Tabs items={['Customer Management', 'Request Tracking', 'Document Types']}>
-  <Tabs.Tab>
-    ### Complete Customer Information
-    <br />
-    - ✅ First and last name tracking 
-    - ✅ Email and phone contact information 
-    - ✅ City/location data 
-    - ✅ Document identification (CC, CE, Passport, NIT) 
-    - ✅ Document number storage
-  </Tabs.Tab>
-  <Tabs.Tab>
-    ### Advanced Tracking System
-
-    <br />
-    - 📊 Status monitoring (Processing/Completed)
-    - 💬 Detailed message/description storage
-    - 🔄 Full CRUD operations
-    - ⚡ Real-time updates
-    - 🔍 Easy search and filtering
-
-  </Tabs.Tab>
-  <Tabs.Tab>
-    ### Supported Document Types
-    <br />
-
-    - **CC** - Cédula de Ciudadanía (Citizenship Card)
-    - **CE** - Cédula de Extranjería (Foreign ID)
-    - **PASSPORT** - International passport
-    - **NIT** - Número de Identificación Tributaria (Tax ID)
-
-  </Tabs.Tab>
-</Tabs>
+### 🖥️ Frontend (React + Next.js)
 
 <br />
 
-## 🚀 Getting Started
+- Modern and responsive UI  
+- Secure data entry  
+- Real-time display of AI classification results  
 
-<Steps>
+<br />
 
-### Navigate to PQR List
 
-Go to the PQR List page from the sidebar menu under **PQR → Create-view**
 
-### Create a New PQR
+### ⚙️ Backend (Python)
 
-Click the **"Add PQR"** button in the top right corner
+<br />
 
-### Fill in the Form
+- Microservice architecture  
+- Routes for classification, audit, SLA, scoring, and override logic  
+- Fast async GPU inference routing  
 
-Complete all required fields:
+<br />
 
-- Personal Information (First Name, Last Name)
-- Contact Details (Email, Phone)
-- Location (City)
-- Identification (Document Type & Number)
-- Request Details (Message)
-- Status (Processing/Completed)
 
-### Save and Manage
 
-Click **"Create PQR"** to save. You can then edit, view, or delete the PQR from the table.
+### 🧠 AI Engine (NVIDIA L40S)
 
-</Steps>
+<br />
 
-## 📊 Data Structure
+- Proprietary **gtt-oos-20B** language model  
+- Trained specifically for PQR patterns, legal risk, financial disputes, and emotional classification  
+- Performs topic detection, sentiment, emotion analysis, legal/threat detection, and fraud prediction  
 
-```typescript
-interface PQR {
-  id: string
-  firstName: string // Max 100 characters
-  lastName: string // Max 100 characters
-  phone: string
-  email: string // Valid email format
-  city: string
-  documentType: 'CC' | 'CE' | 'PASSPORT' | 'NIT'
-  documentNumber: string
-  message: string // Detailed description
-  status: 'PROCESSING' | 'COMPLETED'
-  projectId: string
-  createdAt: Date
-  updatedAt: Date
+<br />
+
+<Callout type="warning">
+All inference runs **locally on GPU hardware**, ensuring full data privacy, ultra-low latency, and regulatory compliance.
+</Callout>
+
+<br />
+
+
+
+### 🗄️ Database (MongoDB)
+
+<br />
+
+Stores:
+
+- Raw PQR data  
+- AI outputs  
+- Risk score  
+- Final priority  
+- SLA deadline  
+- Overrides  
+- Historical audit logs  
+
+<br />
+
+
+
+### 📝 Input Fields (Web PQR Form)
+
+<br />
+
+These fields form the structure of the PQR entry:
+
+#### First Name
+The customer's given name. Used to personalize communication and support identification.
+
+#### Last Name
+Customer's family name. Used with first name for full identification.
+
+#### Phone
+Primary contact number. Useful for urgent follow-up in high-risk cases.
+
+#### Email
+Customer's email address. Used for notifications and formal responses.
+
+#### City
+Location of the customer. Helps identify regional risk patterns or regulatory considerations.
+
+#### Document Type
+Type of identification (CC, CE, Passport). Determines how the entity validates user identity.
+
+#### Document Number
+The ID number associated with the selected document type. Helps uniquely identify the customer in the organization's systems.
+
+#### Status
+Represents the lifecycle state of the PQR. Default is *Processing* until resolved.
+
+#### Message
+The **core text** entered by the customer.  
+This is the primary input for the AI, and includes the user's request, complaint, or claim.
+
+<br />
+
+<Callout type="success">
+The <strong>Message</strong> field drives 80% of the AI logic: topic classification, emotion detection, urgency evaluation, and risk scoring depend on its content.
+</Callout>
+
+<br />
+
+
+
+### 🧪 AI Processing Pipeline
+
+<br />
+
+The AI engine performs multilayer analysis:
+
+#### 1. Text Processing  
+- Cleans and structures input  
+- Extracts relevant entities (amounts, deadlines, threats, legal words)  
+
+<br />
+
+#### 2. Sentiment & Emotion Detection  
+- Sentiment: positive, neutral, negative  
+- Emotions: anger, frustration, fear, anxiety, urgency  
+
+<br />
+
+#### 3. Topic Classification (Taxonomy)
+
+| Level | Description | Examples |
+|-------|-------------|----------|
+| **L0 – Critical** | Fraud, identity theft, legal action | hacked, stolen, lawsuit |
+| **L1 – High** | High-risk financial/legal terms | fraud, estafa, demanda |
+| **L2 – Medium** | Complaints & recurring issues | reclamo, cobro |
+| **L3 – Low** | Administrative requests | paz y salvo, certificate |
+| **L4 – Info** | Queries, gratitude | thanks, inquiry |
+
+<br />
+
+#### 4. Risk Score (0–100)
+
+Weighted criteria:
+
+- Topic / Intent — 40 pts  
+- Sentiment — 15 pts  
+- Emotion — 15 pts  
+- Urgency / Threat — 10 pts  
+- VIP Status — 10 pts  
+- Historical / Amount — 5–10 pts  
+
+<br />
+
+#### 5. SLA Assignment
+
+| Score | Level | SLA |
+|-------|--------|--------|
+| ≥ 85 | **L0 – Critical** | ≤ 30 minutes |
+| 65–84 | **L1 – High** | ≤ 2 hours |
+| 45–64 | **L2 – Medium** | ≤ 24 hours |
+| 25–44 | **L3 – Low** | ≤ 72 hours |
+| 0–24 | **L4 – Info** | Self-service |
+
+<br />
+
+#### 6. Override Rules
+
+- VIP → minimum **L1**  
+- Fraud → always **L0**  
+- Press/media → escalate one level  
+- Legal threats → escalate automatically  
+
+<br />
+
+<Callout type="warning">
+Overrides protect customers, ensure fairness, and safeguard institutional reputation.
+</Callout>
+
+<br />
+
+
+
+### 🧾 Final AI Output (JSON)
+
+<br />
+
+```json
+{
+  "priority_level": "L0",
+  "risk_score": 95,
+  "sentiment": "negative",
+  "emotion": "anger",
+  "topic": "fraud",
+  "sla_target": "30 minutes",
+  "overrides": ["VIP minimum L1", "Fraud → L0"]
 }
-```
 
-<Callout type="warning" emoji="⚠️">
-  All fields are **required** and must meet validation criteria. Make sure to
-  provide valid email addresses and complete information.
-</Callout>
-
-<br />
-
-## 🎯 Status Management
-
-<br />
-
-<div className="card">
-  <div className="card-body">
-    <div className="overflow-x-auto">
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Status</th>
-            <th>Description</th>
-            <th>Indicator</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className="font-semibold">PROCESSING</td>
-            <td>The PQR is currently being reviewed or worked on</td>
-            <td>
-              <span className="badge badge-warning">🟡 Yellow</span>
-            </td>
-          </tr>
-          <tr>
-            <td className="font-semibold">COMPLETED</td>
-            <td>The PQR has been resolved and closed</td>
-            <td>
-              <span className="badge badge-success">🟢 Green</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<br />
-
-## 🔧 Common Operations
-
-<Tabs items={['Create', 'Edit', 'View', 'Delete']}>
-  <Tabs.Tab>
-    ### Creating a New PQR
-    <br />
-
-    1. Click **"Add PQR"** button
-    2. Fill in all required fields
-    3. Select appropriate document type
-    4. Write a detailed message
-    5. Choose status (Processing/Completed)
-    6. Click **"Create PQR"**
-
-    <Callout type="info">
-    Make sure you have a project selected before creating a PQR!
-    </Callout>
-
-  </Tabs.Tab>
-
-  <Tabs.Tab>
-    ### Editing an Existing PQR
-    <br />
-
-    1. Locate the PQR in the table
-    2. Click the **Edit** button (✏️ pencil icon)
-    3. Modify the necessary fields
-    4. Click **"Update PQR"** to save changes
-
-    <Callout>
-    Changes are saved immediately and cannot be undone.
-    </Callout>
-
-  </Tabs.Tab>
-
-<Tabs.Tab>
-  ### Viewing PQR Details 1. Find the PQR in the list 2. Click the **View**
-  button (👁️ eye icon) 3. Review complete PQR information including all fields
-  and timestamps
-</Tabs.Tab>
-
-  <Tabs.Tab>
-    ### Deleting a PQR
-    <br />
-
-    1. Locate the PQR you want to delete
-    2. Click the **Delete** button (🗑️ trash icon)
-    3. Confirm the deletion in the modal dialog
-
-    <Callout type="error" emoji="🚨">
-    **Warning**: This action cannot be undone! Make sure you really want to delete this PQR.
-    </Callout>
-
-  </Tabs.Tab>
-</Tabs>
-
-<br />
-
-## 🔐 Project Integration
-
-<Callout type="info" emoji="🏢">
-  The PQR module is **project-scoped** for enhanced security and organization.
-</Callout>
-<br />
-
-### Key Points:
-
-<br />
-
-- ✅ Each PQR belongs to a specific project
-- ✅ You must have a project selected to create or view PQRs
-- ✅ PQRs are isolated per project for data security
-- ✅ Only project members can access project PQRs
-
-<br />
-
-## 🛠️ API Reference
-
-The module uses **tRPC** for type-safe API calls:
-
-```typescript
-// Get all PQRs for a project
-projectPQR.getByProject({ projectId: string })
-
-// Create a new PQR
-projectPQR.create({ ...pqrData, projectId: string })
-
-// Update an existing PQR
-projectPQR.update({ id: string, ...pqrData })
-
-// Delete a PQR
-projectPQR.delete({ id: string })
-```
-
-<br />
-
-## ✅ Best Practices
-
-<br />
-
-1. **Complete Information** - Always fill in all required fields with accurate data
-2. **Regular Updates** - Keep PQR statuses up to date (Processing → Completed)
-3. **Detailed Messages** - Provide clear and detailed descriptions
-4. **Correct Document Type** - Verify the document type matches the number
-5. **Review Before Deletion** - Double-check before deleting (cannot be undone)
-
-<br />
-
-## ❓ Troubleshooting
-
-<Callout type="warning">
-  ### "Please select a project first" **Solution**: Select a project from the
-  project selector before accessing the PQR module.
-</Callout>
-
-<Callout type="warning">
-  ### Validation errors when creating/editing **Solution**: Check that all
-  required fields are filled and meet validation criteria: - Valid email format
-  - Non-empty strings - Correct document type selection
-</Callout>
-
-<Callout type="warning">
-  ### PQR not appearing in the list **Solution**: 1. Verify you're viewing the
-  correct project 2. Refresh the page 3. Check your internet connection 4.
-  Ensure you have proper permissions
-</Callout>
-
-<br />
-
-## 🆘 Support
-
-<br />
-Need help with the PQR module?
-
-- 👨‍💼 Contact your system administrator
-- 🤖 Check the AI Agent section for automated assistance
-- 📄 Review the [landing page](/apps/pqr/landing) for more information
-
-<br />
-
-<Callout type="default" emoji="📅">
-  *Last updated: {new Date().toLocaleDateString()}*
-</Callout>

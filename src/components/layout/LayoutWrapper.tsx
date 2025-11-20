@@ -18,8 +18,8 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
 
   useEffect(() => {
     document.title = route
-      ? `${route.title} | Zenith - Premium Versatile Admin & Dashboard Template`
-      : 'Zenith - Premium Versatile Admin & Dashboard Template'
+      ? `${route.title} | Zenith - Ai apps`
+      : 'Zenith - Ai apps'
   }, [route])
   return (
     <Layout>

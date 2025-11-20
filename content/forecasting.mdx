@@ -1,11 +1,180 @@
-# Introduction
- 
-Welcome to Nextra! This is a basic docs template. You can use it as a starting point for your own project :)
+import { Callout } from 'nextra/components'
 
-## What is Nextra?
 
-A **simple**, **powerful** and **flexible** site generation framework with everything you love from Next.js.
 
-## Documentation
+<br />
 
-The documentation is available at [https://nextra.site](https://nextra.site).
+### 🔮 GPU-Accelerated Forecasting System  
+#### NHITS Technical Documentation (GPU + NeuralForecast)
+
+<br />
+
+The Forecasting Module enables users to upload a time series and instantly generate multi-step predictions using **NHITS**, a state-of-the-art neural forecasting architecture optimized for **GPU acceleration** (NVIDIA L40S).
+
+It delivers:
+
+- Fast multi-step forecasts  
+- Probabilistic intervals (lower/upper bands)  
+- Automated model training per project  
+- Enterprise-scale performance  
+- Real-time decision support  
+
+<br />
+
+
+
+### 💠 System Architecture
+
+<br />
+
+<Callout type="info">
+This forecasting engine is powered by NHITS + PyTorch + NeuralForecast, fully accelerated on an NVIDIA L40S GPU.
+</Callout>
+
+<br />
+
+The architecture consists of:
+
+- **Frontend (React + Next.js)** — CSV upload, configuration, and forecast visualization  
+- **Backend (Python)** — Model training, inference, probabilistic intervals  
+- **AI Engine (NHITS)** — GPU-accelerated forecasting using PyTorch  
+- **Database (MongoDB)** — ProjectForecasting & metadata storage  
+- **API Layer (FastAPI)** — `/forecast/` endpoint for real-time predictions  
+
+<br />
+
+
+
+### 🖥️ Frontend — Forecast Creation Form
+
+<br />
+
+Users configure a forecast by providing the following fields:
+
+<br />
+
+#### **Time Interval Configuration**
+Defines the expected frequency of your time series.  
+Examples:  
+- 1 hour  
+- 1 day  
+- 30 minutes  
+
+Used to validate timestamps and align predictions with real-world cadence.
+
+<br />
+
+#### **Description**  
+Optional text field that allows the user to describe the purpose or context of the forecast.  
+Useful for audit logs, reporting, and team collaboration.
+
+<br />
+
+#### **Period to Predict**  
+Number of future time intervals (integer) that the model will forecast.  
+Examples:  
+- 12 (next 12 hours)  
+- 30 (next 30 days)  
+
+This corresponds to NHITS’ horizon parameter.
+
+<br />
+
+#### **Confidence Level (%)**  
+Optional numeric field (80–100).  
+Determines the width of probabilistic forecast intervals.  
+- Higher confidence → wider bands  
+- Lower confidence → narrower bands  
+
+Values map to NHITS’ `level` parameter.
+
+<br />
+
+#### **CSV File Upload**  
+The user uploads a CSV with the format:
+<br />
+timestamp,value
+mm/dd/yyyy hh:mm:ss, number
+<br />
+
+
+The system then:
+
+1. Parses and validates timestamps  
+2. Normalizes the series  
+3. Trains NHITS on GPU  
+4. Returns multi-step predictions  
+
+<br />
+
+<Callout type="success">
+CSV files are processed directly on the GPU pipeline, enabling real-time predictions even for high-frequency signals.
+</Callout>
+
+<br />
+
+
+
+### ⚙️ Backend – Python Engine
+
+<br />
+
+The backend performs core operations:
+
+- Loads the uploaded CSV  
+- Runs validation (frequency, nulls, monotonic timestamps)  
+- Converts series into NeuralForecast format  
+- Initializes NHITS with GPU acceleration  
+- Trains the model on the fly  
+- Generates point forecasts and confidence intervals  
+- Stores technical metadata in MongoDB  
+
+<br />
+
+<Callout type="warning">
+If a GPU (CUDA) is available, NHITS automatically switches to **GPU mode**, speeding training and inference dramatically.
+</Callout>
+
+<br />
+
+
+
+### 🧠 NHITS Forecasting Engine (PyTorch + NeuralForecast)
+
+<br />
+
+NHITS (Neural Hierarchical Interpolation for Time Series) is a modern architecture designed to:
+
+- Handle long-term dependencies  
+- Model complex temporal hierarchies  
+- Capture both trend and local fluctuations  
+- Decompose signals across multiple temporal scales  
+
+It consistently outperforms LSTM, GRU, DeepAR, and Transformers on:
+
+- Noisy series  
+- Irregular patterns  
+- Volatile time series  
+- Long-horizon predictions  
+
+<br />
+
+
+
+### 📤 Forecast Output (JSON Example)
+
+<br />
+
+```json
+{
+  "forecast": [
+    { "timestamp": "2025-01-01 12:00:00", "point": 234.1, "lower": 210.3, "upper": 260.9 },
+    { "timestamp": "2025-01-01 13:00:00", "point": 240.4, "lower": 215.2, "upper": 268.5 }
+  ],
+  "model_summary": {
+    "engine": "NHITS",
+    "device": "cuda",
+    "interval": "1 Hour",
+    "confidence": 90
+  }
+}
