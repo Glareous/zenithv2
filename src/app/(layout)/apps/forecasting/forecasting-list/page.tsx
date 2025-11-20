@@ -472,8 +472,8 @@ const ForecastingListPage: NextPageWithLayout = () => {
           return (
             <span
               className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${status === 'COMPLETED'
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-yellow-100 text-yellow-800'
+                ? 'bg-green-100 text-green-800'
+                : 'bg-yellow-100 text-yellow-800'
                 }`}>
               {status}
             </span>
@@ -920,11 +920,12 @@ const ForecastingListPage: NextPageWithLayout = () => {
         title="CSV Examples"
         size="modal-md"
         position="modal-center"
+        footerClass='flex justify-end'
         content={
           <div className="space-y-6">
             {/* Example 1 */}
             <div className="flex gap-4 items-start">
-              <div className="w-28 h-28 bg-gray-200 dark:bg-dark-700 rounded-lg flex-shrink-0 flex items-center justify-center">
+              <div className="w-24 h-24 bg-gray-200 dark:bg-dark-700 rounded-lg flex-shrink-0 flex items-center justify-center">
                 <span className="text-4xl">📊</span>
               </div>
               <div className="flex-1">
@@ -951,7 +952,7 @@ const ForecastingListPage: NextPageWithLayout = () => {
 
             {/* Example 2 */}
             <div className="flex gap-4 items-start">
-              <div className="w-28 h-28 bg-gray-200 dark:bg-dark-700 rounded-lg flex-shrink-0 flex items-center justify-center">
+              <div className="w-24 h-24 bg-gray-200 dark:bg-dark-700 rounded-lg flex-shrink-0 flex items-center justify-center">
                 <span className="text-4xl">📈</span>
               </div>
               <div className="flex-1">
@@ -978,7 +979,7 @@ const ForecastingListPage: NextPageWithLayout = () => {
 
             {/* Example 3 */}
             <div className="flex gap-4 items-start">
-              <div className="w-28 h-28 bg-gray-200 dark:bg-dark-700 rounded-lg flex-shrink-0 flex items-center justify-center">
+              <div className="w-24 h-24 bg-gray-200 dark:bg-dark-700 rounded-lg flex-shrink-0 flex items-center justify-center">
                 <span className="text-4xl">📅</span>
               </div>
               <div className="flex-1">
@@ -1002,12 +1003,39 @@ const ForecastingListPage: NextPageWithLayout = () => {
                 </div>
               </div>
             </div>
+
+            {/* Example 4 */}
+            <div className="flex gap-4 items-start">
+              <div className="w-24 h-24 bg-gray-200 dark:bg-dark-700 rounded-lg flex-shrink-0 flex items-center justify-center">
+                <span className="text-4xl">🍎</span>
+              </div>
+              <div className="flex-1">
+                <h6 className="text-lg font-semibold mb-1">Apple Stock Price History</h6>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                  Frecuencia: 7 Days (Weekly)
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => handleDownloadExample('Apple Stock Price History.csv')}>
+                    DOWNLOAD
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => handleUseExample('Apple Stock Price History.csv', 7, 'DAYS')}>
+                    USE
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         }
         footer={
           <button
             onClick={() => setShowExamplesModal(false)}
-            className="btn btn-outline-secondary">
+            className="btn btn-outline-red">
             Cancel
           </button>
         }
