@@ -128,8 +128,8 @@ const Topbar: React.FC<TopBarProps> = ({
     <React.Fragment>
       <div
         className={`main-topbar group/topbar navbar ${scrolled
-            ? 'group-data-[layout=boxed]:top-0 group-data-[layout=semibox]:top-0 nav-sticky'
-            : ''
+          ? 'group-data-[layout=boxed]:top-0 group-data-[layout=semibox]:top-0 nav-sticky'
+          : ''
           }`}>
         <div className="main-topbar-wrapper group-data-[nav-type=pattern]:!border-primary-400 group-data-[nav-type=pattern]:group-[&.nav-sticky]/topbar:!bg-primary-500 group-data-[nav-type=pattern]:group-[&.nav-sticky]/topbar:!border-primary-400">
           <div className="flex items-center w-full ltr:pr-4 rtl:pl-4">
@@ -144,7 +144,7 @@ const Topbar: React.FC<TopBarProps> = ({
                       src={organization.logoUrl}
                       aria-label={organization.name}
                       alt={organization.name}
-                      className="h-10 group-data-[layout=modern]:hidden inline-block object-contain"
+                      className="h-12 group-data-[layout=modern]:hidden inline-block object-contain"
                     />
                   ) : (
                     <>
@@ -152,7 +152,7 @@ const Topbar: React.FC<TopBarProps> = ({
                         src={logo}
                         aria-label="Read more about Seminole tax hike"
                         alt="logo"
-                        className="h-6 group-data-[layout=modern]:hidden inline-block dark:hidden"
+                        className="h-12 group-data-[layout=modern]:hidden inline-block dark:hidden"
                         height={24}
                         width={132}
                       />
@@ -160,7 +160,7 @@ const Topbar: React.FC<TopBarProps> = ({
                         src={whiteLogo}
                         aria-label="Read more about Seminole tax hike"
                         alt="logo"
-                        className="h-6 hidden dark:inline-block group-data-[layout=modern]:hidden"
+                        className="h-12 hidden dark:inline-block group-data-[layout=modern]:hidden"
                         height={24}
                         width={132}
                       />
@@ -172,8 +172,8 @@ const Topbar: React.FC<TopBarProps> = ({
               <button
                 onClick={() => !disableToggle && toggleSidebar()}
                 className={`sidebar-toggle group-data-[layout=horizontal]:lg:hidden ${disableToggle
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'cursor-pointer'
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'cursor-pointer'
                   }`}
                 title={
                   disableToggle
