@@ -34,10 +34,6 @@ export const AgentSidebar = ({
     ? '/admin/agents'
     : '/apps/agents/default'
 
-  const backText = isAdminAgent
-    ? 'Back to Agents'
-    : 'Back to Agents'
-
   const navigationItems = [
     {
       name: 'Configure',
@@ -60,18 +56,20 @@ export const AgentSidebar = ({
     <div
       className={`transition-all duration-300 ease-in-out h-full ${isCollapsed ? 'w-16' : 'w-56'} flex-shrink-0`}>
       <div className="h-full border-r border-b border-gray-200 dark:border-gray-800 flex flex-col">
-        {/* Header with back button */}
-        <div className="flex items-center p-4">
-          <button
-            onClick={() => router.push(backRoute)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 w-full dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors ${isCollapsed ? 'justify-center px-2' : ''}`}
-            title={isCollapsed ? backText : undefined}>
-            <ArrowLeft className="w-4 h-4" />
-            {!isCollapsed && (
-              <span className="text-sm font-medium">{backText}</span>
-            )}
-          </button>
-        </div>
+        {/* Header with back button - only show in admin */}
+        {isAdminAgent && (
+          <div className="flex items-center p-4">
+            <button
+              onClick={() => router.push(backRoute)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 w-full dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors ${isCollapsed ? 'justify-center px-2' : ''}`}
+              title={isCollapsed ? 'Back to Agents' : undefined}>
+              <ArrowLeft className="w-4 h-4" />
+              {!isCollapsed && (
+                <span className="text-sm font-medium">Back to Agents</span>
+              )}
+            </button>
+          </div>
+        )}
 
         <div className="card p-3 m-2">
           <div className="space-y-2">
@@ -91,7 +89,7 @@ export const AgentSidebar = ({
             </p>
             <button
               onClick={() => setIsTestModalOpen(true)}
-              className="btn btn-gray flex items-center justify-center gap-3 w-full">
+              className="btn btn-gray flex items-center justify-center gap-3 w-full hidden">
               <Phone className="w-4 h-4" />
               Test Agent
             </button>
@@ -108,10 +106,9 @@ export const AgentSidebar = ({
                     href={item.href}
                     className={`
                       flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200
-                      ${
-                        isActive
-                          ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400  border-primary-500'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400'
+                      ${isActive
+                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400  border-primary-500'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400'
                       }
                       ${isCollapsed ? 'justify-center px-2' : ''}
                     `}
@@ -189,10 +186,9 @@ export const AgentMobileDrawer = ({
                   onClick={onClose}
                   className={`
                     flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200
-                    ${
-                      isActive
-                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-primary-500'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400'
+                    ${isActive
+                      ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-primary-500'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400'
                     }
                   `}>
                   {item.name}

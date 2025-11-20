@@ -226,7 +226,7 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
       if (selectedFiles.length > 0) {
         await uploadFiles()
       }
-    } catch (error) {}
+    } catch (error) { }
   }
 
   const uploadFiles = async () => {
@@ -466,9 +466,8 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
             type="text"
             id="name"
             disabled={!canManageAgents}
-            className={`form-input ${
-              errors.name ? 'border-red-500 focus:ring-red-500' : ''
-            }`}
+            className={`form-input ${errors.name ? 'border-red-500 focus:ring-red-500' : ''
+              }`}
             placeholder="Enter agent name"
           />
           {errors.name && (
@@ -566,11 +565,11 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
               value={
                 watch('modelId')
                   ? {
-                      value: watch('modelId'),
-                      label:
-                        projectModels.find((m) => m.id === watch('modelId'))
-                          ?.name || 'Select model',
-                    }
+                    value: watch('modelId'),
+                    label:
+                      projectModels.find((m) => m.id === watch('modelId'))
+                        ?.name || 'Select model',
+                  }
                   : null
               }
               onChange={(option) => setValue('modelId', option?.value || null)}
@@ -612,11 +611,10 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
           {/* File Upload Area - Only for SUPERADMIN */}
           {canManageAgents && (
             <div
-              className={`border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
-                dragActive
-                  ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/10'
-                  : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-              }`}
+              className={`border-2 border-dashed rounded-lg p-3 text-center transition-colors ${dragActive
+                ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/10'
+                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                }`}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}>
@@ -741,33 +739,30 @@ const AgentEditPage: React.FC<AgentEditPageProps> = ({ params }) => {
             <button
               type="button"
               onClick={() => setActiveTab('general')}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
-                activeTab === 'general'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}>
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${activeTab === 'general'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}>
               <Settings className="w-4 h-4 mr-1" />
               General
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('voice')}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
-                activeTab === 'voice'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}>
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center hidden ${activeTab === 'voice'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}>
               <Volume2 className="w-4 h-4 mr-1" />
               Voice
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('call-configuration')}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
-                activeTab === 'call-configuration'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}>
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center hidden ${activeTab === 'call-configuration'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}>
               <PhoneCall className="w-4 h-4 mr-1" />
               Call Configuration
             </button>
