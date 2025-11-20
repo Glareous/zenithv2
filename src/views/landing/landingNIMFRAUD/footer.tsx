@@ -5,33 +5,37 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import logoWhite from '@assets/images/logo-white.png'
 import mainLogo from '@assets/images/main-logo.png'
+import { api } from '@src/trpc/react'
+import { useSession } from 'next-auth/react'
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear()
+  const { status, data: session } = useSession()
+
+  // Use the same query as the Layout to get organization with logoUrl
+  const { data: userOrganization } = api.organization.getUserOrganization.useQuery(
+    undefined,
+    {
+      enabled: status === 'authenticated' && session?.user?.role !== 'SUPERADMIN',
+    }
+  )
+
   return (
     <React.Fragment>
       <footer className="pb-8 pt-36 bg-slate-50 dark:bg-dark-900/30">
         <div className="container mx-auto px-4 xl:px-20">
           <div className="grid grid-cols-12 gap-space">
             <div className="col-span-12 xl:col-span-4">
-              <Link href="/" title="logo">
-                <Image
-                  src={mainLogo}
-                  alt="logo"
-                  className="inline-block h-8 dark:hidden"
-                  width={175}
-                  height={32}
-                />
-                <Image
-                  src={logoWhite}
-                  alt="logo"
-                  className="hidden h-8 dark:inline-block"
-                  width={175}
-                  height={32}
-                />
-              </Link>
+              {userOrganization?.logoUrl && (
+                <Link href="/apps/nim-fraud/list" title="logo">
+                  <img
+                    src={userOrganization.logoUrl}
+                    alt={userOrganization.name}
+                    className="inline-block h-16 object-contain"
+                  />
+                </Link>
+              )}
               <p className="mb-5 text-gray-500 dark:text-dark-500 mt-7 text-16">
                 We help your business!
               </p>
