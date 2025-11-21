@@ -244,7 +244,7 @@ const menu: MegaMenu[] = [
       },
     ],
   },
-    {
+  {
     title: 'NVIDIA - NIM FRAUD',
     lang: 'pe-nim-fraud',
     icon: 'gem',
@@ -310,6 +310,60 @@ const menu: MegaMenu[] = [
     link: '/apps/advisor/',
     separator: false,
     children: [
+      {
+        title: 'Products',
+        link: '#',
+        lang: 'pe-products',
+        children: [
+          {
+            title: 'Products List',
+            lang: 'products-list',
+            link: '/apps/ecommerce/products/list',
+            dropdownPosition: null,
+            children: [],
+          },
+          {
+            title: 'Create Product',
+            lang: 'create-product',
+            link: '/apps/ecommerce/products/create-products',
+            dropdownPosition: null,
+            children: [],
+          },
+          {
+            title: 'Warehouse',
+            lang: 'warehouse',
+            link: '/apps/ecommerce/products/warehouse',
+            dropdownPosition: null,
+            children: [],
+          },
+        ],
+      },
+      {
+        title: 'Service',
+        lang: 'service',
+        link: '#',
+        children: [
+          {
+            title: 'Services List',
+            lang: 'Services List',
+            link: '/apps/service/list',
+            dropdownPosition: null,
+            children: [],
+          },
+          {
+            title: 'Create Service',
+            lang: 'Create Service',
+            link: '/apps/service/create-service',
+            dropdownPosition: null,
+            children: [],
+          },
+        ],
+      },
+      {
+        title: 'Category',
+        lang: 'Category',
+        link: '/apps/category',
+      },
       {
         title: 'Landing',
         link: '/apps/advisor/landing',
