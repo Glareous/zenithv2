@@ -13,8 +13,9 @@ import { NextPageWithLayout } from '@src/dtos'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
 import { CirclePlus, Eye, Pencil, Trash2 } from 'lucide-react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
+import Select from 'react-select'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
@@ -27,10 +28,23 @@ const pqrSchema = z.object({
   documentType: z.enum(['CC', 'CE', 'PASSPORT', 'NIT']),
   documentNumber: z.string().min(1, 'Document number is required'),
   message: z.string().min(1, 'Message is required'),
-  status: z.enum(['PROCESSING', 'COMPLETED']),
+  status: z.enum(['PROCESSING', 'COMPLETED', 'FAILED']),
 })
 
 type PQRFormData = z.infer<typeof pqrSchema>
+
+const documentTypeOptions = [
+  { value: 'CC', label: 'CC - Citizenship Card' },
+  { value: 'CE', label: 'CE - Foreign ID' },
+  { value: 'PASSPORT', label: 'Passport' },
+  { value: 'NIT', label: 'NIT - Tax ID' },
+]
+
+const statusOptions = [
+  { value: 'PROCESSING', label: 'Processing' },
+  { value: 'COMPLETED', label: 'Completed' },
+  { value: 'FAILED', label: 'Failed' },
+]
 
 const PQRListPage: NextPageWithLayout = () => {
   const { currentProject } = useSelector((state: RootState) => state.Project)
@@ -44,6 +58,7 @@ const PQRListPage: NextPageWithLayout = () => {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<PQRFormData>({
     resolver: zodResolver(pqrSchema),
@@ -207,6 +222,31 @@ const PQRListPage: NextPageWithLayout = () => {
       {
         header: 'City',
         accessorKey: 'city',
+      },
+      {
+        header: 'Status',
+        cell: ({ row }: { row: { original: any } }) => {
+          const status = row.original.status
+          const statusConfig = {
+            PROCESSING: {
+              label: 'Processing',
+              className: 'badge badge-sub-yellow',
+            },
+            COMPLETED: {
+              label: 'Completed',
+              className: 'badge badge-sub-green',
+            },
+            FAILED: {
+              label: 'Failed',
+              className: 'badge badge-sub-red',
+            },
+          }
+          const config = statusConfig[status as keyof typeof statusConfig] || {
+            label: status,
+            className: 'badge badge-soft-secondary',
+          }
+          return <span className={config.className}>{config.label}</span>
+        },
       },
       {
         header: 'Actions',
@@ -406,15 +446,23 @@ const PQRListPage: NextPageWithLayout = () => {
                   className="block mb-2 text-sm font-medium">
                   Document Type <span className="text-red-500">*</span>
                 </label>
-                <select
-                  id="documentType"
-                  {...register('documentType')}
-                  className={`form-input ${errors.documentType ? 'border-red-500' : ''}`}>
-                  <option value="CC">CC - Citizenship Card</option>
-                  <option value="CE">CE - Foreign ID</option>
-                  <option value="PASSPORT">Passport</option>
-                  <option value="NIT">NIT - Tax ID</option>
-                </select>
+                <Controller
+                  name="documentType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={documentTypeOptions}
+                      value={documentTypeOptions.find(
+                        (opt) => opt.value === field.value
+                      )}
+                      onChange={(option) => field.onChange(option?.value)}
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      placeholder="Select document type..."
+                    />
+                  )}
+                />
                 {errors.documentType && (
                   <p className="mt-1 text-sm text-red-600">
                     {errors.documentType.message}
@@ -450,13 +498,21 @@ const PQRListPage: NextPageWithLayout = () => {
                   className="block mb-2 text-sm font-medium">
                   Status <span className="text-red-500">*</span>
                 </label>
-                <select
-                  id="status"
-                  {...register('status')}
-                  className={`form-input ${errors.status ? 'border-red-500' : ''}`}>
-                  <option value="PROCESSING">Processing</option>
-                  <option value="COMPLETED">Completed</option>
-                </select>
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={statusOptions}
+                      value={statusOptions.find((opt) => opt.value === field.value)}
+                      onChange={(option) => field.onChange(option?.value)}
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      placeholder="Select status..."
+                    />
+                  )}
+                />
                 {errors.status && (
                   <p className="mt-1 text-sm text-red-600">
                     {errors.status.message}
@@ -503,8 +559,8 @@ const PQRListPage: NextPageWithLayout = () => {
                   updateMutation.isPending
                 }>
                 {isSubmitting ||
-                createMutation.isPending ||
-                updateMutation.isPending
+                  createMutation.isPending ||
+                  updateMutation.isPending
                   ? 'Saving...'
                   : isEditMode
                     ? 'Update PQR'

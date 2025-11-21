@@ -471,10 +471,13 @@ const ForecastingListPage: NextPageWithLayout = () => {
           const status = cell.getValue()
           return (
             <span
-              className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${status === 'COMPLETED'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-yellow-100 text-yellow-800'
-                }`}>
+              className={`badge ${
+                status === 'COMPLETED'
+                  ? 'badge-sub-green'
+                  : status === 'FAILED'
+                    ? 'badge-sub-red'
+                    : 'badge-sub-yellow'
+              }`}>
               {status}
             </span>
           )

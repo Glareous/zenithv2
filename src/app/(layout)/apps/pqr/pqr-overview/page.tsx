@@ -11,8 +11,9 @@ import { NextPageWithLayout } from '@src/dtos'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
 import { CalendarCheck, Mail, MapPin, Pencil, Phone } from 'lucide-react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
+import Select from 'react-select'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
@@ -25,10 +26,23 @@ const pqrSchema = z.object({
   documentType: z.enum(['CC', 'CE', 'PASSPORT', 'NIT']),
   documentNumber: z.string().min(1, 'Document number is required'),
   message: z.string().min(1, 'Message is required'),
-  status: z.enum(['PROCESSING', 'COMPLETED']),
+  status: z.enum(['PROCESSING', 'COMPLETED', 'FAILED']),
 })
 
 type PQRFormData = z.infer<typeof pqrSchema>
+
+const documentTypeOptions = [
+  { value: 'CC', label: 'CC - Citizenship Card' },
+  { value: 'CE', label: 'CE - Foreign ID' },
+  { value: 'PASSPORT', label: 'Passport' },
+  { value: 'NIT', label: 'NIT - Tax ID' },
+]
+
+const statusOptions = [
+  { value: 'PROCESSING', label: 'Processing' },
+  { value: 'COMPLETED', label: 'Completed' },
+  { value: 'FAILED', label: 'Failed' },
+]
 
 const PQROverviewContent = () => {
   const router = useRouter()
@@ -51,6 +65,7 @@ const PQROverviewContent = () => {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<PQRFormData>({
     resolver: zodResolver(pqrSchema),
@@ -189,10 +204,16 @@ const PQROverviewContent = () => {
                   </span>
                   <span
                     className={`badge ${pqr.status === 'COMPLETED'
-                      ? 'badge-success'
-                      : 'badge-warning'
+                      ? 'badge-sub-green'
+                      : pqr.status === 'FAILED'
+                        ? 'badge-sub-red'
+                        : 'badge-sub-yellow'
                       }`}>
-                    {pqr.status}
+                    {pqr.status === 'COMPLETED'
+                      ? 'Completed'
+                      : pqr.status === 'FAILED'
+                        ? 'Failed'
+                        : 'Processing'}
                   </span>
                 </div>
               </div>
@@ -303,54 +324,50 @@ const PQROverviewContent = () => {
                     <tr className="border-t border-gray-200 dark:border-dark-700">
                       <td className="px-3 py-4 text-center">
                         <span
-                          className={`badge ${
-                            pqr.analysis.type === 'COMPLAINT'
-                              ? 'badge-danger'
-                              : pqr.analysis.type === 'CLAIM'
-                                ? 'badge-warning'
-                                : 'badge-primary'
-                          }`}>
+                          className={`badge ${pqr.analysis.type === 'COMPLAINT'
+                            ? 'badge-danger'
+                            : pqr.analysis.type === 'CLAIM'
+                              ? 'badge-warning'
+                              : 'badge-primary'
+                            }`}>
                           {pqr.analysis.type}
                         </span>
                       </td>
                       <td className="px-3 py-4 text-center">
                         <span
-                          className={`badge ${
-                            pqr.analysis.priority === 'CRITICAL' ||
+                          className={`badge ${pqr.analysis.priority === 'CRITICAL' ||
                             pqr.analysis.priority === 'HIGH'
-                              ? 'badge-danger'
-                              : pqr.analysis.priority === 'MEDIUM'
-                                ? 'badge-warning'
-                                : 'badge-success'
-                          }`}>
+                            ? 'badge-danger'
+                            : pqr.analysis.priority === 'MEDIUM'
+                              ? 'badge-warning'
+                              : 'badge-success'
+                            }`}>
                           {pqr.analysis.priority}
                         </span>
                       </td>
                       <td className="px-3 py-4">
                         <div className="flex flex-col items-center gap-1">
                           <span
-                            className={`font-semibold ${
-                              parseInt(pqr.analysis.risk) >= 75
-                                ? 'text-red-600'
-                                : parseInt(pqr.analysis.risk) >= 50
-                                  ? 'text-orange-600'
-                                  : parseInt(pqr.analysis.risk) >= 25
-                                    ? 'text-yellow-600'
-                                    : 'text-green-600'
-                            }`}>
+                            className={`font-semibold ${parseInt(pqr.analysis.risk) >= 75
+                              ? 'text-red-600'
+                              : parseInt(pqr.analysis.risk) >= 50
+                                ? 'text-orange-600'
+                                : parseInt(pqr.analysis.risk) >= 25
+                                  ? 'text-yellow-600'
+                                  : 'text-green-600'
+                              }`}>
                             {pqr.analysis.risk}
                           </span>
                           <div className="w-20 h-2 bg-gray-200 rounded-full dark:bg-dark-700">
                             <div
-                              className={`h-2 rounded-full ${
-                                parseInt(pqr.analysis.risk) >= 75
-                                  ? 'bg-red-600'
-                                  : parseInt(pqr.analysis.risk) >= 50
-                                    ? 'bg-orange-600'
-                                    : parseInt(pqr.analysis.risk) >= 25
-                                      ? 'bg-yellow-600'
-                                      : 'bg-green-600'
-                              }`}
+                              className={`h-2 rounded-full ${parseInt(pqr.analysis.risk) >= 75
+                                ? 'bg-red-600'
+                                : parseInt(pqr.analysis.risk) >= 50
+                                  ? 'bg-orange-600'
+                                  : parseInt(pqr.analysis.risk) >= 25
+                                    ? 'bg-yellow-600'
+                                    : 'bg-green-600'
+                                }`}
                               style={{
                                 width: pqr.analysis.risk,
                               }}
@@ -360,25 +377,23 @@ const PQROverviewContent = () => {
                       </td>
                       <td className="px-3 py-4 text-center">
                         <span
-                          className={`badge ${
-                            pqr.analysis.sla === 'BREACHED'
-                              ? 'badge-danger'
-                              : pqr.analysis.sla === 'AT_RISK'
-                                ? 'badge-warning'
-                                : 'badge-success'
-                          }`}>
+                          className={`badge ${pqr.analysis.sla === 'BREACHED'
+                            ? 'badge-danger'
+                            : pqr.analysis.sla === 'AT_RISK'
+                              ? 'badge-warning'
+                              : 'badge-success'
+                            }`}>
                           {pqr.analysis.sla}
                         </span>
                       </td>
                       <td className="px-3 py-4 text-center">
                         <span
-                          className={`badge ${
-                            pqr.analysis.sentiment === 'NEGATIVE'
-                              ? 'badge-danger'
-                              : pqr.analysis.sentiment === 'NEUTRAL'
-                                ? 'badge-secondary'
-                                : 'badge-success'
-                          }`}>
+                          className={`badge ${pqr.analysis.sentiment === 'NEGATIVE'
+                            ? 'badge-danger'
+                            : pqr.analysis.sentiment === 'NEUTRAL'
+                              ? 'badge-secondary'
+                              : 'badge-success'
+                            }`}>
                           {pqr.analysis.sentiment}
                         </span>
                       </td>
@@ -397,11 +412,10 @@ const PQROverviewContent = () => {
                       )}
                       <td className="px-3 py-4 text-center">
                         <span
-                          className={`badge ${
-                            pqr.analysis.override
-                              ? 'badge-warning'
-                              : 'badge-success'
-                          }`}>
+                          className={`badge ${pqr.analysis.override
+                            ? 'badge-warning'
+                            : 'badge-success'
+                            }`}>
                           {pqr.analysis.override ? 'Yes' : 'No'}
                         </span>
                       </td>
@@ -569,15 +583,23 @@ const PQROverviewContent = () => {
                   className="block mb-2 text-sm font-medium">
                   Document Type <span className="text-red-500">*</span>
                 </label>
-                <select
-                  id="documentType"
-                  {...register('documentType')}
-                  className={`form-input ${errors.documentType ? 'border-red-500' : ''}`}>
-                  <option value="CC">CC - Citizenship Card</option>
-                  <option value="CE">CE - Foreign ID</option>
-                  <option value="PASSPORT">Passport</option>
-                  <option value="NIT">NIT - Tax ID</option>
-                </select>
+                <Controller
+                  name="documentType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={documentTypeOptions}
+                      value={documentTypeOptions.find(
+                        (opt) => opt.value === field.value
+                      )}
+                      onChange={(option) => field.onChange(option?.value)}
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      placeholder="Select document type..."
+                    />
+                  )}
+                />
                 {errors.documentType && (
                   <p className="mt-1 text-sm text-red-600">
                     {errors.documentType.message}
@@ -613,13 +635,21 @@ const PQROverviewContent = () => {
                   className="block mb-2 text-sm font-medium">
                   Status <span className="text-red-500">*</span>
                 </label>
-                <select
-                  id="status"
-                  {...register('status')}
-                  className={`form-input ${errors.status ? 'border-red-500' : ''}`}>
-                  <option value="PROCESSING">Processing</option>
-                  <option value="COMPLETED">Completed</option>
-                </select>
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={statusOptions}
+                      value={statusOptions.find((opt) => opt.value === field.value)}
+                      onChange={(option) => field.onChange(option?.value)}
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      placeholder="Select status..."
+                    />
+                  )}
+                />
                 {errors.status && (
                   <p className="mt-1 text-sm text-red-600">
                     {errors.status.message}

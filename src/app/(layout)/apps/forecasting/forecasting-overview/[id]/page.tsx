@@ -202,7 +202,7 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
                   }>
                   <Upload className="inline-block size-4 mr-1" />
                   {getUploadUrlMutation.isPending ||
-                  createFileMutation.isPending
+                    createFileMutation.isPending
                     ? 'Uploading...'
                     : 'Upload CSV'}
                 </button>
@@ -230,13 +230,12 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
                   <p className="text-sm text-gray-500">Status</p>
                   <p className="text-sm font-medium">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        forecasting.status === 'COMPLETED'
-                          ? 'bg-green-100 text-green-800'
-                          : forecasting.status === 'FAILED'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      className={`badge ${forecasting.status === 'COMPLETED'
+                        ? 'badge-sub-green'
+                        : forecasting.status === 'FAILED'
+                          ? 'badge-sub-red'
+                          : 'badge-sub-yellow'
+                        }`}>
                       {forecasting.status}
                     </span>
                   </p>
@@ -374,8 +373,8 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
                   <span className="text-gray-600">
                     {typeof value === 'number'
                       ? value.toLocaleString(undefined, {
-                          maximumFractionDigits: 10,
-                        })
+                        maximumFractionDigits: 10,
+                      })
                       : value === null
                         ? 'null'
                         : String(value)}

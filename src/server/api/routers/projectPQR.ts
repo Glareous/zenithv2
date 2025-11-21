@@ -98,7 +98,7 @@ export const projectPQRRouter = createTRPCRouter({
         documentType: z.enum(['CC', 'CE', 'PASSPORT', 'NIT']),
         documentNumber: z.string().min(1),
         message: z.string().min(1),
-        status: z.enum(['PROCESSING', 'COMPLETED']).optional(),
+        status: z.enum(['PROCESSING', 'COMPLETED', 'FAILED']).optional(),
         projectId: z.string(),
       })
     )
@@ -169,7 +169,7 @@ export const projectPQRRouter = createTRPCRouter({
         documentType: z.enum(['CC', 'CE', 'PASSPORT', 'NIT']).optional(),
         documentNumber: z.string().min(1).optional(),
         message: z.string().min(1).optional(),
-        status: z.enum(['PROCESSING', 'COMPLETED']).optional(),
+        status: z.enum(['PROCESSING', 'COMPLETED', 'FAILED']).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

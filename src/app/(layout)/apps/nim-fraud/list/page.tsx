@@ -139,16 +139,15 @@ const NimFraudList: NextPageWithLayout = () => {
         accessorKey: 'merchantRiskLevel',
         cell: ({ row }: { row: { original: any } }) => {
           const risk = row.original.merchantRiskLevel
-          const colorClass =
+          const badgeClass =
             risk === 'high'
-              ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+              ? 'badge-sub-red'
               : risk === 'medium'
-                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
-                : 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
+                ? 'badge-sub-yellow'
+                : 'badge-sub-green'
 
           return (
-            <span
-              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${colorClass}`}>
+            <span className={`badge ${badgeClass}`}>
               {risk.toUpperCase()}
             </span>
           )
@@ -161,7 +160,7 @@ const NimFraudList: NextPageWithLayout = () => {
 
           if (isFraud === null || isFraud === undefined) {
             return (
-              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100">
+              <span className="badge badge-sub-gray">
                 PENDING
               </span>
             )
@@ -169,10 +168,10 @@ const NimFraudList: NextPageWithLayout = () => {
 
           return (
             <span
-              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+              className={`badge ${
                 isFraud
-                  ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
-                  : 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
+                  ? 'badge-sub-red'
+                  : 'badge-sub-green'
               }`}>
               {isFraud ? 'FRAUD' : 'LEGITIMATE'}
             </span>

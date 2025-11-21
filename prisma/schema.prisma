@@ -218,6 +218,11 @@ enum FraudTransactionStatus {
   FAILED
 }
 
+enum PQRStatus {
+    PROCESSING
+    COMPLETED
+    FAILED
+}
 // Organization model - each signup creates an organization
 model Organization {
     id          String   @id @default(cuid()) @map("_id")
@@ -1710,11 +1715,6 @@ model ProjectModelFile {
     @@index([fileType])
 }
 
-// ProjectPQR model - for managing customer PQRs (Peticiones, Quejas y Reclamos / Requests, Complaints, Claims)
-enum PQRStatus {
-    PROCESSING
-    COMPLETED
-}
 
 model ProjectPQR {
     id                String   @id @default(cuid()) @map("_id")
