@@ -33,6 +33,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'vchatlife.s3.us-east-2.amazonaws.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'zenithsas.s3.us-east-2.amazonaws.com',
+      },
     ],
   },
 }

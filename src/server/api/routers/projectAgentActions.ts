@@ -156,7 +156,6 @@ export const projectAgentActionsRouter = createTRPCRouter({
               agentPqrId: true,
               agentRrhhId: true,
               agentForecastingId: true,
-              agentChatId: true,
             },
           },
         },
@@ -166,8 +165,7 @@ export const projectAgentActionsRouter = createTRPCRouter({
         userOrganization &&
         (userOrganization.organization.agentPqrId === input.agentId ||
           userOrganization.organization.agentRrhhId === input.agentId ||
-          userOrganization.organization.agentForecastingId === input.agentId ||
-          userOrganization.organization.agentChatId === input.agentId)
+          userOrganization.organization.agentForecastingId === input.agentId)
 
       // Build where conditions
       const whereConditions: any[] = []
