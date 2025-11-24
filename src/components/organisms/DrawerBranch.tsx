@@ -37,12 +37,14 @@ interface DrawerBranchStepProps {
   isOpen: boolean
   onClose: () => void
   nodeId?: string
+  canManageAgents?: boolean
 }
 
 const DrawerBranchStep: React.FC<DrawerBranchStepProps> = ({
   isOpen,
   onClose,
   nodeId,
+  canManageAgents = false,
 }) => {
   const {
     layout,
@@ -246,8 +248,9 @@ const DrawerBranchStep: React.FC<DrawerBranchStepProps> = ({
           id="branchname"
           type="text"
           {...register('label')}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
           placeholder="Enter Step Name"
+          disabled={!canManageAgents}
         />
         {errors.label && (
           <p className="text-sm text-red-600">{errors.label.message}</p>
@@ -263,7 +266,8 @@ const DrawerBranchStep: React.FC<DrawerBranchStepProps> = ({
           <button
             type="button"
             onClick={() => setIsEditorExpanded(true)}
-            className="translate-y-9 -translate-x-0,5 z-20 btn-xs btn-sub-primary p-1 btn">
+            className="translate-y-9 -translate-x-0,5 z-20 btn-xs btn-sub-primary p-1 btn"
+            disabled={!canManageAgents}>
             <Expand className="size-5" />
           </button>
         </div>
@@ -279,6 +283,7 @@ const DrawerBranchStep: React.FC<DrawerBranchStepProps> = ({
           availableActions={selectedActionsForEditor}
           placeholder="Enter instructions for this step..."
           className="min-h-[120px] border border-gray-300 rounded-md"
+          editable={canManageAgents}
         />
         <p className="text-xs text-gray-500">
           Type{' '}
@@ -313,25 +318,29 @@ const DrawerBranchStep: React.FC<DrawerBranchStepProps> = ({
                   <span className="w-2 h-2 bg-blue-500 rounded-full flex items-center justify-center mr-2"></span>
                   <span className="text-sm font-medium">{action.name}</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveAction(action.id)}
-                  className="text-red-500 hover:text-red-700">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                {canManageAgents && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveAction(action.id)}
+                    className="text-red-500 hover:text-red-700">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             ))}
-            <div className="text-center py-2">
-              <button
-                type="button"
-                onClick={handleAddAction}
-                className="flex items-center justify-center text-purple-600 hover:text-purple-700 text-sm">
-                <Plus className="w-4 h-4 mx-2" />
-                Add Action
-              </button>
-            </div>
+            {canManageAgents && (
+              <div className="text-center py-2">
+                <button
+                  type="button"
+                  onClick={handleAddAction}
+                  className="flex items-center justify-center text-purple-600 hover:text-purple-700 text-sm">
+                  <Plus className="w-4 h-4 mx-2" />
+                  Add Action
+                </button>
+              </div>
+            )}
           </div>
-        ) : (
+        ) : canManageAgents ? (
           <div className="text-center py-4 border border-dashed border-gray-300 rounded-lg">
             <button
               type="button"
@@ -341,7 +350,7 @@ const DrawerBranchStep: React.FC<DrawerBranchStepProps> = ({
               Add Action
             </button>
           </div>
-        )}
+        ) : null}
       </div>
     </form>
   )
@@ -352,15 +361,17 @@ const DrawerBranchStep: React.FC<DrawerBranchStepProps> = ({
         onClick={onClose}
         type="button"
         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-        Cancel
+        {canManageAgents ? 'Cancel' : 'Close'}
       </button>
-      <button
-        onClick={handleSubmit(onSubmit)}
-        type="submit"
-        disabled={isSubmitting}
-        className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">
-        {isSubmitting ? 'Saving...' : 'Save Changes'}
-      </button>
+      {canManageAgents && (
+        <button
+          onClick={handleSubmit(onSubmit)}
+          type="submit"
+          disabled={isSubmitting}
+          className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">
+          {isSubmitting ? 'Saving...' : 'Save Changes'}
+        </button>
+      )}
     </div>
   )
 

@@ -45,9 +45,15 @@ interface DrawerStepProps {
   isOpen: boolean
   onClose: () => void
   nodeId?: string
+  canManageAgents?: boolean
 }
 
-const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
+const DrawerStep: React.FC<DrawerStepProps> = ({
+  isOpen,
+  onClose,
+  nodeId,
+  canManageAgents = false,
+}) => {
   const {
     layout,
     actions,
@@ -309,8 +315,9 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
           id="stepName"
           type="text"
           {...register('label')}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
           placeholder="Enter Step Name"
+          disabled={!canManageAgents}
         />
         {errors.label && (
           <p className="text-sm text-red-600">{errors.label.message}</p>
@@ -323,7 +330,8 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
           id="requireUserResponse"
           type="checkbox"
           {...register('requireUserResponse')}
-          className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-2 focus:ring-purple-500"
+          className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-2 focus:ring-purple-500 disabled:cursor-not-allowed"
+          disabled={!canManageAgents}
         />
         <label
           htmlFor="requireUserResponse"
@@ -360,7 +368,8 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
           <button
             type="button"
             onClick={() => setIsEditorExpanded(true)}
-            className="translate-y-9 -translate-x-0,5 z-20 btn-xs btn-sub-primary p-1 btn">
+            className="translate-y-9 -translate-x-0,5 z-20 btn-xs btn-sub-primary p-1 btn"
+            disabled={!canManageAgents}>
             <Expand className="size-5" />
           </button>
         </div>
@@ -376,6 +385,7 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
           availableActions={selectedActionsForEditor}
           placeholder="Enter instructions for this step..."
           className="min-h-[120px] border border-gray-300 rounded-md pr-6!"
+          editable={canManageAgents}
         />
       </div>
 
@@ -395,25 +405,29 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
                   <span className="w-2 h-2 bg-blue-500 rounded-full flex items-center justify-center mr-2"></span>
                   <span className="text-sm font-medium">{action.name}</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveAction(action.id)}
-                  className="text-red-500 hover:text-red-700">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                {canManageAgents && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveAction(action.id)}
+                    className="text-red-500 hover:text-red-700">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             ))}
-            <div className="text-center py-2">
-              <button
-                type="button"
-                onClick={handleAddAction}
-                className="flex items-center justify-center text-purple-600 hover:text-purple-700 text-sm">
-                <Plus className="w-4 h-4 mx-2" />
-                Add Action
-              </button>
-            </div>
+            {canManageAgents && (
+              <div className="text-center py-2">
+                <button
+                  type="button"
+                  onClick={handleAddAction}
+                  className="flex items-center justify-center text-purple-600 hover:text-purple-700 text-sm">
+                  <Plus className="w-4 h-4 mx-2" />
+                  Add Action
+                </button>
+              </div>
+            )}
           </div>
-        ) : (
+        ) : canManageAgents ? (
           <div className="text-center py-4 border border-dashed border-gray-300 rounded-lg">
             <button
               type="button"
@@ -423,7 +437,7 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
               Add Action
             </button>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* FAQ Section */}
@@ -455,25 +469,29 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
                       {faq.question}
                     </div>
                     <div className="text-sm text-gray-700">{faq.answer}</div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFaq(faq.id)}
-                      className="text-red-500 hover:text-red-700 text-xs">
-                      Remove FAQ
-                    </button>
+                    {canManageAgents && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFaq(faq.id)}
+                        className="text-red-500 hover:text-red-700 text-xs">
+                        Remove FAQ
+                      </button>
+                    )}
                   </div>
                 ))}
-                <div className="text-center py-2">
-                  <button
-                    type="button"
-                    onClick={handleAddFaq}
-                    className="flex items-center justify-center text-purple-600 hover:text-purple-700 text-sm">
-                    <Plus className="w-4 h-4 mx-2" />
-                    Add FAQ
-                  </button>
-                </div>
+                {canManageAgents && (
+                  <div className="text-center py-2">
+                    <button
+                      type="button"
+                      onClick={handleAddFaq}
+                      className="flex items-center justify-center text-purple-600 hover:text-purple-700 text-sm">
+                      <Plus className="w-4 h-4 mx-2" />
+                      Add FAQ
+                    </button>
+                  </div>
+                )}
               </div>
-            ) : (
+            ) : canManageAgents ? (
               <div className="text-center py-4 border border-dashed border-gray-300 rounded-lg mb-2">
                 <button
                   type="button"
@@ -483,7 +501,7 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
                   Add FAQ
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
         </Accordion>
       </div>
@@ -520,26 +538,30 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
                       <div className="text-sm text-gray-700">
                         {objection.instructions}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveObjection(objection.id)}
-                        className="text-red-500 hover:text-red-700 text-xs">
-                        Remove Objection
-                      </button>
+                      {canManageAgents && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveObjection(objection.id)}
+                          className="text-red-500 hover:text-red-700 text-xs">
+                          Remove Objection
+                        </button>
+                      )}
                     </div>
                   )
                 )}
-                <div className="text-center py-2">
-                  <button
-                    type="button"
-                    onClick={handleAddObjection}
-                    className="flex items-center justify-center text-purple-600 hover:text-purple-700 text-sm">
-                    <Plus className="w-4 h-4 mx-2" />
-                    Add Case
-                  </button>
-                </div>
+                {canManageAgents && (
+                  <div className="text-center py-2">
+                    <button
+                      type="button"
+                      onClick={handleAddObjection}
+                      className="flex items-center justify-center text-purple-600 hover:text-purple-700 text-sm">
+                      <Plus className="w-4 h-4 mx-2" />
+                      Add Case
+                    </button>
+                  </div>
+                )}
               </div>
-            ) : (
+            ) : canManageAgents ? (
               <div className="text-center py-4 border border-dashed border-gray-300 rounded-lg mb-2">
                 <button
                   type="button"
@@ -549,7 +571,7 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
                   Add Case
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
         </Accordion>
       </div>
@@ -601,25 +623,29 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
                           </span>
                         )}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveProduct(product.id)}
-                      className="text-red-500 hover:text-red-700 text-xs">
-                      Remove Product
-                    </button>
+                    {canManageAgents && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveProduct(product.id)}
+                        className="text-red-500 hover:text-red-700 text-xs">
+                        Remove Product
+                      </button>
+                    )}
                   </div>
                 ))}
-                <div className="text-center py-2">
-                  <button
-                    type="button"
-                    onClick={handleAddProduct}
-                    className="flex items-center justify-center text-purple-600 hover:text-purple-700 text-sm">
-                    <Plus className="w-4 h-4 mx-2" />
-                    Add Product
-                  </button>
-                </div>
+                {canManageAgents && (
+                  <div className="text-center py-2">
+                    <button
+                      type="button"
+                      onClick={handleAddProduct}
+                      className="flex items-center justify-center text-purple-600 hover:text-purple-700 text-sm">
+                      <Plus className="w-4 h-4 mx-2" />
+                      Add Product
+                    </button>
+                  </div>
+                )}
               </div>
-            ) : (
+            ) : canManageAgents ? (
               <div className="text-center py-4 border border-dashed border-gray-300 rounded-lg mb-2">
                 <button
                   type="button"
@@ -629,7 +655,7 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
                   Add Product
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
         </Accordion>
       </div>
@@ -681,25 +707,29 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
                           </span>
                         )}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveService(service.id)}
-                      className="text-red-500 hover:text-red-700 text-xs">
-                      Remove Service
-                    </button>
+                    {canManageAgents && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveService(service.id)}
+                        className="text-red-500 hover:text-red-700 text-xs">
+                        Remove Service
+                      </button>
+                    )}
                   </div>
                 ))}
-                <div className="text-center py-2">
-                  <button
-                    type="button"
-                    onClick={handleAddService}
-                    className="flex items-center justify-center text-purple-600 hover:text-purple-700 text-sm">
-                    <Plus className="w-4 h-4 mx-2" />
-                    Add Service
-                  </button>
-                </div>
+                {canManageAgents && (
+                  <div className="text-center py-2">
+                    <button
+                      type="button"
+                      onClick={handleAddService}
+                      className="flex items-center justify-center text-purple-600 hover:text-purple-700 text-sm">
+                      <Plus className="w-4 h-4 mx-2" />
+                      Add Service
+                    </button>
+                  </div>
+                )}
               </div>
-            ) : (
+            ) : canManageAgents ? (
               <div className="text-center py-4 border border-dashed border-gray-300 rounded-lg mb-2">
                 <button
                   type="button"
@@ -709,7 +739,7 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
                   Add Service
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
         </Accordion>
       </div>
@@ -722,15 +752,17 @@ const DrawerStep: React.FC<DrawerStepProps> = ({ isOpen, onClose, nodeId }) => {
         onClick={onClose}
         type="button"
         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-        Cancel
+        {canManageAgents ? 'Cancel' : 'Close'}
       </button>
-      <button
-        onClick={handleSubmit(onSubmit)}
-        type="submit"
-        disabled={isSubmitting}
-        className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">
-        {isSubmitting ? 'Saving...' : 'Save Changes'}
-      </button>
+      {canManageAgents && (
+        <button
+          onClick={handleSubmit(onSubmit)}
+          type="submit"
+          disabled={isSubmitting}
+          className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">
+          {isSubmitting ? 'Saving...' : 'Save Changes'}
+        </button>
+      )}
     </div>
   )
 

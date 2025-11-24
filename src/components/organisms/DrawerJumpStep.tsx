@@ -22,12 +22,14 @@ interface DrawerJumpStepProps {
   isOpen: boolean
   onClose: () => void
   nodeId?: string
+  canManageAgents?: boolean
 }
 
 const DrawerJumpStep: React.FC<DrawerJumpStepProps> = ({
   isOpen,
   onClose,
   nodeId,
+  canManageAgents = false,
 }) => {
   const { layout, updateNode, setJumpTarget } = useWorkflow()
 
@@ -133,7 +135,8 @@ const DrawerJumpStep: React.FC<DrawerJumpStepProps> = ({
           <button
             type="button"
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-full px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 flex items-center justify-between">
+            disabled={!canManageAgents}
+            className="w-full px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 flex items-center justify-between disabled:bg-gray-100 disabled:cursor-not-allowed">
             <span
               className={
                 watchedTargetNodeId ? 'text-gray-900' : 'text-gray-500'
@@ -210,15 +213,17 @@ const DrawerJumpStep: React.FC<DrawerJumpStepProps> = ({
         onClick={onClose}
         type="button"
         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-        Cancel
+        {canManageAgents ? 'Cancel' : 'Close'}
       </button>
-      <button
-        onClick={handleSubmit(onSubmit)}
-        type="submit"
-        disabled={isSubmitting}
-        className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">
-        {isSubmitting ? 'Saving...' : 'Save Changes'}
-      </button>
+      {canManageAgents && (
+        <button
+          onClick={handleSubmit(onSubmit)}
+          type="submit"
+          disabled={isSubmitting}
+          className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">
+          {isSubmitting ? 'Saving...' : 'Save Changes'}
+        </button>
+      )}
     </div>
   )
 

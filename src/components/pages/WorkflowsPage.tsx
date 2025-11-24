@@ -36,13 +36,8 @@ const CustomCardStep = ({
 }: any) => {
   const { openDrawer } = useWorkflow()
 
-  console.log('🔍 CustomCardStep - canManageAgents:', data.canManageAgents)
-  console.log('🔍 CustomCardStep - full data:', data)
-
   const handleDoubleClick = (nodeId: string) => {
-    if (data.canManageAgents) {
-      openDrawer(nodeId, data.variant)
-    }
+    openDrawer(nodeId, data.variant)
   }
 
   return (
@@ -214,9 +209,7 @@ const WorkflowsPage: React.FC<WorkflowsPageProps> = ({
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeDoubleClick={(event, node) => {
-            if (canManageAgents) {
-              openDrawer(node.id, node.data?.variant as any)
-            }
+            openDrawer(node.id, node.data?.variant as any)
           }}
           nodeTypes={nodeTypes}
           nodesDraggable={false}
@@ -295,6 +288,7 @@ const WorkflowsPage: React.FC<WorkflowsPageProps> = ({
           isOpen={isDrawerOpen}
           onClose={closeDrawer}
           nodeId={selectedNodeId || undefined}
+          canManageAgents={canManageAgents}
         />
       )}
 
@@ -303,6 +297,7 @@ const WorkflowsPage: React.FC<WorkflowsPageProps> = ({
           isOpen={isDrawerOpen}
           onClose={closeDrawer}
           nodeId={selectedNodeId || undefined}
+          canManageAgents={canManageAgents}
         />
       )}
 
@@ -311,6 +306,7 @@ const WorkflowsPage: React.FC<WorkflowsPageProps> = ({
           isOpen={isDrawerOpen}
           onClose={closeDrawer}
           nodeId={selectedNodeId || undefined}
+          canManageAgents={canManageAgents}
         />
       )}
 
@@ -319,6 +315,7 @@ const WorkflowsPage: React.FC<WorkflowsPageProps> = ({
           isOpen={isDrawerOpen}
           onClose={closeDrawer}
           nodeId={selectedNodeId || undefined}
+          canManageAgents={canManageAgents}
         />
       )}
 

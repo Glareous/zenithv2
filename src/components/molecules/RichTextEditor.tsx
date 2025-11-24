@@ -32,6 +32,7 @@ export interface RichTextEditorProps {
   className?: string
   enabledTriggers?: EnabledTriggers
   replaceResultChar?: boolean
+  editable?: boolean
 }
 
 export interface RichTextEditorRef {
@@ -54,6 +55,7 @@ export const RichTextEditor = forwardRef<
       className = '',
       enabledTriggers = { variables: true, actions: true, results: true },
       replaceResultChar = false,
+      editable = true,
     },
     ref
   ) => {
@@ -297,6 +299,7 @@ export const RichTextEditor = forwardRef<
     const editor = useEditor(
       {
         immediatelyRender: false,
+        editable,
         extensions: [
           StarterKit.configure({
             heading: false,
@@ -322,7 +325,7 @@ export const RichTextEditor = forwardRef<
         content: parsedContent,
         editorProps: {
           attributes: {
-            class: `prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none p-3 ${className}`,
+            class: `prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none p-3 ${className} ${!editable ? 'opacity-60 cursor-not-allowed' : ''}`,
             'data-placeholder': placeholder,
           },
         },
@@ -333,7 +336,7 @@ export const RichTextEditor = forwardRef<
           }
         },
       },
-      [JSON.stringify(availableActions)]
+      [JSON.stringify(availableActions), editable]
     )
 
     useImperativeHandle(ref, () => ({
