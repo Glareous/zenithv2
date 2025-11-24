@@ -20,15 +20,51 @@ import { toast } from 'react-toastify'
 import { z } from 'zod'
 
 const employeeFormSchema = z.object({
-  employeeId: z.string().min(1, 'Employee ID is required'),
-  firstName: z.string().min(1, 'First name is required'),
-  middleName: z.string().optional(),
-  lastName: z.string().min(1, 'Last name is required'),
+  employeeId: z
+    .string()
+    .min(1, 'Employee ID is required')
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      'Employee ID can only contain letters, numbers, hyphens, and underscores'
+    ),
+  firstName: z
+    .string()
+    .min(1, 'First name is required')
+    .regex(
+      /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/,
+      'First name can only contain letters, spaces, hyphens, and apostrophes'
+    ),
+  middleName: z
+    .string()
+    .regex(
+      /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]*$/,
+      'Middle name can only contain letters, spaces, hyphens, and apostrophes'
+    )
+    .optional(),
+  lastName: z
+    .string()
+    .min(1, 'Last name is required')
+    .regex(
+      /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/,
+      'Last name can only contain letters, spaces, hyphens, and apostrophes'
+    ),
   gender: z.string().min(1, 'Gender is required'),
   age: z.string().optional(),
   birthDate: z.string().optional(),
-  phone: z.string().min(1, 'Phone number is required'),
-  alternativePhone: z.string().optional(),
+  phone: z
+    .string()
+    .min(1, 'Phone number is required')
+    .regex(
+      /^[\d\s+()-]+$/,
+      'Phone number can only contain numbers, spaces, plus sign, hyphens, and parentheses'
+    ),
+  alternativePhone: z
+    .string()
+    .regex(
+      /^[\d\s+()-]*$/,
+      'Alternative phone can only contain numbers, spaces, plus sign, hyphens, and parentheses'
+    )
+    .optional(),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
   nationality: z.string().optional(),
   address: z.string().optional(),
@@ -40,10 +76,28 @@ const employeeFormSchema = z.object({
   admissionDate: z.string().optional(),
 
   religion: z.string().optional(),
-  fatherName: z.string().optional(),
-  motherName: z.string().optional(),
+  fatherName: z
+    .string()
+    .regex(
+      /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]*$/,
+      'Father name can only contain letters, spaces, hyphens, and apostrophes'
+    )
+    .optional(),
+  motherName: z
+    .string()
+    .regex(
+      /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]*$/,
+      'Mother name can only contain letters, spaces, hyphens, and apostrophes'
+    )
+    .optional(),
   fatherOccupation: z.string().optional(),
-  parentsPhone: z.string().optional(),
+  parentsPhone: z
+    .string()
+    .regex(
+      /^[\d\s+()-]*$/,
+      'Parents phone can only contain numbers, spaces, plus sign, hyphens, and parentheses'
+    )
+    .optional(),
 })
 
 const stepValidationFields = {
