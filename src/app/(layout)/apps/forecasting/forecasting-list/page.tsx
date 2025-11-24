@@ -224,6 +224,37 @@ const ForecastingListPage: NextPageWithLayout = () => {
 
   const deleteMutationForCleanup = api.projectForecasting.delete.useMutation()
 
+  // Function to trigger the forecasting API
+  const triggerForecastingAPI = async (forecastingId: string, horizon: number, confidenceLevel?: number) => {
+    try {
+      // Convert confidence level from percentage to decimal (e.g., 95 -> 0.95)
+      const level = confidenceLevel ? confidenceLevel / 100 : 0.95
+
+      const apiUrl = `http://201.217.192.13:81/forecast/${forecastingId}?horizon=${horizon}&level=${level}`
+
+      toast.info('Triggering forecasting analysis...')
+
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+      })
+
+      if (!response.ok) {
+        throw new Error(`Forecasting API returned status ${response.status}`)
+      }
+
+      const result = await response.json()
+      console.log('Forecasting API result:', result)
+
+      toast.success('Forecasting analysis completed successfully')
+
+      return result
+    } catch (error: any) {
+      console.error('Forecasting API error:', error)
+      toast.error(error.message || 'Failed to trigger forecasting analysis')
+      throw error
+    }
+  }
+
   const onSubmit = async (data: ForecastingFormData) => {
     if (!currentProject?.id) {
       toast.error('No project selected')
@@ -285,11 +316,18 @@ const ForecastingListPage: NextPageWithLayout = () => {
             s3Key: uploadResult.s3Key,
             isPublic: false,
           })
-
+          // Trigger the forecasting API
+          await triggerForecastingAPI(
+            selectedForecasting.id,
+            data.periodToPredict,
+            data.confidenceLevel
+          )
           toast.success('Forecasting updated and CSV uploaded successfully')
         } else {
           toast.success('Forecasting updated successfully')
         }
+
+
 
         refetch()
         closeModal()
@@ -374,6 +412,14 @@ const ForecastingListPage: NextPageWithLayout = () => {
       })
 
       toast.success('Forecasting created and CSV validated successfully')
+
+      // Trigger the forecasting API
+      await triggerForecastingAPI(
+        forecasting.id,
+        data.periodToPredict,
+        data.confidenceLevel
+      )
+
       refetch()
       closeModal()
     } catch (error: any) {
@@ -471,13 +517,12 @@ const ForecastingListPage: NextPageWithLayout = () => {
           const status = cell.getValue()
           return (
             <span
-              className={`badge ${
-                status === 'COMPLETED'
+              className={`badge ${status === 'COMPLETED'
                   ? 'badge-sub-green'
                   : status === 'FAILED'
                     ? 'badge-sub-red'
                     : 'badge-sub-yellow'
-              }`}>
+                }`}>
               {status}
             </span>
           )

@@ -265,72 +265,73 @@ export const projectForecastingFileRouter = createTRPCRouter({
           })
         }
 
+        // COMMENTED OUT: Time interval validation
         // Get forecasting configuration for interval validation
-        const forecastingConfig = await ctx.db.projectForecasting.findUnique({
-          where: { id: input.forecastingId },
-          select: { timeInterval: true, timeUnit: true },
-        })
+        // const forecastingConfig = await ctx.db.projectForecasting.findUnique({
+        //   where: { id: input.forecastingId },
+        //   select: { timeInterval: true, timeUnit: true },
+        // })
 
-        if (!forecastingConfig) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Forecasting configuration not found',
-          })
-        }
+        // if (!forecastingConfig) {
+        //   throw new TRPCError({
+        //     code: 'NOT_FOUND',
+        //     message: 'Forecasting configuration not found',
+        //   })
+        // }
 
         // Validate time intervals between consecutive rows
-        for (let i = 1; i < parsedData.length; i++) {
-          const prev = parsedData[i - 1]!
-          const curr = parsedData[i]!
+        // for (let i = 1; i < parsedData.length; i++) {
+        //   const prev = parsedData[i - 1]!
+        //   const curr = parsedData[i]!
 
-          const diffMs = curr.date.getTime() - prev.date.getTime()
+        //   const diffMs = curr.date.getTime() - prev.date.getTime()
 
-          // Calculate expected difference in milliseconds
-          let expectedDiffMs = 0
-          switch (forecastingConfig.timeUnit) {
-            case 'SECONDS':
-              expectedDiffMs = forecastingConfig.timeInterval * 1000
-              break
-            case 'MINUTES':
-              expectedDiffMs = forecastingConfig.timeInterval * 60 * 1000
-              break
-            case 'HOURS':
-              expectedDiffMs = forecastingConfig.timeInterval * 60 * 60 * 1000
-              break
-            case 'DAYS':
-              expectedDiffMs = forecastingConfig.timeInterval * 24 * 60 * 60 * 1000
-              break
-            case 'MONTHS':
-              // For months, use a more flexible validation (28-31 days)
-              const monthsDiff =
-                (curr.date.getFullYear() - prev.date.getFullYear()) * 12 +
-                (curr.date.getMonth() - prev.date.getMonth())
-              if (monthsDiff !== forecastingConfig.timeInterval) {
-                throw new TRPCError({
-                  code: 'BAD_REQUEST',
-                  message: 'CSV_INVALID_INTERVAL',
-                })
-              }
-              continue // Skip millisecond comparison for months
-            case 'YEARS':
-              const yearsDiff = curr.date.getFullYear() - prev.date.getFullYear()
-              if (yearsDiff !== forecastingConfig.timeInterval) {
-                throw new TRPCError({
-                  code: 'BAD_REQUEST',
-                  message: 'CSV_INVALID_INTERVAL',
-                })
-              }
-              continue // Skip millisecond comparison for years
-          }
+        //   // Calculate expected difference in milliseconds
+        //   let expectedDiffMs = 0
+        //   switch (forecastingConfig.timeUnit) {
+        //     case 'SECONDS':
+        //       expectedDiffMs = forecastingConfig.timeInterval * 1000
+        //       break
+        //     case 'MINUTES':
+        //       expectedDiffMs = forecastingConfig.timeInterval * 60 * 1000
+        //       break
+        //     case 'HOURS':
+        //       expectedDiffMs = forecastingConfig.timeInterval * 60 * 60 * 1000
+        //       break
+        //     case 'DAYS':
+        //       expectedDiffMs = forecastingConfig.timeInterval * 24 * 60 * 60 * 1000
+        //       break
+        //     case 'MONTHS':
+        //       // For months, use a more flexible validation (28-31 days)
+        //       const monthsDiff =
+        //         (curr.date.getFullYear() - prev.date.getFullYear()) * 12 +
+        //         (curr.date.getMonth() - prev.date.getMonth())
+        //       if (monthsDiff !== forecastingConfig.timeInterval) {
+        //         throw new TRPCError({
+        //           code: 'BAD_REQUEST',
+        //           message: 'CSV_INVALID_INTERVAL',
+        //         })
+        //       }
+        //       continue // Skip millisecond comparison for months
+        //     case 'YEARS':
+        //       const yearsDiff = curr.date.getFullYear() - prev.date.getFullYear()
+        //       if (yearsDiff !== forecastingConfig.timeInterval) {
+        //         throw new TRPCError({
+        //           code: 'BAD_REQUEST',
+        //           message: 'CSV_INVALID_INTERVAL',
+        //         })
+        //       }
+        //       continue // Skip millisecond comparison for years
+        //   }
 
-          // Check if difference matches expected interval (with small tolerance for rounding)
-          if (Math.abs(diffMs - expectedDiffMs) > 1000) {
-            throw new TRPCError({
-              code: 'BAD_REQUEST',
-              message: 'CSV_INVALID_INTERVAL',
-            })
-          }
-        }
+        //   // Check if difference matches expected interval (with small tolerance for rounding)
+        //   if (Math.abs(diffMs - expectedDiffMs) > 1000) {
+        //     throw new TRPCError({
+        //       code: 'BAD_REQUEST',
+        //       message: 'CSV_INVALID_INTERVAL',
+        //     })
+        //   }
+        // }
 
         // Remove date object before storing (keep only timestamp and value strings)
         const finalParsedData = parsedData.map(({ timestamp, value }) => ({
