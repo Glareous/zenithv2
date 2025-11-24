@@ -49,73 +49,51 @@ const GradientLineChart = ({
 
   // Process multiple series - combine all unique timestamps
   const { categories, series } = React.useMemo(() => {
-    console.log('🔍 GradientLineChart - seriesData received:', seriesData)
-
     if (seriesData.length === 0) return { categories: [], series: [] }
 
-    // Helper function to normalize timestamp - keep full timestamp for proper grouping
-    const normalizeTimestamp = (ts: string): string => {
-      const date = new Date(ts)
-      // Return full ISO string to preserve hours/minutes/seconds
-      return date.toISOString()
-    }
-
-    // Collect all unique normalized timestamps from all series
-    const timestampMap = new Map<
-      string,
-      { original: string; values: Map<number, number> }
-    >()
+    // Use numeric timestamps for faster sorting
+    const timestampMap = new Map<number, Map<number, number>>()
+    const timestampToString = new Map<number, string>()
 
     seriesData.forEach((s, seriesIndex) => {
       s.data.forEach((d) => {
-        const normalized = normalizeTimestamp(d.timestamp)
+        const timestamp = new Date(d.timestamp).getTime()
+        if (isNaN(timestamp)) return
 
-        if (!timestampMap.has(normalized)) {
-          timestampMap.set(normalized, {
-            original: d.timestamp,
-            values: new Map(),
-          })
+        if (!timestampToString.has(timestamp)) {
+          timestampToString.set(timestamp, d.timestamp)
         }
 
-        const entry = timestampMap.get(normalized)!
-        const value = parseFloat(d.value) || 0
-
-        // If multiple values for same date in same series, use the last one
-        entry.values.set(seriesIndex, value)
+        if (!timestampMap.has(timestamp)) {
+          timestampMap.set(timestamp, new Map())
+        }
+        timestampMap.get(timestamp)!.set(seriesIndex, parseFloat(d.value) || 0)
       })
     })
 
-    // Sort timestamps chronologically
-    const sortedEntries = Array.from(timestampMap.entries()).sort((a, b) => {
-      const dateA = new Date(a[1].original).getTime()
-      const dateB = new Date(b[1].original).getTime()
-      return dateA - dateB
-    })
+    // Sort timestamps numerically (much faster than string comparison)
+    const sortedTimestamps = Array.from(timestampMap.keys()).sort((a, b) => a - b)
 
     // Convert to ISO strings for categories
-    const categories = sortedEntries.map(([_, entry]) => {
-      const date = new Date(entry.original)
+    const categories = sortedTimestamps.map((timestamp) => {
+      const originalTimestamp = timestampToString.get(timestamp)!
+      const date = new Date(originalTimestamp)
       return isNaN(date.getTime())
         ? new Date().toISOString()
         : date.toISOString()
     })
 
-    // Process each series to align with combined timestamps
+    // Build series data arrays
     const processedSeries = seriesData.map((s, seriesIndex) => {
-      const alignedData = sortedEntries.map(([normalized, entry]) => {
-        return entry.values.get(seriesIndex) ?? null
+      const data = sortedTimestamps.map((timestamp) => {
+        return timestampMap.get(timestamp)!.get(seriesIndex) ?? null
       })
-
-      console.log(`📊 Series "${s.name}" data:`, alignedData)
 
       return {
         name: s.name,
-        data: alignedData,
+        data,
       }
     })
-
-    console.log('✅ Final processed series:', processedSeries)
-    console.log('📅 Final categories:', categories)
 
     return { categories, series: processedSeries }
   }, [seriesData])
@@ -126,6 +104,14 @@ const GradientLineChart = ({
         defaultLocale: 'en',
         height: 420,
         type: 'line',
+        animations: {
+          enabled: categories.length < 1000,
+          speed: 400,
+          animateGradually: {
+            enabled: true,
+            delay: 50,
+          },
+        },
         zoom: {
           enabled: true,
         },
@@ -171,23 +157,28 @@ const GradientLineChart = ({
         },
       },
       stroke: {
-        width: seriesData.map((s) => 5), // Same width for all series
+        width: 5,
         curve: 'smooth',
-        dashArray: seriesData.map((s) => (s.order === 0 ? 0 : 5)), // Solid for first (order=0), dashed for rest
+        dashArray: seriesData.map((s) => (s.order === 0 ? 0 : 5)),
       },
       xaxis: {
         type: 'category',
-        categories:
-          categories.length > 0
-            ? categories.map((c, index) => {
-                const date = new Date(c)
-                return date.toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })
-              })
-            : [],
+        categories: categories.map((c) => {
+          const date = new Date(c)
+          if (isNaN(date.getTime())) return ''
+          return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        }),
+        labels: {
+          rotate: categories.length > 50 ? -45 : 0,
+          rotateAlways: categories.length > 50,
+          hideOverlappingLabels: true,
+          trim: true,
+          maxHeight: 120,
+        },
       },
       title: {
         text: 'Forecast',
