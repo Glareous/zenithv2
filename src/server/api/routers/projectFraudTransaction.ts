@@ -108,54 +108,25 @@ export const projectFraudTransactionRouter = createTRPCRouter({
     .input(
       z.object({
         projectId: z.string(),
-        // DATOS BÁSICOS
+        // TRANSACTION DATA
+        user: z.number().int(),
+        card: z.number().int(),
+        year: z.number().int(),
+        month: z.number().int().min(1).max(12),
+        day: z.number().int().min(1).max(31),
+        time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/), // HH:MM format
         amount: z.number(),
-        timestamp: z.coerce.date(),
-        // DATOS DEL TARJETAHABIENTE
-        cardType: z.string(),
-        cardLevel: z.string(),
-        customerAge: z.number().int(),
-        accountAgeDays: z.number().int(),
-        customerCountry: z.string(),
-        // DATOS DEL COMERCIO
-        merchantCategory: z.string(),
-        merchantCountry: z.string(),
-        merchantRiskLevel: z.string(),
-        // COMPORTAMIENTO HISTÓRICO
-        daysSinceLastTransaction: z.number(),
-        numTransactionsToday: z.number().int(),
-        numTransactionsThisHour: z.number().int(),
-        avgTransactionAmount30d: z.number(),
-        stdTransactionAmount30d: z.number(),
-        numTransactions30d: z.number().int(),
-        // VELOCIDAD DE TRANSACCIONES
-        amountSpentLast24h: z.number(),
-        numUniqueMerchants24h: z.number().int(),
-        numCountries24h: z.number().int(),
-        // INDICADORES DE RIESGO
-        internationalTransaction: z.boolean(),
-        onlineTransaction: z.boolean(),
-        weekendTransaction: z.boolean(),
-        nightTransaction: z.boolean(),
-        highRiskCountry: z.boolean(),
-        firstTimeMerchant: z.boolean(),
-        // PATRONES ANÓMALOS
-        amountDeviationFromAvg: z.number(),
-        unusualHourForUser: z.boolean(),
-        unusualMerchantCategory: z.boolean(),
-        suddenLocationChange: z.boolean(),
-        // AUTENTICACIÓN
-        authenticationMethod: z.string(),
-        failedAttemptsToday: z.number().int(),
-        cardPresent: z.boolean(),
-        cvvMatch: z.boolean(),
-        // RESULTADO (opcional)
-        isFraud: z.boolean().optional(),
-        fraudProbability: z.number().optional(),
-        riskScore: z.number().int().optional(),
-        // STATUS Y SUMMARY
+        use_chip: z.enum(['Swipe Transaction', 'Chip Transaction', 'Online Transaction']),
+        merchant_name: z.string(),
+        merchant_city: z.string(),
+        merchant_state: z.string().length(2),
+        zip: z.number().int(),
+        mcc: z.number().int(),
+        // PREDICTION RESULTS (optional)
+        fraud_score: z.number().min(0).max(1).optional(),
+        prediccion: z.enum(['FRAUDE', 'NO FRAUDE']).optional(),
+        // STATUS
         status: z.enum(['PROCESSING', 'COMPLETED', 'FAILED']).optional(),
-        summary: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -225,53 +196,25 @@ export const projectFraudTransactionRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        // DATOS BÁSICOS
+        // TRANSACTION DATA (all optional for update)
+        user: z.number().int().optional(),
+        card: z.number().int().optional(),
+        year: z.number().int().optional(),
+        month: z.number().int().min(1).max(12).optional(),
+        day: z.number().int().min(1).max(31).optional(),
+        time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
         amount: z.number().optional(),
-        timestamp: z.coerce.date().optional(),
-        // DATOS DEL TARJETAHABIENTE
-        cardType: z.string().optional(),
-        cardLevel: z.string().optional(),
-        customerAge: z.number().int().optional(),
-        accountAgeDays: z.number().int().optional(),
-        customerCountry: z.string().optional(),
-        // DATOS DEL COMERCIO
-        merchantCategory: z.string().optional(),
-        merchantCountry: z.string().optional(),
-        merchantRiskLevel: z.string().optional(),
-        // COMPORTAMIENTO HISTÓRICO
-        daysSinceLastTransaction: z.number().optional(),
-        numTransactionsToday: z.number().int().optional(),
-        numTransactionsThisHour: z.number().int().optional(),
-        avgTransactionAmount30d: z.number().optional(),
-        stdTransactionAmount30d: z.number().optional(),
-        numTransactions30d: z.number().int().optional(),
-        // VELOCIDAD DE TRANSACCIONES
-        amountSpentLast24h: z.number().optional(),
-        numUniqueMerchants24h: z.number().int().optional(),
-        numCountries24h: z.number().int().optional(),
-        // INDICADORES DE RIESGO
-        internationalTransaction: z.boolean().optional(),
-        onlineTransaction: z.boolean().optional(),
-        weekendTransaction: z.boolean().optional(),
-        nightTransaction: z.boolean().optional(),
-        highRiskCountry: z.boolean().optional(),
-        firstTimeMerchant: z.boolean().optional(),
-        // PATRONES ANÓMALOS
-        amountDeviationFromAvg: z.number().optional(),
-        unusualHourForUser: z.boolean().optional(),
-        unusualMerchantCategory: z.boolean().optional(),
-        suddenLocationChange: z.boolean().optional(),
-        // AUTENTICACIÓN
-        authenticationMethod: z.string().optional(),
-        failedAttemptsToday: z.number().int().optional(),
-        cardPresent: z.boolean().optional(),
-        cvvMatch: z.boolean().optional(),
-        // RESULTADO
-        isFraud: z.boolean().optional(),
-        fraudProbability: z.number().optional(),
-        riskScore: z.number().int().optional(),
+        use_chip: z.enum(['Swipe Transaction', 'Chip Transaction', 'Online Transaction']).optional(),
+        merchant_name: z.string().optional(),
+        merchant_city: z.string().optional(),
+        merchant_state: z.string().length(2).optional(),
+        zip: z.number().int().optional(),
+        mcc: z.number().int().optional(),
+        // PREDICTION RESULTS
+        fraud_score: z.number().min(0).max(1).optional(),
+        prediccion: z.enum(['FRAUDE', 'NO FRAUDE']).optional(),
+        // STATUS
         status: z.enum(['PROCESSING', 'COMPLETED', 'FAILED']).optional(),
-        summary: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

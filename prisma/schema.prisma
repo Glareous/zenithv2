@@ -1886,63 +1886,27 @@ model ProjectForecastingSeries {
 model ProjectFraudTransaction {
   id        String   @id @default(cuid()) @map("_id")
 
-  // DATOS BÁSICOS DE LA TRANSACCIÓN
-  amount              Float
-  timestamp           DateTime
+  // TRANSACTION DATA (from CSV specification)
+  user          Int       // User ID
+  card          Int       // Card ID
+  year          Int       // Transaction year
+  month         Int       // Transaction month (1-12)
+  day           Int       // Transaction day (1-31)
+  time          String    // Transaction time (HH:MM)
+  amount        Float     // Transaction amount
+  use_chip      String    // "Swipe Transaction", "Chip Transaction", or "Online Transaction"
+  merchant_name String    // Merchant name/identifier
+  merchant_city String    // Merchant city
+  merchant_state String   // Merchant state (2 letters)
+  zip           Int       // ZIP code
+  mcc           Int       // Merchant Category Code
 
-  // DATOS DEL TARJETAHABIENTE
-  cardType            String
-  cardLevel           String
-  customerAge         Int
-  accountAgeDays      Int
-  customerCountry     String
+  // PREDICTION RESULTS (from API response)
+  fraud_score   Float?    // Fraud probability (0.00 to 1.00)
+  prediccion    String?   // "FRAUDE" or "NO FRAUDE"
 
-  // DATOS DEL COMERCIO
-  merchantCategory    String
-  merchantCountry     String
-  merchantRiskLevel   String
-
-  // COMPORTAMIENTO HISTÓRICO
-  daysSinceLastTransaction    Float
-  numTransactionsToday        Int
-  numTransactionsThisHour     Int
-  avgTransactionAmount30d     Float
-  stdTransactionAmount30d     Float
-  numTransactions30d          Int
-
-  // VELOCIDAD DE TRANSACCIONES
-  amountSpentLast24h          Float
-  numUniqueMerchants24h       Int
-  numCountries24h             Int
-
-  // INDICADORES DE RIESGO
-  internationalTransaction    Boolean
-  onlineTransaction           Boolean
-  weekendTransaction          Boolean
-  nightTransaction            Boolean
-  highRiskCountry             Boolean
-  firstTimeMerchant           Boolean
-
-  // PATRONES ANÓMALOS
-  amountDeviationFromAvg      Float
-  unusualHourForUser          Boolean
-  unusualMerchantCategory     Boolean
-  suddenLocationChange        Boolean
-
-  // AUTENTICACIÓN
-  authenticationMethod        String
-  failedAttemptsToday         Int
-  cardPresent                 Boolean
-  cvvMatch                    Boolean
-
-  // RESULTADO (predicción del modelo)
-  isFraud                     Boolean?
-  fraudProbability            Float?
-  riskScore                   Int?
-
-  // STATUS Y SUMMARY
-  status                      FraudTransactionStatus @default(PROCESSING)
-  summary                     String?                @db.String // Summary/analysis shown when status is COMPLETED
+  // STATUS
+  status        FraudTransactionStatus @default(PROCESSING)
 
   // RELACIONES
   projectId String
@@ -1961,7 +1925,8 @@ model ProjectFraudTransaction {
   @@index([projectId])
   @@index([agentId])
   @@index([createdById])
-  @@index([timestamp])
-  @@index([isFraud])
+  @@index([year])
+  @@index([month])
+  @@index([fraud_score])
   @@index([status])
 }

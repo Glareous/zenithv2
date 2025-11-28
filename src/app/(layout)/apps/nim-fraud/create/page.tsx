@@ -10,7 +10,6 @@ import { LAYOUT_DIRECTION } from '@src/components/constants/layout'
 import { NextPageWithLayout } from '@src/dtos'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
-import Flatpickr from 'react-flatpickr'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import Select from 'react-select'
@@ -18,54 +17,19 @@ import { ToastContainer, toast } from 'react-toastify'
 import { z } from 'zod'
 
 const fraudTransactionSchema = z.object({
-  // DATOS BÁSICOS
+  user: z.coerce.number().int().min(0, 'User ID must be positive'),
+  card: z.coerce.number().int().min(0, 'Card ID must be positive'),
+  year: z.coerce.number().int().min(2000).max(2100),
+  month: z.coerce.number().int().min(1).max(12),
+  day: z.coerce.number().int().min(1).max(31),
+  time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
   amount: z.coerce.number().positive('Amount must be positive'),
-  timestamp: z.string().min(1, 'Timestamp is required'),
-
-  // DATOS DEL TARJETAHABIENTE
-  cardType: z.string().min(1, 'Card type is required'),
-  cardLevel: z.string().min(1, 'Card level is required'),
-  customerAge: z.coerce.number().int().min(18, 'Must be at least 18'),
-  accountAgeDays: z.coerce.number().int().min(0),
-  customerCountry: z.string().min(1, 'Customer country is required'),
-
-  // DATOS DEL COMERCIO
-  merchantCategory: z.string().min(1, 'Merchant category is required'),
-  merchantCountry: z.string().min(1, 'Merchant country is required'),
-  merchantRiskLevel: z.enum(['low', 'medium', 'high']),
-
-  // COMPORTAMIENTO HISTÓRICO
-  daysSinceLastTransaction: z.coerce.number().min(0),
-  numTransactionsToday: z.coerce.number().int().min(0),
-  numTransactionsThisHour: z.coerce.number().int().min(0),
-  avgTransactionAmount30d: z.coerce.number().min(0),
-  stdTransactionAmount30d: z.coerce.number().min(0),
-  numTransactions30d: z.coerce.number().int().min(0),
-
-  // VELOCIDAD DE TRANSACCIONES
-  amountSpentLast24h: z.coerce.number().min(0),
-  numUniqueMerchants24h: z.coerce.number().int().min(0),
-  numCountries24h: z.coerce.number().int().min(0),
-
-  // INDICADORES DE RIESGO
-  internationalTransaction: z.boolean(),
-  onlineTransaction: z.boolean(),
-  weekendTransaction: z.boolean(),
-  nightTransaction: z.boolean(),
-  highRiskCountry: z.boolean(),
-  firstTimeMerchant: z.boolean(),
-
-  // PATRONES ANÓMALOS
-  amountDeviationFromAvg: z.coerce.number(),
-  unusualHourForUser: z.boolean(),
-  unusualMerchantCategory: z.boolean(),
-  suddenLocationChange: z.boolean(),
-
-  // AUTENTICACIÓN
-  authenticationMethod: z.string().min(1, 'Authentication method is required'),
-  failedAttemptsToday: z.coerce.number().int().min(0),
-  cardPresent: z.boolean(),
-  cvvMatch: z.boolean(),
+  use_chip: z.enum(['Swipe Transaction', 'Chip Transaction', 'Online Transaction']),
+  merchant_name: z.string().min(1, 'Merchant name is required'),
+  merchant_city: z.string().min(1, 'Merchant city is required'),
+  merchant_state: z.string().length(2, 'State must be 2 letters'),
+  zip: z.coerce.number().int().min(0, 'Invalid ZIP code'),
+  mcc: z.coerce.number().int().min(0, 'Invalid MCC'),
 })
 
 export type FraudTransactionFormData = z.infer<typeof fraudTransactionSchema>
@@ -77,45 +41,30 @@ const NimFraudCreate: NextPageWithLayout = () => {
     (state: RootState) => state.Layout
   )
   const [editTransactionId, setEditTransactionId] = useState<string | null>(null)
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [isLoadingRandom, setIsLoadingRandom] = useState(false)
+  const [isPredicting, setIsPredicting] = useState(false)
+  const [predictionResult, setPredictionResult] = useState<{
+    fraud_score: number
+    prediccion: string
+  } | null>(null)
 
   const methods = useForm<FraudTransactionFormData>({
     resolver: zodResolver(fraudTransactionSchema) as any,
     mode: 'onChange',
     defaultValues: {
+      user: 0,
+      card: 0,
+      year: new Date().getFullYear(),
+      month: new Date().getMonth() + 1,
+      day: new Date().getDate(),
+      time: '00:00',
       amount: 0,
-      timestamp: new Date().toISOString().slice(0, 16),
-      cardType: '',
-      cardLevel: '',
-      customerAge: 18,
-      accountAgeDays: 0,
-      customerCountry: '',
-      merchantCategory: '',
-      merchantCountry: '',
-      merchantRiskLevel: 'low',
-      daysSinceLastTransaction: 0,
-      numTransactionsToday: 0,
-      numTransactionsThisHour: 0,
-      avgTransactionAmount30d: 0,
-      stdTransactionAmount30d: 0,
-      numTransactions30d: 0,
-      amountSpentLast24h: 0,
-      numUniqueMerchants24h: 0,
-      numCountries24h: 0,
-      internationalTransaction: false,
-      onlineTransaction: false,
-      weekendTransaction: false,
-      nightTransaction: false,
-      highRiskCountry: false,
-      firstTimeMerchant: false,
-      amountDeviationFromAvg: 0,
-      unusualHourForUser: false,
-      unusualMerchantCategory: false,
-      suddenLocationChange: false,
-      authenticationMethod: '',
-      failedAttemptsToday: 0,
-      cardPresent: false,
-      cvvMatch: false,
+      use_chip: 'Swipe Transaction',
+      merchant_name: '',
+      merchant_city: '',
+      merchant_state: '',
+      zip: 0,
+      mcc: 0,
     },
   })
 
@@ -131,42 +80,29 @@ const NimFraudCreate: NextPageWithLayout = () => {
 
   useEffect(() => {
     if (transaction) {
-      setSelectedDate(new Date(transaction.timestamp))
       methods.reset({
+        user: transaction.user,
+        card: transaction.card,
+        year: transaction.year,
+        month: transaction.month,
+        day: transaction.day,
+        time: transaction.time,
         amount: transaction.amount,
-        timestamp: new Date(transaction.timestamp).toISOString().slice(0, 16),
-        cardType: transaction.cardType,
-        cardLevel: transaction.cardLevel,
-        customerAge: transaction.customerAge,
-        accountAgeDays: transaction.accountAgeDays,
-        customerCountry: transaction.customerCountry,
-        merchantCategory: transaction.merchantCategory,
-        merchantCountry: transaction.merchantCountry,
-        merchantRiskLevel: transaction.merchantRiskLevel as 'low' | 'medium' | 'high',
-        daysSinceLastTransaction: transaction.daysSinceLastTransaction,
-        numTransactionsToday: transaction.numTransactionsToday,
-        numTransactionsThisHour: transaction.numTransactionsThisHour,
-        avgTransactionAmount30d: transaction.avgTransactionAmount30d,
-        stdTransactionAmount30d: transaction.stdTransactionAmount30d,
-        numTransactions30d: transaction.numTransactions30d,
-        amountSpentLast24h: transaction.amountSpentLast24h,
-        numUniqueMerchants24h: transaction.numUniqueMerchants24h,
-        numCountries24h: transaction.numCountries24h,
-        internationalTransaction: transaction.internationalTransaction,
-        onlineTransaction: transaction.onlineTransaction,
-        weekendTransaction: transaction.weekendTransaction,
-        nightTransaction: transaction.nightTransaction,
-        highRiskCountry: transaction.highRiskCountry,
-        firstTimeMerchant: transaction.firstTimeMerchant,
-        amountDeviationFromAvg: transaction.amountDeviationFromAvg,
-        unusualHourForUser: transaction.unusualHourForUser,
-        unusualMerchantCategory: transaction.unusualMerchantCategory,
-        suddenLocationChange: transaction.suddenLocationChange,
-        authenticationMethod: transaction.authenticationMethod,
-        failedAttemptsToday: transaction.failedAttemptsToday,
-        cardPresent: transaction.cardPresent,
-        cvvMatch: transaction.cvvMatch,
+        use_chip: transaction.use_chip as 'Swipe Transaction' | 'Chip Transaction' | 'Online Transaction',
+        merchant_name: transaction.merchant_name,
+        merchant_city: transaction.merchant_city,
+        merchant_state: transaction.merchant_state,
+        zip: transaction.zip,
+        mcc: transaction.mcc,
       })
+
+      // Show prediction results if available
+      if (transaction.fraud_score !== null && transaction.prediccion) {
+        setPredictionResult({
+          fraud_score: transaction.fraud_score,
+          prediccion: transaction.prediccion,
+        })
+      }
     }
   }, [transaction, methods])
 
@@ -201,17 +137,95 @@ const NimFraudCreate: NextPageWithLayout = () => {
     const transactionData = {
       ...data,
       projectId: currentProject.id,
-      timestamp: new Date(data.timestamp),
+      ...(predictionResult && {
+        fraud_score: predictionResult.fraud_score,
+        prediccion: predictionResult.prediccion as 'FRAUDE' | 'NO FRAUDE',
+        status: 'COMPLETED' as const,
+      }),
     }
 
     if (editTransactionId) {
       updateMutation.mutate({
         id: editTransactionId,
         ...data,
-        timestamp: new Date(data.timestamp),
+        ...(predictionResult && {
+          fraud_score: predictionResult.fraud_score,
+          prediccion: predictionResult.prediccion as 'FRAUDE' | 'NO FRAUDE',
+          status: 'COMPLETED' as const,
+        }),
       })
     } else {
       createMutation.mutate(transactionData)
+    }
+  }
+
+  const handleLoadRandomTransaction = async () => {
+    setIsLoadingRandom(true)
+    try {
+      const response = await fetch('/api/fraud/transaccion/random')
+      if (!response.ok) {
+        throw new Error('Failed to load random transaction')
+      }
+      const data = await response.json()
+
+      methods.reset({
+        user: data.user,
+        card: data.card,
+        year: data.year,
+        month: data.month,
+        day: data.day,
+        time: data.time,
+        amount: data.amount,
+        use_chip: data.use_chip,
+        merchant_name: data.merchant_name,
+        merchant_city: data.merchant_city,
+        merchant_state: data.merchant_state,
+        zip: data.zip,
+        mcc: data.mcc,
+      })
+
+      toast.success('Random transaction loaded successfully')
+    } catch (error) {
+      toast.error('Failed to load random transaction')
+      console.error(error)
+    } finally {
+      setIsLoadingRandom(false)
+    }
+  }
+
+  const handlePredict = async () => {
+    if (!editTransactionId && !currentProject) {
+      toast.error('Please save the transaction first')
+      return
+    }
+
+    setIsPredicting(true)
+    setPredictionResult(null)
+
+    try {
+      // Use the transaction ID from edit mode or create a temporary one
+      const transactionId = editTransactionId || Date.now()
+
+      const response = await fetch('/api/fraud/predecir', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ transaction_id: transactionId }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to predict fraud')
+      }
+
+      const data = await response.json()
+      setPredictionResult(data)
+      toast.success('Prediction completed successfully')
+    } catch (error) {
+      toast.error('Failed to predict fraud')
+      console.error(error)
+    } finally {
+      setIsPredicting(false)
     }
   }
 
@@ -234,14 +248,155 @@ const NimFraudCreate: NextPageWithLayout = () => {
           <div className="grid grid-cols-12 gap-x-space">
             <div className="col-span-12 card">
               <div className="card-header">
-                <h4 className="card-title">Transaction Details</h4>
+                <div className="flex justify-between items-center">
+                  <h4 className="card-title">Transaction Details</h4>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary"
+                      onClick={handleLoadRandomTransaction}
+                      disabled={isLoadingRandom}>
+                      {isLoadingRandom ? 'Loading...' : 'Load Random Transaction'}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline-yellow"
+                      onClick={handlePredict}
+                      disabled={isPredicting}>
+                      {isPredicting ? 'Predicting...' : 'Predict Fraud'}
+                    </button>
+                  </div>
+                </div>
               </div>
               <div className="card-body">
-                {/* DATOS BÁSICOS */}
-                <h5 className="mb-4 text-lg font-semibold">Basic Information</h5>
+                {/* Prediction Result */}
+                {predictionResult && (
+                  <div className="mb-6 p-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                    <h5 className="text-lg font-semibold mb-3">Prediction Result</h5>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Fraud Score</p>
+                        <p className="text-2xl font-bold">
+                          {(predictionResult.fraud_score * 100).toFixed(4)}%
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Prediction</p>
+                        <span
+                          className={`inline-flex px-3 py-1 text-lg font-bold rounded-full ${predictionResult.prediccion === 'FRAUDE'
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                              : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            }`}>
+                          {predictionResult.prediccion === 'FRAUDE' ? '🚨 FRAUDE' : '✅ NO FRAUDE'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* User & Card Information */}
+                <h5 className="mb-4 text-lg font-semibold">User & Card Information</h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div>
-                    <label className="block mb-2 text-sm font-medium">Amount (USD/EUR)</label>
+                    <label className="block mb-2 text-sm font-medium">User ID</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
+                      {...methods.register('user')}
+                    />
+                    {methods.formState.errors.user && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {methods.formState.errors.user.message}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">Card ID</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
+                      {...methods.register('card')}
+                    />
+                    {methods.formState.errors.card && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {methods.formState.errors.card.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Transaction Date & Time */}
+                <h5 className="mb-4 text-lg font-semibold">Transaction Date & Time</h5>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">Year</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      onWheel={(e) => e.currentTarget.blur()}
+                      {...methods.register('year')}
+                    />
+                    {methods.formState.errors.year && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {methods.formState.errors.year.message}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">Month (1-12)</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      min="1"
+                      max="12"
+                      onWheel={(e) => e.currentTarget.blur()}
+                      {...methods.register('month')}
+                    />
+                    {methods.formState.errors.month && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {methods.formState.errors.month.message}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">Day (1-31)</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      min="1"
+                      max="31"
+                      onWheel={(e) => e.currentTarget.blur()}
+                      {...methods.register('day')}
+                    />
+                    {methods.formState.errors.day && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {methods.formState.errors.day.message}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">Time (HH:MM)</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="14:30"
+                      {...methods.register('time')}
+                    />
+                    {methods.formState.errors.time && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {methods.formState.errors.time.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Transaction Details */}
+                <h5 className="mb-4 text-lg font-semibold">Transaction Details</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">Amount</label>
                     <input
                       type="number"
                       step="0.01"
@@ -256,374 +411,98 @@ const NimFraudCreate: NextPageWithLayout = () => {
                     )}
                   </div>
                   <div>
-                    <label className="block mb-2 text-sm font-medium">Timestamp</label>
-                    <Flatpickr
-                      className="form-input"
-                      placeholder="Select transaction date and time"
-                      value={selectedDate}
-                      options={{
-                        enableTime: true,
-                        dateFormat: 'Y-m-d H:i',
-                        time_24hr: true,
-                        minuteIncrement: 1,
+                    <label className="block mb-2 text-sm font-medium">Use Chip</label>
+                    <Select
+                      value={{
+                        value: methods.watch('use_chip'),
+                        label: methods.watch('use_chip'),
                       }}
-                      onChange={(date) => {
-                        if (date.length > 0) {
-                          setSelectedDate(date[0])
-                          methods.setValue('timestamp', date[0].toISOString().slice(0, 16))
-                        }
-                      }}
+                      onChange={(option) => option && methods.setValue('use_chip', option.value as any)}
+                      options={[
+                        { value: 'Swipe Transaction', label: 'Swipe Transaction' },
+                        { value: 'Chip Transaction', label: 'Chip Transaction' },
+                        { value: 'Online Transaction', label: 'Online Transaction' },
+                      ]}
+                      classNamePrefix="select"
                     />
-                    {methods.formState.errors.timestamp && (
+                    {methods.formState.errors.use_chip && (
                       <p className="text-red-500 text-xs mt-1">
-                        {methods.formState.errors.timestamp.message}
+                        {methods.formState.errors.use_chip.message}
                       </p>
                     )}
                   </div>
                 </div>
 
-                {/* DATOS DEL TARJETAHABIENTE */}
-                <h5 className="mb-4 text-lg font-semibold">Cardholder Information</h5>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Card Type</label>
-                    <Select
-                      value={{
-                        value: methods.watch('cardType'),
-                        label: methods.watch('cardType'),
-                      }}
-                      onChange={(option) => option && methods.setValue('cardType', option.value)}
-                      options={[
-                        { value: 'VISA', label: 'VISA' },
-                        { value: 'MASTERCARD', label: 'MASTERCARD' },
-                        { value: 'AMEX', label: 'AMEX' },
-                      ]}
-                      classNamePrefix="select"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Card Level</label>
-                    <Select
-                      value={{
-                        value: methods.watch('cardLevel'),
-                        label: methods.watch('cardLevel'),
-                      }}
-                      onChange={(option) => option && methods.setValue('cardLevel', option.value)}
-                      options={[
-                        { value: 'CLASSIC', label: 'CLASSIC' },
-                        { value: 'GOLD', label: 'GOLD' },
-                        { value: 'PLATINUM', label: 'PLATINUM' },
-                      ]}
-                      classNamePrefix="select"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Customer Age</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('customerAge')}
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Account Age (Days)</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('accountAgeDays')}
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Customer Country</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      {...methods.register('customerCountry')}
-                    />
-                  </div>
-                </div>
-
-                {/* DATOS DEL COMERCIO */}
+                {/* Merchant Information */}
                 <h5 className="mb-4 text-lg font-semibold">Merchant Information</h5>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div>
-                    <label className="block mb-2 text-sm font-medium">Merchant Category</label>
-                    <Select
-                      value={{
-                        value: methods.watch('merchantCategory'),
-                        label: methods.watch('merchantCategory') === 'grocery_store' ? 'Grocery Store' :
-                               methods.watch('merchantCategory') === 'gas_station' ? 'Gas Station' :
-                               methods.watch('merchantCategory') === 'online' ? 'Online' : 'Restaurant',
-                      }}
-                      onChange={(option) => option && methods.setValue('merchantCategory', option.value)}
-                      options={[
-                        { value: 'grocery_store', label: 'Grocery Store' },
-                        { value: 'gas_station', label: 'Gas Station' },
-                        { value: 'online', label: 'Online' },
-                        { value: 'restaurant', label: 'Restaurant' },
-                      ]}
-                      classNamePrefix="select"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Merchant Country</label>
+                    <label className="block mb-2 text-sm font-medium">Merchant Name</label>
                     <input
                       type="text"
                       className="form-input"
-                      {...methods.register('merchantCountry')}
+                      {...methods.register('merchant_name')}
                     />
+                    {methods.formState.errors.merchant_name && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {methods.formState.errors.merchant_name.message}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <label className="block mb-2 text-sm font-medium">Merchant Risk Level</label>
-                    <Select
-                      value={{
-                        value: methods.watch('merchantRiskLevel'),
-                        label: methods.watch('merchantRiskLevel').charAt(0).toUpperCase() + methods.watch('merchantRiskLevel').slice(1),
-                      }}
-                      onChange={(option) => option && methods.setValue('merchantRiskLevel', option.value as 'low' | 'medium' | 'high')}
-                      options={[
-                        { value: 'low', label: 'Low' },
-                        { value: 'medium', label: 'Medium' },
-                        { value: 'high', label: 'High' },
-                      ]}
-                      classNamePrefix="select"
-                    />
-                  </div>
-                </div>
-
-                {/* COMPORTAMIENTO HISTÓRICO */}
-                <h5 className="mb-4 text-lg font-semibold">Historical Behavior</h5>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Days Since Last Transaction</label>
+                    <label className="block mb-2 text-sm font-medium">Merchant City</label>
                     <input
-                      type="number"
-                      step="0.1"
+                      type="text"
                       className="form-input"
-                      onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('daysSinceLastTransaction')}
+                      {...methods.register('merchant_city')}
                     />
+                    {methods.formState.errors.merchant_city && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {methods.formState.errors.merchant_city.message}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <label className="block mb-2 text-sm font-medium">Transactions Today</label>
+                    <label className="block mb-2 text-sm font-medium">Merchant State (2 letters)</label>
                     <input
-                      type="number"
+                      type="text"
                       className="form-input"
-                      onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('numTransactionsToday')}
+                      maxLength={2}
+                      {...methods.register('merchant_state')}
                     />
+                    {methods.formState.errors.merchant_state && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {methods.formState.errors.merchant_state.message}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <label className="block mb-2 text-sm font-medium">Transactions This Hour</label>
+                    <label className="block mb-2 text-sm font-medium">ZIP Code</label>
                     <input
                       type="number"
                       className="form-input"
                       onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('numTransactionsThisHour')}
+                      {...methods.register('zip')}
                     />
+                    {methods.formState.errors.zip && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {methods.formState.errors.zip.message}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <label className="block mb-2 text-sm font-medium">Avg Transaction Amount (30d)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      className="form-input"
-                      onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('avgTransactionAmount30d')}
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Std Transaction Amount (30d)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      className="form-input"
-                      onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('stdTransactionAmount30d')}
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Transactions (30d)</label>
+                    <label className="block mb-2 text-sm font-medium">MCC (Merchant Category Code)</label>
                     <input
                       type="number"
                       className="form-input"
                       onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('numTransactions30d')}
+                      {...methods.register('mcc')}
                     />
-                  </div>
-                </div>
-
-                {/* VELOCIDAD DE TRANSACCIONES */}
-                <h5 className="mb-4 text-lg font-semibold">Transaction Velocity</h5>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Amount Spent Last 24h</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      className="form-input"
-                      onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('amountSpentLast24h')}
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Unique Merchants (24h)</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('numUniqueMerchants24h')}
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Countries (24h)</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('numCountries24h')}
-                    />
-                  </div>
-                </div>
-
-                {/* INDICADORES DE RIESGO */}
-                <h5 className="mb-4 text-lg font-semibold">Risk Indicators</h5>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      {...methods.register('internationalTransaction')}
-                    />
-                    <label className="ml-2 text-sm">International Transaction</label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      {...methods.register('onlineTransaction')}
-                    />
-                    <label className="ml-2 text-sm">Online Transaction</label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      {...methods.register('weekendTransaction')}
-                    />
-                    <label className="ml-2 text-sm">Weekend Transaction</label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      {...methods.register('nightTransaction')}
-                    />
-                    <label className="ml-2 text-sm">Night Transaction (00:00-06:00)</label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      {...methods.register('highRiskCountry')}
-                    />
-                    <label className="ml-2 text-sm">High Risk Country</label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      {...methods.register('firstTimeMerchant')}
-                    />
-                    <label className="ml-2 text-sm">First Time Merchant</label>
-                  </div>
-                </div>
-
-                {/* PATRONES ANÓMALOS */}
-                <h5 className="mb-4 text-lg font-semibold">Anomalous Patterns</h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Amount Deviation from Avg</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      className="form-input"
-                      onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('amountDeviationFromAvg')}
-                    />
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      {...methods.register('unusualHourForUser')}
-                    />
-                    <label className="ml-2 text-sm">Unusual Hour for User</label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      {...methods.register('unusualMerchantCategory')}
-                    />
-                    <label className="ml-2 text-sm">Unusual Merchant Category</label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      {...methods.register('suddenLocationChange')}
-                    />
-                    <label className="ml-2 text-sm">Sudden Location Change</label>
-                  </div>
-                </div>
-
-                {/* AUTENTICACIÓN */}
-                <h5 className="mb-4 text-lg font-semibold">Authentication</h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Authentication Method</label>
-                    <Select
-                      value={{
-                        value: methods.watch('authenticationMethod'),
-                        label: methods.watch('authenticationMethod'),
-                      }}
-                      onChange={(option) => option && methods.setValue('authenticationMethod', option.value)}
-                      options={[
-                        { value: 'NONE', label: 'NONE' },
-                        { value: '3DS', label: '3DS' },
-                        { value: 'PIN', label: 'PIN' },
-                        { value: 'BIOMETRIC', label: 'BIOMETRIC' },
-                      ]}
-                      classNamePrefix="select"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2 text-sm font-medium">Failed Attempts Today</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      onWheel={(e) => e.currentTarget.blur()}
-                      {...methods.register('failedAttemptsToday')}
-                    />
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      {...methods.register('cardPresent')}
-                    />
-                    <label className="ml-2 text-sm">Card Present</label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      {...methods.register('cvvMatch')}
-                    />
-                    <label className="ml-2 text-sm">CVV Match</label>
+                    {methods.formState.errors.mcc && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {methods.formState.errors.mcc.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -641,8 +520,8 @@ const NimFraudCreate: NextPageWithLayout = () => {
                     {createMutation.isPending || updateMutation.isPending
                       ? 'Saving...'
                       : editTransactionId
-                      ? 'Update Transaction'
-                      : 'Create Transaction'}
+                        ? 'Update Transaction'
+                        : 'Create Transaction'}
                   </button>
                 </div>
               </div>

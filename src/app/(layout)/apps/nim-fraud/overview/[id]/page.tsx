@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import BreadCrumb from '@src/components/common/BreadCrumb'
 import DeleteModal from '@src/components/common/DeleteModal'
 import { api } from '@src/trpc/react'
-import { ArrowLeft, RefreshCw, Trash2 } from 'lucide-react'
+import { ArrowLeft, Trash2 } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 interface FraudOverviewPageProps {
@@ -22,7 +22,6 @@ const FraudOverviewPage = ({ params }: FraudOverviewPageProps) => {
   const {
     data: transaction,
     isLoading,
-    refetch,
   } = api.projectFraudTransaction.getById.useQuery({ id }, { enabled: !!id })
 
   const deleteMutation = api.projectFraudTransaction.delete.useMutation()
@@ -76,12 +75,6 @@ const FraudOverviewPage = ({ params }: FraudOverviewPageProps) => {
             </button>
             <div className="flex gap-2">
               <button
-                onClick={() => refetch()}
-                className="btn btn-outline-primary hidden">
-                <RefreshCw className="inline-block size-4 mr-1" />
-                Refresh
-              </button>
-              <button
                 onClick={() => setShowDeleteModal(true)}
                 className="btn btn-red">
                 <Trash2 className="inline-block size-4 mr-1" />
@@ -91,100 +84,110 @@ const FraudOverviewPage = ({ params }: FraudOverviewPageProps) => {
           </div>
 
           <div className="space-y-6">
+            {/* Prediction Result */}
+            {transaction.fraud_score !== null && transaction.prediccion && (
+              <div className="p-6 rounded-lg border-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-gray-300 dark:border-gray-700">
+                <h6 className="text-lg font-semibold mb-4">
+                  Fraud Detection Result
+                </h6>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Fraud Score</p>
+                    <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                      {(transaction.fraud_score * 100).toFixed(4)}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Prediction</p>
+                    <span
+                      className={`inline-flex px-4 py-2 text-xl font-bold rounded-full ${
+                        transaction.prediccion === 'FRAUDE'
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                          : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                      }`}>
+                      {transaction.prediccion === 'FRAUDE' ? '🚨 FRAUDE' : '✅ NO FRAUDE'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Transaction Details */}
             <div>
               <h6 className="text-15 font-semibold mb-4">
-                Transaction Details
+                Transaction Information
               </h6>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">ID</p>
+                  <p className="text-sm text-gray-500">Transaction ID</p>
                   <p className="text-sm font-medium">{transaction.id}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Status</p>
                   <p className="text-sm font-medium">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${transaction.status === 'COMPLETED'
-                        ? 'bg-green-100 text-green-800'
-                        : transaction.status === 'FAILED'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                        }`}>
+                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                        transaction.status === 'COMPLETED'
+                          ? 'bg-green-100 text-green-800'
+                          : transaction.status === 'FAILED'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                      }`}>
                       {transaction.status}
                     </span>
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Transaction Amount</p>
+                  <p className="text-sm text-gray-500">User ID</p>
+                  <p className="text-sm font-medium">{transaction.user}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Card ID</p>
+                  <p className="text-sm font-medium">{transaction.card}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Amount</p>
                   <p className="text-sm font-medium">
                     ${transaction.amount.toLocaleString()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Timestamp</p>
-                  <p className="text-sm font-medium">
-                    {new Date(transaction.timestamp).toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Is Fraud</p>
+                  <p className="text-sm text-gray-500">Use Chip</p>
                   <p className="text-sm font-medium">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${transaction.isFraud
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-green-100 text-green-800'
-                        }`}>
-                      {transaction.isFraud ? 'Yes' : 'No'}
+                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                        transaction.use_chip === 'Online Transaction'
+                          ? 'bg-blue-100 text-blue-800'
+                          : transaction.use_chip === 'Chip Transaction'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                      }`}>
+                      {transaction.use_chip}
                     </span>
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Fraud Probability</p>
-                  <p className="text-sm font-medium">
-                    {transaction.fraudProbability !== null
-                      ? `${(transaction.fraudProbability * 100).toFixed(2)}%`
-                      : 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Risk Score</p>
-                  <p className="text-sm font-medium">
-                    {transaction.riskScore ?? 'N/A'}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Cardholder Information */}
+            {/* Date & Time */}
             <div>
-              <h6 className="text-15 font-semibold mb-4">
-                Cardholder Information
-              </h6>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <h6 className="text-15 font-semibold mb-4">Date & Time</h6>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Card Type</p>
-                  <p className="text-sm font-medium">{transaction.cardType}</p>
+                  <p className="text-sm text-gray-500">Year</p>
+                  <p className="text-sm font-medium">{transaction.year}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Card Level</p>
-                  <p className="text-sm font-medium">{transaction.cardLevel}</p>
+                  <p className="text-sm text-gray-500">Month</p>
+                  <p className="text-sm font-medium">{transaction.month}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Customer Age</p>
-                  <p className="text-sm font-medium">{transaction.customerAge}</p>
+                  <p className="text-sm text-gray-500">Day</p>
+                  <p className="text-sm font-medium">{transaction.day}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Customer Country</p>
-                  <p className="text-sm font-medium">
-                    {transaction.customerCountry}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Account Age (Days)</p>
-                  <p className="text-sm font-medium">
-                    {transaction.accountAgeDays}
-                  </p>
+                  <p className="text-sm text-gray-500">Time</p>
+                  <p className="text-sm font-medium">{transaction.time}</p>
                 </div>
               </div>
             </div>
@@ -196,208 +199,54 @@ const FraudOverviewPage = ({ params }: FraudOverviewPageProps) => {
               </h6>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Merchant Category</p>
+                  <p className="text-sm text-gray-500">Merchant Name</p>
                   <p className="text-sm font-medium">
-                    {transaction.merchantCategory}
+                    {transaction.merchant_name}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Merchant Country</p>
+                  <p className="text-sm text-gray-500">Merchant City</p>
                   <p className="text-sm font-medium">
-                    {transaction.merchantCountry}
+                    {transaction.merchant_city}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Merchant Risk Level</p>
+                  <p className="text-sm text-gray-500">Merchant State</p>
                   <p className="text-sm font-medium">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${transaction.merchantRiskLevel === 'HIGH'
-                        ? 'bg-red-100 text-red-800'
-                        : transaction.merchantRiskLevel === 'MEDIUM'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-green-100 text-green-800'
-                        }`}>
-                      {transaction.merchantRiskLevel}
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Historical Behavior */}
-            <div>
-              <h6 className="text-15 font-semibold mb-4">
-                Historical Behavior
-              </h6>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Days Since Last Transaction</p>
-                  <p className="text-sm font-medium">
-                    {transaction.daysSinceLastTransaction.toFixed(2)}
+                    {transaction.merchant_state}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Transactions Today</p>
-                  <p className="text-sm font-medium">
-                    {transaction.numTransactionsToday}
-                  </p>
+                  <p className="text-sm text-gray-500">ZIP Code</p>
+                  <p className="text-sm font-medium">{transaction.zip}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Transactions This Hour</p>
-                  <p className="text-sm font-medium">
-                    {transaction.numTransactionsThisHour}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Avg Transaction Amount (30d)</p>
-                  <p className="text-sm font-medium">
-                    ${transaction.avgTransactionAmount30d.toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Std Transaction Amount (30d)</p>
-                  <p className="text-sm font-medium">
-                    ${transaction.stdTransactionAmount30d.toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Transactions (30d)</p>
-                  <p className="text-sm font-medium">
-                    {transaction.numTransactions30d}
-                  </p>
+                  <p className="text-sm text-gray-500">MCC (Merchant Category Code)</p>
+                  <p className="text-sm font-medium">{transaction.mcc}</p>
                 </div>
               </div>
             </div>
 
-            {/* Transaction Velocity */}
+            {/* Metadata */}
             <div>
-              <h6 className="text-15 font-semibold mb-4">
-                Transaction Velocity
-              </h6>
+              <h6 className="text-15 font-semibold mb-4">Metadata</h6>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Amount Spent (24h)</p>
+                  <p className="text-sm text-gray-500">Created At</p>
                   <p className="text-sm font-medium">
-                    ${transaction.amountSpentLast24h.toLocaleString()}
+                    {new Date(transaction.createdAt).toLocaleString()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Unique Merchants (24h)</p>
+                  <p className="text-sm text-gray-500">Updated At</p>
                   <p className="text-sm font-medium">
-                    {transaction.numUniqueMerchants24h}
+                    {new Date(transaction.updatedAt).toLocaleString()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Countries (24h)</p>
+                  <p className="text-sm text-gray-500">Created By</p>
                   <p className="text-sm font-medium">
-                    {transaction.numCountries24h}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Risk Indicators */}
-            <div>
-              <h6 className="text-15 font-semibold mb-4">Risk Indicators</h6>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">International Transaction</p>
-                  <p className="text-sm font-medium">
-                    {transaction.internationalTransaction ? 'Yes' : 'No'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Online Transaction</p>
-                  <p className="text-sm font-medium">
-                    {transaction.onlineTransaction ? 'Yes' : 'No'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Weekend Transaction</p>
-                  <p className="text-sm font-medium">
-                    {transaction.weekendTransaction ? 'Yes' : 'No'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Night Transaction</p>
-                  <p className="text-sm font-medium">
-                    {transaction.nightTransaction ? 'Yes' : 'No'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">High Risk Country</p>
-                  <p className="text-sm font-medium">
-                    {transaction.highRiskCountry ? 'Yes' : 'No'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">First Time Merchant</p>
-                  <p className="text-sm font-medium">
-                    {transaction.firstTimeMerchant ? 'Yes' : 'No'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Anomalous Patterns */}
-            <div>
-              <h6 className="text-15 font-semibold mb-4">
-                Anomalous Patterns
-              </h6>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Amount Deviation From Avg</p>
-                  <p className="text-sm font-medium">
-                    {transaction.amountDeviationFromAvg.toFixed(2)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Unusual Hour For User</p>
-                  <p className="text-sm font-medium">
-                    {transaction.unusualHourForUser ? 'Yes' : 'No'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Unusual Merchant Category</p>
-                  <p className="text-sm font-medium">
-                    {transaction.unusualMerchantCategory ? 'Yes' : 'No'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Sudden Location Change</p>
-                  <p className="text-sm font-medium">
-                    {transaction.suddenLocationChange ? 'Yes' : 'No'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Authentication */}
-            <div>
-              <h6 className="text-15 font-semibold mb-4">Authentication</h6>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Authentication Method</p>
-                  <p className="text-sm font-medium">
-                    {transaction.authenticationMethod}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Failed Attempts Today</p>
-                  <p className="text-sm font-medium">
-                    {transaction.failedAttemptsToday}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Card Present</p>
-                  <p className="text-sm font-medium">
-                    {transaction.cardPresent ? 'Yes' : 'No'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">CVV Match</p>
-                  <p className="text-sm font-medium">
-                    {transaction.cvvMatch ? 'Yes' : 'No'}
+                    {transaction.createdBy.firstName} {transaction.createdBy.lastName}
                   </p>
                 </div>
               </div>
@@ -436,21 +285,6 @@ const FraudOverviewPage = ({ params }: FraudOverviewPageProps) => {
                 </p>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {transaction.status === 'COMPLETED' && (
-        <div className="card card-body">
-          <div className="space-y-4">
-            <h6 className="text-15 font-semibold">Summary</h6>
-            {transaction.summary ? (
-              <p className="text-sm text-gray-700">{transaction.summary}</p>
-            ) : (
-              <p className="text-sm text-gray-500 italic">
-                No summary available yet.
-              </p>
-            )}
           </div>
         </div>
       )}

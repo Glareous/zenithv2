@@ -93,9 +93,11 @@ const NimFraudList: NextPageWithLayout = () => {
     const query = searchQuery.toLowerCase()
     return transactions.filter((transaction) => {
       return (
-        transaction.cardType.toLowerCase().includes(query) ||
-        transaction.customerCountry.toLowerCase().includes(query) ||
-        transaction.merchantCategory.toLowerCase().includes(query) ||
+        transaction.user.toString().includes(query) ||
+        transaction.card.toString().includes(query) ||
+        transaction.merchant_name.toLowerCase().includes(query) ||
+        transaction.merchant_city.toLowerCase().includes(query) ||
+        transaction.merchant_state.toLowerCase().includes(query) ||
         transaction.amount.toString().includes(query)
       )
     })
@@ -113,8 +115,16 @@ const NimFraudList: NextPageWithLayout = () => {
       {
         header: 'Date',
         cell: ({ row }: { row: { original: any } }) => {
-          return new Date(row.original.timestamp).toLocaleString()
+          return `${row.original.year}-${String(row.original.month).padStart(2, '0')}-${String(row.original.day).padStart(2, '0')} ${row.original.time}`
         },
+      },
+      {
+        header: 'User',
+        accessorKey: 'user',
+      },
+      {
+        header: 'Card',
+        accessorKey: 'card',
       },
       {
         header: 'Amount',
@@ -123,42 +133,40 @@ const NimFraudList: NextPageWithLayout = () => {
         },
       },
       {
-        header: 'Card Type',
-        accessorKey: 'cardType',
-      },
-      {
-        header: 'Merchant',
-        accessorKey: 'merchantCategory',
-      },
-      {
-        header: 'Country',
-        accessorKey: 'customerCountry',
-      },
-      {
-        header: 'Risk Level',
-        accessorKey: 'merchantRiskLevel',
+        header: 'Use Chip',
         cell: ({ row }: { row: { original: any } }) => {
-          const risk = row.original.merchantRiskLevel
+          const useChip = row.original.use_chip
           const badgeClass =
-            risk === 'high'
-              ? 'badge-sub-red'
-              : risk === 'medium'
-                ? 'badge-sub-yellow'
-                : 'badge-sub-green'
+            useChip === 'Online Transaction'
+              ? 'badge-sub-primary'
+              : useChip === 'Chip Transaction'
+                ? 'badge-sub-green'
+                : 'badge-sub-gray'
 
           return (
             <span className={`badge ${badgeClass}`}>
-              {risk.toUpperCase()}
+              {useChip}
             </span>
           )
         },
       },
       {
-        header: 'Fraud Status',
+        header: 'Merchant',
         cell: ({ row }: { row: { original: any } }) => {
-          const isFraud = row.original.isFraud
+          return (
+            <div className="text-sm">
+              <div className="font-medium">{row.original.merchant_city}, {row.original.merchant_state}</div>
+              <div className="text-gray-500 text-xs">MCC: {row.original.mcc}</div>
+            </div>
+          )
+        },
+      },
+      {
+        header: 'Prediction',
+        cell: ({ row }: { row: { original: any } }) => {
+          const prediccion = row.original.prediccion
 
-          if (isFraud === null || isFraud === undefined) {
+          if (!prediccion) {
             return (
               <span className="badge badge-sub-gray">
                 PENDING
@@ -169,21 +177,21 @@ const NimFraudList: NextPageWithLayout = () => {
           return (
             <span
               className={`badge ${
-                isFraud
+                prediccion === 'FRAUDE'
                   ? 'badge-sub-red'
                   : 'badge-sub-green'
               }`}>
-              {isFraud ? 'FRAUD' : 'LEGITIMATE'}
+              {prediccion}
             </span>
           )
         },
       },
       {
-        header: 'Fraud Probability',
+        header: 'Fraud Score',
         cell: ({ row }: { row: { original: any } }) => {
-          const probability = row.original.fraudProbability
-          if (!probability) return '-'
-          return `${(probability * 100).toFixed(1)}%`
+          const score = row.original.fraud_score
+          if (score === null || score === undefined) return '-'
+          return `${(score * 100).toFixed(2)}%`
         },
       },
       {
@@ -237,7 +245,7 @@ const NimFraudList: NextPageWithLayout = () => {
                   <input
                     type="text"
                     className="ltr:pl-9 rtl:pr-9 form-input ltr:group-[&.right]/form:pr-9 rtl:group-[&.right]/form:pl-9 ltr:group-[&.right]/form:pl-4 rtl:group-[&.right]/form:pr-4"
-                    placeholder="Search by card type, country, merchant..."
+                    placeholder="Search by user, card, merchant, city, state..."
                     value={searchQuery}
                     onChange={handleSearch}
                   />
