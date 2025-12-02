@@ -23,6 +23,9 @@ const leadSchema = z.object({
   companyName: z.string().optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
   location: z.string().optional(),
+  age: z.coerce.number().int().min(0).max(150).optional(),
+  jobPosition: z.string().optional(),
+  industry: z.string().optional(),
   contactId: z.string().optional(),
 })
 
@@ -108,7 +111,7 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
     formState: { errors, isSubmitting },
     watch,
   } = useForm<LeadFormData>({
-    resolver: zodResolver(leadSchema),
+    resolver: zodResolver(leadSchema) as any,
   })
 
   const resetForm = useCallback(() => {
@@ -120,6 +123,9 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
       companyName: '',
       gender: undefined,
       location: '',
+      age: undefined,
+      jobPosition: '',
+      industry: '',
       contactId: undefined,
     })
     setGender(null)
@@ -138,6 +144,9 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
       setValue('companyName', currentLead.companyName || '')
       setValue('gender', currentLead.gender || undefined)
       setValue('location', currentLead.location || '')
+      setValue('age', currentLead.age || undefined)
+      setValue('jobPosition', currentLead.jobPosition || '')
+      setValue('industry', currentLead.industry || '')
       setValue('contactId', currentLead.contactId || undefined)
 
       if (currentLead.gender) {
@@ -365,7 +374,7 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
             )}
 
             <div className="grid grid-cols-12 gap-4 mt-5">
-              <div className="col-span-12">
+              <div className="col-span-9">
                 <label htmlFor="fullNameInput" className="form-label">
                   Full Name
                 </label>
@@ -380,54 +389,23 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
                   <span className="text-red-500">{errors.name.message}</span>
                 )}
               </div>
-
-              <div className="col-span-12">
-                <label htmlFor="emailInput" className="form-label">
-                  Email
+              <div className="col-span-3">
+                <label htmlFor="ageInput" className="form-label">
+                  Age
                 </label>
                 <input
-                  type="email"
-                  id="emailInput"
+                  type="number"
+                  id="ageInput"
                   className="form-input"
-                  placeholder="support@example.com"
-                  {...register('email')}
+                  placeholder="Age"
+                  min="0"
+                  max="150"
+                  onWheel={(e) => e.currentTarget.blur()}
+                  {...register('age')}
                 />
-                {errors.email && (
-                  <span className="text-red-500">{errors.email.message}</span>
+                {errors.age && (
+                  <span className="text-red-500">{errors.age.message}</span>
                 )}
-              </div>
-
-              <div className="col-span-12">
-                <label htmlFor="phoneNumber" className="form-label">
-                  Phone Number
-                </label>
-                <PhoneInput
-                  defaultCountry="us"
-                  value={watch('phoneNumber')}
-                  onChange={(value) => {
-                    setValue('phoneNumber', value || '')
-                  }}
-                  className={`${errors.phoneNumber ? 'border-red-500' : ''}`}
-                  placeholder="Enter phone number"
-                />
-                {errors.phoneNumber && (
-                  <span className="text-red-500">
-                    {errors.phoneNumber.message}
-                  </span>
-                )}
-              </div>
-
-              <div className="col-span-12">
-                <label htmlFor="companyNameInput" className="form-label">
-                  Company Name
-                </label>
-                <input
-                  type="text"
-                  id="companyNameInput"
-                  className="form-input"
-                  placeholder="Company name"
-                  {...register('companyName')}
-                />
               </div>
 
               <div className="col-span-6">
@@ -463,6 +441,81 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
                   className="form-input"
                   placeholder="City, Country"
                   {...register('location')}
+                />
+              </div>
+
+              <div className="col-span-6">
+                <label htmlFor="emailInput" className="form-label">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="emailInput"
+                  className="form-input"
+                  placeholder="support@example.com"
+                  {...register('email')}
+                />
+                {errors.email && (
+                  <span className="text-red-500">{errors.email.message}</span>
+                )}
+              </div>
+
+              <div className="col-span-6">
+                <label htmlFor="jobPositionInput" className="form-label">
+                  Job Position
+                </label>
+                <input
+                  type="text"
+                  id="jobPositionInput"
+                  className="form-input"
+                  placeholder="e.g. CEO, Manager"
+                  {...register('jobPosition')}
+                />
+              </div>
+
+              <div className="col-span-7">
+                <label htmlFor="phoneNumber" className="form-label">
+                  Phone Number
+                </label>
+                <PhoneInput
+                  defaultCountry="us"
+                  value={watch('phoneNumber')}
+                  onChange={(value) => {
+                    setValue('phoneNumber', value || '')
+                  }}
+                  className={`${errors.phoneNumber ? 'border-red-500' : ''}`}
+                  placeholder="Enter phone number"
+                />
+                {errors.phoneNumber && (
+                  <span className="text-red-500">
+                    {errors.phoneNumber.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="col-span-6">
+                <label htmlFor="companyNameInput" className="form-label">
+                  Company Name
+                </label>
+                <input
+                  type="text"
+                  id="companyNameInput"
+                  className="form-input"
+                  placeholder="Company name"
+                  {...register('companyName')}
+                />
+              </div>
+
+              <div className="col-span-6">
+                <label htmlFor="industryInput" className="form-label">
+                  Industry
+                </label>
+                <input
+                  type="text"
+                  id="industryInput"
+                  className="form-input"
+                  placeholder="e.g. Technology, Healthcare"
+                  {...register('industry')}
                 />
               </div>
 

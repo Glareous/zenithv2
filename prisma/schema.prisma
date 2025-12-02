@@ -1114,6 +1114,9 @@ model ProjectLead {
     companyName String?    // Company name
     gender      Gender?    // Gender (MALE/FEMALE/OTHER)
     location    String?    // Location/address
+    age         Int?       // Age of the lead
+    jobPosition String?    // Job position/title
+    industry    String?    // Industry sector
 
     projectId   String
     project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)

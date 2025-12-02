@@ -413,6 +413,11 @@ const menu: MegaMenu[] = [
         link: '/apps/agents',
         lang: 'Leads Agent',
       },
+      {
+        title: 'Company Info',
+        link: '/apps/leads/companyInfo',
+        lang: 'Company Info',
+      },
     ],
   },
   {

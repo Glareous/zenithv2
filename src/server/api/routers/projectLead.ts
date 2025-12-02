@@ -12,6 +12,9 @@ const createLeadSchema = z.object({
   companyName: z.string().optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
   location: z.string().optional(),
+  age: z.number().int().min(0).max(150).optional(),
+  jobPosition: z.string().optional(),
+  industry: z.string().optional(),
   projectId: z.string().min(1, 'ProjectId is required'),
   contactId: z.string().optional(),
 })
