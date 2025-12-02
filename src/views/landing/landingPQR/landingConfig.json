@@ -7,7 +7,7 @@
                 "part2": "When Your Clients",
                 "part3": "Need It Most"
             },
-            "description": "Our proprietary AI model (gtt-oos-20B) instantly analyzes every incoming PQR: detects active fraud, identity theft, legal actions, high emotional distress, and VIP clients. Automatically prioritizes, assigns SLA, and provides full transparency with clear explanations. Real-time protection for your clients and your business reputation."
+            "description": "Our proprietary AI model (gpt-oos-20B) instantly analyzes every incoming PQR: detects active fraud, identity theft, legal actions, high emotional distress, and VIP clients. Automatically prioritizes, assigns SLA, and provides full transparency with clear explanations. Real-time protection for your clients and your business reputation."
         },
         "images": {
             "mainHome": "/assets/images/hospital/landing/main-pqr.png",
@@ -114,7 +114,7 @@
                 "part2": "to Protect Your Members",
                 "part3": "and Your Institution"
             },
-            "description": "Our in-house model gtt-oos-20B was fine-tuned on thousands of real  PQRs. It understands cooperative language, identifies legal-financial risk patterns, and makes faster, fairer decisions than any human team — 24/7."
+            "description": "Our in-house model gpt-oos-20B was fine-tuned on thousands of real  PQRs. It understands cooperative language, identifies legal-financial risk patterns, and makes faster, fairer decisions than any human team — 24/7."
         },
         "colors": {
             "titleHighlight": "text-orange-600",
