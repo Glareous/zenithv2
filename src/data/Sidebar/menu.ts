@@ -415,7 +415,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'Company Info',
-        link: '/apps/leads/companyInfo',
+        link: '/apps/leads/companyInfo/company-list',
         lang: 'Company Info',
       },
     ],

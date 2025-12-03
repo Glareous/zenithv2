@@ -223,6 +223,12 @@ enum PQRStatus {
     COMPLETED
     FAILED
 }
+
+enum ProjectLeadsCompanyStatus {
+    PROCESSING
+    COMPLETED
+    FAILED
+}
 // Organization model - each signup creates an organization
 model Organization {
     id          String   @id @default(cuid()) @map("_id")
@@ -358,6 +364,7 @@ model Project {
     pqrs           ProjectPQR[]
     forecasting    ProjectForecasting[]
     fraudTransactions ProjectFraudTransaction[]
+    leadsCompanies ProjectLeadsCompany[]
 
     revenue Float?
     status  ProjectStatus @default(CREATED)
@@ -1932,4 +1939,104 @@ model ProjectFraudTransaction {
   @@index([month])
   @@index([fraud_score])
   @@index([status])
+}
+
+// ProjectLeadsCompany model - for managing company leads with AI analysis
+model ProjectLeadsCompany {
+  id                String   @id @default(cuid()) @map("_id")
+
+  // Basic fields (always visible - user input)
+  companyName       String
+  shortDescription  String   @db.String
+  mainServices      String   @db.String
+  targetAudience    String   @db.String
+
+  // Status (only changeable in DB)
+  status            ProjectLeadsCompanyStatus @default(PROCESSING)
+
+  // Timestamps
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId         String
+
+  analysis          ProjectLeadsCompanyAnalysis? // One-to-one relation with analysis (only when COMPLETED)
+
+  @@index([projectId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ProjectLeadsCompanyAnalysis model - for AI-generated company lead analysis (only when status = COMPLETED)
+model ProjectLeadsCompanyAnalysis {
+  id                    String   @id @default(cuid()) @map("_id")
+
+  // Lead Overview
+  shortSummary          String   @db.String
+  detectedNeeds         String[] // Array of strings
+  matchedServices       String[] // Array of strings
+
+  // Contact Profile
+  fullName              String
+  jobPosition           String
+  seniorityLevel        String   // e.g., "C_LEVEL", "MANAGER", "INDIVIDUAL_CONTRIBUTOR"
+  roleType              String   // e.g., "TECH_DECISION_MAKER", "BUSINESS_DECISION_MAKER"
+  decisionPower         String   // e.g., "HIGH", "MEDIUM", "LOW"
+  age                   Int?
+  email                 String
+  emailType             String   // e.g., "CORPORATE", "PERSONAL"
+  emailDomain           String
+  location              String
+  companyNameContact    String
+  industryInferred      String
+
+  // Fit
+  fitScore              Int
+  fitGrade              String   // e.g., "A", "B", "C"
+  industryMatch         Boolean
+  companySizeMatch      Boolean
+  geoMatch              Boolean
+  isIdealCustomerProfile Boolean
+  fitReasons            String[] // Array of strings
+
+  // Urgency
+  urgencyScore          Int
+  urgencyLevel          String   // e.g., "CRITICAL", "HIGH", "MEDIUM", "LOW"
+  urgencySignals        String[] // Array of strings
+
+  // Opportunity
+  dealSizePotential     String   // e.g., "HIGH", "MEDIUM", "LOW"
+  complexity            String   // e.g., "HIGH", "MEDIUM", "LOW"
+  riskFlags             String[] // Array of strings
+
+  // Data Quality
+  dataQualityScore      Int
+  dataQualityLevel      String   // e.g., "EXCELLENT", "GOOD", "FAIR", "POOR"
+  fieldsCompleteness    String   // e.g., "HIGH", "MEDIUM", "LOW"
+  isEmailCorporate      Boolean
+  dataIssues            String[] // Array of strings
+
+  // Classification
+  stage                 String   // e.g., "SQL", "MQL", "LEAD"
+  priority              String   // e.g., "P1", "P2", "P3"
+  recommendedOwner      String   // e.g., "Sales_Senior", "Sales_Junior"
+  slaResponseMinutes    Int
+
+  // Recommended Actions
+  recommendedActions    String[] // Array of strings
+
+  // Timestamps
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  leadsCompany          ProjectLeadsCompany @relation(fields: [leadsCompanyId], references: [id], onDelete: Cascade)
+  leadsCompanyId        String   @unique // One analysis per company lead
+
+  @@index([fitScore])
+  @@index([urgencyLevel])
+  @@index([priority])
+  @@index([createdAt])
 }

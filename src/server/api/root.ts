@@ -48,6 +48,8 @@ import { organizationRouter } from './routers/organization'
 import { organizationFileRouter } from './routers/organizationFile'
 import { projectChatRouter } from './routers/projectChat'
 import { projectMessageRouter } from './routers/projectMessage'
+import { projectLeadsCompanyRouter } from './routers/projectLeadsCompany'
+import { projectLeadsCompanyAnalysisRouter } from './routers/projectLeadsCompanyAnalysis'
 
 /**
  * This is the primary router for your server.
@@ -103,6 +105,8 @@ export const appRouter = createTRPCRouter({
   projectFraudTransaction: projectFraudTransactionRouter,
   projectChat: projectChatRouter,
   projectMessage: projectMessageRouter,
+  projectLeadsCompany: projectLeadsCompanyRouter,
+  projectLeadsCompanyAnalysis: projectLeadsCompanyAnalysisRouter,
 })
 
 // export type definition of API

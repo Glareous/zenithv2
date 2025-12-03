@@ -1,0 +1,72 @@
+{
+    "_id": "692f87ebdaa54ddf3dd266e8",
+    "leadsCompanyId": "cmipa78ci00015a34vptxq30w",
+    "shortSummary": "CTO de una empresa tipo maquiladora que opera 3 plantas y casi pierde datos críticos por un NAS obsoleto; busca respaldo de datos y nube híbrida con alta urgencia.",
+    "detectedNeeds": [
+        "Respaldo de datos robusto",
+        "Almacenamiento escalable",
+        "Arquitectura de nube híbrida",
+        "Alta disponibilidad",
+        "Modernización de infraestructura de TI"
+    ],
+    "matchedServices": [
+        "Respaldo de datos",
+        "Almacenamiento",
+        "Implementación de tecnologías",
+        "Consultoría estratégica"
+    ],
+    "fullName": "JOSH BIDEN",
+    "jobPosition": "CTO",
+    "seniorityLevel": "C_LEVEL",
+    "roleType": "TECH_DECISION_MAKER",
+    "decisionPower": "HIGH",
+    "age": 42,
+    "email": "josh@openenergy.com",
+    "emailType": "CORPORATE",
+    "emailDomain": "openenergy.com",
+    "location": "USA, Miami",
+    "companyNameContact": "Open Energy LLC",
+    "industryInferred": "Manufactura / Maquila",
+    "fitScore": 94,
+    "fitGrade": "A",
+    "industryMatch": true,
+    "companySizeMatch": true,
+    "geoMatch": true,
+    "isIdealCustomerProfile": true,
+    "fitReasons": [
+        "La empresa encaja con el perfil de manufactura / maquila dependiente de TI robusta.",
+        "Necesidades directamente relacionadas con respaldo de datos y almacenamiento.",
+        "Cargo del contacto (CTO) con alto poder de decisión tecnológica."
+    ],
+    "urgencyScore": 95,
+    "urgencyLevel": "CRITICAL",
+    "urgencySignals": [
+        "Casi pierden datos de producción por fallo reciente de NAS.",
+        "Mención explícita de urgencia y solicitud de llamada esta misma semana.",
+        "Planes de expansión que requieren solución escalable inmediata."
+    ],
+    "dealSizePotential": "HIGH",
+    "complexity": "MEDIUM",
+    "riskFlags": [],
+    "dataQualityScore": 90,
+    "dataQualityLevel": "GOOD",
+    "fieldsCompleteness": "HIGH",
+    "isEmailCorporate": true,
+    "dataIssues": [],
+    "stage": "SQL",
+    "priority": "P1",
+    "recommendedOwner": "Sales_Senior",
+    "slaResponseMinutes": 60,
+    "recommendedActions": [
+        "Contactar al CTO en menos de 1 hora para agendar la llamada solicitada.",
+        "Llevar a la reunión una propuesta preliminar de arquitectura de respaldo híbrido.",
+        "Levantar información detallada de volumen de datos, RPO/RTO y sistemas actuales.",
+        "Explorar roadmap de expansión para dimensionar una solución escalable a largo plazo."
+    ],
+    "createdAt": {
+        "$date": "2025-12-03T00:41:20.126Z"
+    },
+    "updatedAt": {
+        "$date": "2025-12-03T00:41:20.126Z"
+    }
+}
