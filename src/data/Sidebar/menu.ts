@@ -208,11 +208,11 @@ const menu: MegaMenu[] = [
         link: '/docs/pqr',
         lang: 'Documentation',
       },
-      {
+      /*{
         title: 'Pqr Agent',
         link: '/apps/agents',
         lang: 'Pqr Agent',
-      },
+      },*/
     ],
   },
   {
@@ -237,11 +237,11 @@ const menu: MegaMenu[] = [
         link: '/docs/forecasting',
         lang: 'Documentation',
       },
-      {
+      /*{
         title: 'Forecasting Agent',
         link: '/apps/agents',
         lang: 'Forecasting Agent',
-      },
+      },*/
     ],
   },
   {
@@ -408,11 +408,11 @@ const menu: MegaMenu[] = [
         link: '/docs/lead',
         lang: 'Documentation',
       },
-      {
+      /*{
         title: 'Leads Agent',
         link: '/apps/agents',
         lang: 'Leads Agent',
-      },
+      },*/
       {
         title: 'Company Info',
         link: '/apps/leads/companyInfo/company-list',
