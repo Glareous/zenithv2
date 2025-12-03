@@ -1,6 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from '@src/server/api/trpc'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
+import { triggerPQRAsync } from '@src/server/services/backendAsync'
 
 export const projectPQRRouter = createTRPCRouter({
   // Get all PQRs for a project
@@ -147,13 +148,21 @@ export const projectPQRRouter = createTRPCRouter({
         },
       })
 
-      return await ctx.db.projectPQR.create({
+      const pqr = await ctx.db.projectPQR.create({
         data: {
           ...data,
           projectId,
           agentId: project?.organization?.agentPqrId,
         },
       })
+
+      // Trigger async processing (fire and forget)
+      console.log('[PQR Router] About to trigger async for created PQR:', pqr.id)
+      triggerPQRAsync(pqr.id).catch((err) => {
+        console.error('[PQR Router] Failed to trigger async:', err)
+      })
+
+      return pqr
     }),
 
   // Update a PQR
@@ -211,10 +220,18 @@ export const projectPQRRouter = createTRPCRouter({
 
       const { id, ...updateData } = input
 
-      return await ctx.db.projectPQR.update({
+      const updatedPqr = await ctx.db.projectPQR.update({
         where: { id },
         data: updateData,
       })
+
+      // Trigger async processing (fire and forget)
+      console.log('[PQR Router] About to trigger async for updated PQR:', updatedPqr.id)
+      triggerPQRAsync(updatedPqr.id).catch((err) => {
+        console.error('[PQR Router] Failed to trigger async:', err)
+      })
+
+      return updatedPqr
     }),
 
   // Delete a PQR

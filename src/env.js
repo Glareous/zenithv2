@@ -32,6 +32,7 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(['development', 'test', 'production'])
       .default('development'),
+    BACKEND_URL: z.string().url(),
   },
 
   /**
@@ -76,6 +77,7 @@ export const env = createEnv({
     AWS_REGION: process.env.AWS_REGION,
     AWS_ARN: process.env.AWS_ARN,
     S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
+    BACKEND_URL: process.env.BACKEND_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
