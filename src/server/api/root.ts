@@ -50,6 +50,8 @@ import { projectChatRouter } from './routers/projectChat'
 import { projectMessageRouter } from './routers/projectMessage'
 import { projectLeadsCompanyRouter } from './routers/projectLeadsCompany'
 import { projectLeadsCompanyAnalysisRouter } from './routers/projectLeadsCompanyAnalysis'
+import { projectBoxClasificationRouter } from './routers/projectBoxClasification'
+import { projectBoxClasificationFileRouter } from './routers/projectBoxClasificationFile'
 
 /**
  * This is the primary router for your server.
@@ -107,6 +109,8 @@ export const appRouter = createTRPCRouter({
   projectMessage: projectMessageRouter,
   projectLeadsCompany: projectLeadsCompanyRouter,
   projectLeadsCompanyAnalysis: projectLeadsCompanyAnalysisRouter,
+  projectBoxClasification: projectBoxClasificationRouter,
+  projectBoxClasificationFile: projectBoxClasificationFileRouter,
 })
 
 // export type definition of API
