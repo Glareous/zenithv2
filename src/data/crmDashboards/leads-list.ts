@@ -7,6 +7,7 @@ const leadsList1 = [
     leadSource: 'Online Source',
     leadStatus: 'New',
     totalBalance: '$15,000',
+    emailToNotify: 'notify@example.com',
   },
   {
     leadName: 'John Smith',
@@ -16,6 +17,7 @@ const leadsList1 = [
     leadSource: 'Referral',
     leadStatus: 'Contacted',
     totalBalance: '$12,500',
+    emailToNotify: '',
   },
   {
     leadName: 'Jane Doe',
@@ -25,6 +27,7 @@ const leadsList1 = [
     leadSource: 'Online Source',
     leadStatus: 'Interested',
     totalBalance: '$8,000',
+    emailToNotify: 'manager@example.com',
   },
   {
     leadName: 'Michael Johnson',
@@ -34,6 +37,7 @@ const leadsList1 = [
     leadSource: 'Trade Show',
     leadStatus: 'Negotiation',
     totalBalance: '$20,000',
+    emailToNotify: '',
   },
   {
     leadName: 'Emily Brown',
@@ -43,6 +47,7 @@ const leadsList1 = [
     leadSource: 'Website',
     leadStatus: 'Closed',
     totalBalance: '$25,000',
+    emailToNotify: 'sales@example.com',
   },
   {
     leadName: 'David Wilson',
@@ -52,6 +57,7 @@ const leadsList1 = [
     leadSource: 'Email Campaign',
     leadStatus: 'Closed',
     totalBalance: '$5,000',
+    emailToNotify: '',
   },
   {
     leadName: 'Jessica Davis',
@@ -61,6 +67,7 @@ const leadsList1 = [
     leadSource: 'Cold Call',
     leadStatus: 'New',
     totalBalance: '$10,000',
+    emailToNotify: '',
   },
   {
     leadName: 'Thomas Martinez',
@@ -70,6 +77,7 @@ const leadsList1 = [
     leadSource: 'Referral',
     leadStatus: 'Contacted',
     totalBalance: '$7,500',
+    emailToNotify: 'team@example.com',
   },
   {
     leadName: 'Sarah Miller',
@@ -79,6 +87,7 @@ const leadsList1 = [
     leadSource: 'Trade Show',
     leadStatus: 'Interested',
     totalBalance: '$18,000',
+    emailToNotify: '',
   },
   {
     leadName: 'Daniel Garcia',
@@ -88,6 +97,7 @@ const leadsList1 = [
     leadSource: 'Online Source',
     leadStatus: 'Negotiation',
     totalBalance: '$9,000',
+    emailToNotify: '',
   },
 ]
 
