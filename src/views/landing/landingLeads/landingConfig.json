@@ -1,0 +1,212 @@
+{
+    "heroBanner": {
+        "texts": {
+            "badge": "AI-Powered Lead Classification Engine",
+            "title": {
+                "part1": "Never Miss",
+                "part2": "a Hot Lead",
+                "part3": "Again"
+            },
+            "description": "Our proprietary 20B-parameter LLM (gpt-oos-20B) — fine-tuned on thousands of real B2B sales conversations — instantly analyzes every inbound lead. Detects buying intent, urgency, decision power, ICP fit, and assigns perfect priority in under 1 second. From cold inquiry to routed SQL — automatically."
+        },
+        "images": {
+            "mainHome": "/assets/images/hospital/landing/main-leads.png",
+            "whiteLogo": "/assets/images/logo-white.png",
+            "darkLogo": "/assets/images/main-logo.png"
+        },
+        "colors": {
+            "background": "bg-gradient-to-b from-amber-50 via-yellow-50 to-amber-100 dark:from-gray-900 dark:via-gray-850 dark:to-black",
+            "badge": {
+                "text": "text-amber-600",
+                "border": "bg-amber-500/20 border border-amber-500/50"
+            },
+            "title": {
+                "highlight": "text-amber-600",
+                "decoration": "decoration-amber-500"
+            },
+            "description": "text-gray-700 dark:text-gray-300",
+            "card": {
+                "background": "bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border border-amber-500/30",
+                "text": "text-gray-900 dark:text-gray-100",
+                "shadow": "shadow-2xl shadow-amber-500/25"
+            },
+            "metricText": "text-amber-600"
+        },
+        "metrics": [
+            {
+                "value": "0.8",
+                "suffix": "s",
+                "label": "Full lead analysis & routing"
+            },
+            {
+                "value": "94",
+                "suffix": "%",
+                "label": "Accuracy in intent & urgency detection"
+            },
+            {
+                "value": "3",
+                "suffix": "x",
+                "label": "More SQLs vs manual triage"
+            },
+            {
+                "value": "100",
+                "suffix": "%",
+                "label": "Explainable JSON output"
+            }
+        ]
+    },
+    "availableFacilities": {
+        "colors": {
+            "cardBg": "bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-amber-500/20",
+            "cardBorder": "border-amber-500/20",
+            "cardHover": "hover:bg-amber-50 hover:dark:bg-gray-800 hover:border-amber-500/70 hover:shadow-2xl hover:shadow-amber-500/30",
+            "iconBg": "bg-amber-500/10",
+            "iconColor": "text-amber-600",
+            "titleColor": "text-amber-700 dark:text-amber-400",
+            "descColor": "text-gray-700 dark:text-gray-300"
+        },
+        "facilities": [
+            {
+                "icon": "BrainCircuit",
+                "title": "Natural Language Intent Analysis",
+                "description": "Understands pain points and buying signals in any language",
+                "href": "#!"
+            },
+            {
+                "icon": "Target",
+                "title": "ICP & Fit Scoring Engine",
+                "description": "Perfect match detection with your Ideal Customer Profile",
+                "href": "#!"
+            },
+            {
+                "icon": "Zap",
+                "title": "Decision Maker Identification",
+                "description": "Instantly recognizes C-level, directors and real buyers",
+                "href": "#!"
+            },
+            {
+                "icon": "Timer",
+                "title": "Urgency & Priority Detection",
+                "description": "Flags 'urgent', 'this week', 'demo now' signals",
+                "href": "#!"
+            },
+            {
+                "icon": "FileSearch",
+                "title": "Full JSON Explainability",
+                "description": "Every classification includes detailed reasoning",
+                "href": "#!"
+            },
+            {
+                "icon": "ShieldCheck",
+                "title": "Corporate Data Quality Filter",
+                "description": "Rejects free emails, students and low-quality leads",
+                "href": "#!"
+            }
+        ]
+    },
+    "ourDoctorsTeam": {
+        "images": {
+            "aboutImage": "/assets/images/hospital/landing/nvidia2.jpg"
+        },
+        "texts": {
+            "title": {
+                "part1": "Powered by",
+                "part2": "gpt-oos-20B",
+                "part3": "Fine-Tuned LLM"
+            },
+            "description": "Our 20-billion-parameter model was trained and fine-tuned exclusively on real enterprise sales conversations, CRM data, email threads, and closed-won deals. It understands corporate hierarchy, buying intent, and sales nuance better than any off-the-shelf LLM."
+        },
+        "colors": {
+            "titleHighlight": "text-amber-600",
+            "titleDecoration": "decoration-amber-500",
+            "description": "text-gray-700 dark:text-gray-300",
+            "iconColor": "text-amber-600",
+            "featureDesc": "text-gray-700 dark:text-gray-300"
+        },
+        "features": [
+            {
+                "icon": "Zap",
+                "title": "From Lead to SQL in <1 Second",
+                "description": "Automatic routing to the right rep with perfect context"
+            },
+            {
+                "icon": "TrendingUp",
+                "title": "3x More Qualified Opportunities",
+                "description": "Never let a high-intent lead sit in the inbox"
+            },
+            {
+                "icon": "UsersRound",
+                "title": "Intelligent Owner Assignment",
+                "description": "Routes by territory, vertical, deal size or expertise"
+            },
+            {
+                "icon": "FileCheck",
+                "title": "Audit-Ready Classification",
+                "description": "Full traceability and integration with CRM & tools"
+            }
+        ]
+    },
+    "healthService": {
+        "texts": {
+            "title": {
+                "part1": "Transform Your",
+                "part2": "Inbound Pipeline",
+                "part3": ""
+            },
+            "description": "How top-performing B2B sales teams are crushing quota with AI lead classification."
+        },
+        "colors": {
+            "sectionBg": "bg-amber-50/50 dark:bg-gray-900",
+            "titleHighlight": "text-amber-600",
+            "titleDecoration": "decoration-amber-500",
+            "description": "text-gray-700 dark:text-gray-300",
+            "cardBg": "bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-amber-500/20",
+            "cardHover": "hover:bg-amber-50 hover:dark:bg-gray-800 hover:border-amber-500/70 hover:shadow-2xl hover:shadow-amber-500/30",
+            "serviceDesc": "text-gray-700 dark:text-gray-300"
+        },
+        "services": [
+            {
+                "icon": "Siren",
+                "iconBg": "bg-red-500/10",
+                "iconColor": "text-red-600",
+                "title": "Critical Hot Leads",
+                "description": "Instant P1 alerts for 'urgent' and 'demo this week'"
+            },
+            {
+                "icon": "Scale",
+                "iconBg": "bg-amber-600/10",
+                "iconColor": "text-amber-600",
+                "title": "C-Level & Director Contacts",
+                "description": "High decision-power leads flagged immediately"
+            },
+            {
+                "icon": "Handshake",
+                "iconBg": "bg-amber-500/10",
+                "iconColor": "text-amber-600",
+                "title": "Perfect ICP Matches",
+                "description": "Only your ideal customers get priority"
+            },
+            {
+                "icon": "MessageSquareWarning",
+                "iconBg": "bg-orange-500/10",
+                "iconColor": "text-orange-600",
+                "title": "Low-Quality Auto-Filter",
+                "description": "Students, free emails and junk go to nurture"
+            },
+            {
+                "icon": "TrendingUp",
+                "iconBg": "bg-yellow-500/10",
+                "iconColor": "text-yellow-600",
+                "title": "Revenue Velocity",
+                "description": "Close 30% faster with perfect lead routing"
+            },
+            {
+                "icon": "Trophy",
+                "iconBg": "bg-amber-600/10",
+                "iconColor": "text-amber-600",
+                "title": "Used by Top Teams",
+                "description": "Fortune 1000 and high-growth startups"
+            }
+        ]
+    }
+}
