@@ -1154,6 +1154,9 @@ model ProjectLead {
     contactId   String?
     contact     ProjectContact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
 
+    // Analysis relation (one-to-one with ProjectLeadAnalysis)
+    analysis    ProjectLeadAnalysis?
+
     @@index([projectId])
     @@index([agentId])
     @@index([createdById])
@@ -1973,17 +1976,14 @@ model ProjectLeadsCompany {
 
   // Relations
   project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId         String
+  projectId         String   @unique // One company per project
 
-  analysis          ProjectLeadsCompanyAnalysis? // One-to-one relation with analysis (only when COMPLETED)
-
-  @@index([projectId])
   @@index([status])
   @@index([createdAt])
 }
 
-// ProjectLeadsCompanyAnalysis model - for AI-generated company lead analysis (only when status = COMPLETED)
-model ProjectLeadsCompanyAnalysis {
+// ProjectLeadAnalysis model - for AI-generated lead analysis (only when status = COMPLETED)
+model ProjectLeadAnalysis {
   id                    String   @id @default(cuid()) @map("_id")
 
   // Lead Overview
@@ -2045,8 +2045,8 @@ model ProjectLeadsCompanyAnalysis {
   updatedAt             DateTime @updatedAt
 
   // Relations
-  leadsCompany          ProjectLeadsCompany @relation(fields: [leadsCompanyId], references: [id], onDelete: Cascade)
-  leadsCompanyId        String   @unique // One analysis per company lead
+  lead                  ProjectLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId                String   @unique // One analysis per lead
 
   @@index([fitScore])
   @@index([urgencyLevel])
