@@ -186,6 +186,7 @@ export const projectAgentRouter = createTRPCRouter({
           agentAdvisorChatId: true,
           agentAdvisorId: true,
           agentLeadsId: true,
+          agentBoxClasificationId: true,
         },
       })
 
@@ -198,6 +199,7 @@ export const projectAgentRouter = createTRPCRouter({
         organization?.agentAdvisorChatId,
         organization?.agentAdvisorId,
         organization?.agentLeadsId,
+        organization?.agentBoxClasificationId,
       ].filter((id): id is string => id !== null && id !== undefined)
 
       const agents = await ctx.db.projectAgent.findMany({
@@ -315,6 +317,7 @@ export const projectAgentRouter = createTRPCRouter({
               agentAdvisorChatId: true,
               agentAdvisorId: true,
               agentLeadsId: true,
+              agentBoxClasificationId: true,
             },
           },
         },
@@ -329,7 +332,8 @@ export const projectAgentRouter = createTRPCRouter({
           userOrganization.organization.agentRrhhChatId === input.id ||
           userOrganization.organization.agentAdvisorChatId === input.id ||
           userOrganization.organization.agentAdvisorId === input.id ||
-          userOrganization.organization.agentLeadsId === input.id)
+          userOrganization.organization.agentLeadsId === input.id ||
+          userOrganization.organization.agentBoxClasificationId === input.id)
 
       // Build where conditions
       const whereConditions: any[] = []
@@ -609,6 +613,7 @@ export const projectAgentRouter = createTRPCRouter({
               { agentAdvisorChatId: input.id },
               { agentAdvisorId: input.id },
               { agentLeadsId: input.id },
+              { agentBoxClasificationId: input.id },
             ],
           },
         })
@@ -704,6 +709,7 @@ export const projectAgentRouter = createTRPCRouter({
             { agentAdvisorChatId: input.id },
             { agentAdvisorId: input.id },
             { agentLeadsId: input.id },
+            { agentBoxClasificationId: input.id },
           ],
         },
       })

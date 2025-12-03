@@ -207,6 +207,7 @@ export const organizationRouter = createTRPCRouter({
         agentAdvisorChatId: z.string().optional(),
         agentAdvisorId: z.string().optional(),
         agentLeadsId: z.string().optional(),
+        agentBoxClasificationId: z.string().optional(),
         custom: z.boolean().default(true),
         administrators: z
           .array(
@@ -279,6 +280,7 @@ export const organizationRouter = createTRPCRouter({
           agentAdvisorChatId: input.agentAdvisorChatId,
           agentAdvisorId: input.agentAdvisorId,
           agentLeadsId: input.agentLeadsId,
+          agentBoxClasificationId: input.agentBoxClasificationId,
           members: {
             create: {
               userId: ownerUser.id,
@@ -506,6 +508,7 @@ export const organizationRouter = createTRPCRouter({
         agentAdvisorChatId: z.string().nullable().optional(),
         agentAdvisorId: z.string().nullable().optional(),
         agentLeadsId: z.string().nullable().optional(),
+        agentBoxClasificationId: z.string().nullable().optional(),
         administratorsToAdd: z.array(
           z.object({
             firstName: z.string(),
@@ -793,6 +796,7 @@ export const organizationRouter = createTRPCRouter({
             agentAdvisorChatId: true,
             agentAdvisorId: true,
             agentLeadsId: true,
+            agentBoxClasificationId: true,
           },
         },
       },

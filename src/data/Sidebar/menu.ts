@@ -421,6 +421,35 @@ const menu: MegaMenu[] = [
     ],
   },
   {
+    title: 'BOX CLASIFICATION',
+    lang: 'pe-box-clasification',
+    icon: 'trophy',
+    link: '/apps/box-clasification/',
+    separator: false,
+    children: [
+      {
+        title: 'Create-view',
+        lang: 'Add/Edit/View',
+        link: '/apps/box-clasification/list',
+      },
+      {
+        title: 'Landing',
+        link: '/apps/box-clasification/landing',
+        lang: 'Landing page',
+      },
+      {
+        title: 'Documentation',
+        link: '/docs/box-clasification',
+        lang: 'Documentation',
+      },
+      {
+        title: 'Box Clasification Agent',
+        link: '/apps/agents',
+        lang: 'Box Clasification Agent',
+      },
+    ],
+  },
+  {
     title: 'API Keys',
     lang: 'pe-api-keys',
     icon: 'box',

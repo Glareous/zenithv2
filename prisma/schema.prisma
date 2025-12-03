@@ -249,6 +249,7 @@ model Organization {
     agentAdvisorChatId  String?  // Reference to ProjectAgent.id (global agent for Advisor chat)
     agentAdvisorId      String?  // Reference to ProjectAgent.id (global agent)
     agentLeadsId        String?  // Reference to ProjectAgent.id (global agent)
+    agentBoxClasificationId String?  // Reference to ProjectAgent.id (global agent)
 
     // Relations
     owner        User                 @relation("OrganizationOwner", fields: [ownerId], references: [id])
@@ -267,6 +268,7 @@ model Organization {
   @@index([agentForecastingId])
   @@index([agentRrhhChatId])
   @@index([agentAdvisorChatId])
+  @@index([agentBoxClasificationId])
 }
 
 // Junction table for organization members with roles

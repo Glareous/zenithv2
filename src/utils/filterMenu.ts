@@ -11,6 +11,7 @@ interface Organization {
   agentAdvisorChatId?: string | null
   agentAdvisorId?: string | null
   agentLeadsId?: string | null
+  agentBoxClasificationId?: string | null
 }
 
 /**
@@ -44,6 +45,7 @@ export function filterMenuByAllowedPages(
     'DIGITAL ADVISOR': 'advisor',
     LEADS: 'leads',
     'NVIDIA - NIM FRAUD': 'nim-fraud',
+    'BOX CLASIFICATION': 'box-clasification',
     'API Keys': 'api-keys',
     Actions: 'actions',
     'Phone Numbers': 'phone-numbers',
@@ -124,6 +126,12 @@ export function filterMenuByAllowedPages(
           return {
             ...child,
             link: `/apps/agents/default/${organization.agentLeadsId}/configure`,
+          }
+        }
+        if (child.lang === 'Box Clasification Agent' && organization.agentBoxClasificationId) {
+          return {
+            ...child,
+            link: `/apps/agents/default/${organization.agentBoxClasificationId}/configure`,
           }
         }
         return child

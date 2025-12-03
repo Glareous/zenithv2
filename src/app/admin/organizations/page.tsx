@@ -64,6 +64,7 @@ const organizationSchema = z.object({
   agentAdvisorChatId: z.string().optional(),
   agentAdvisorId: z.string().optional(),
   agentLeadsId: z.string().optional(),
+  agentBoxClasificationId: z.string().optional(),
 })
 
 type OrganizationFormData = z.infer<typeof organizationSchema>
@@ -81,7 +82,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
   const [showAgentModal, setShowAgentModal] = useState(false)
   const [selectedAgentType, setSelectedAgentType] = useState<
-    'pqr' | 'rrhh' | 'forecasting' | 'advisor' | 'leads' | 'rrhhChat' | 'advisorChat' | null
+    'pqr' | 'rrhh' | 'forecasting' | 'advisor' | 'leads' | 'rrhhChat' | 'advisorChat' | 'box-clasification' | null
   >(null)
 
   // Check if user is SUPERADMIN
@@ -131,6 +132,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
       agentAdvisorChatId: undefined,
       agentAdvisorId: undefined,
       agentLeadsId: undefined,
+      agentBoxClasificationId: undefined,
     },
   })
 
@@ -319,6 +321,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
       agentAdvisorChatId: undefined,
       agentAdvisorId: undefined,
       agentLeadsId: undefined,
+      agentBoxClasificationId: undefined,
     })
     setShowModal(true)
   }
@@ -358,6 +361,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
       agentAdvisorChatId: organization.agentAdvisorChatId || undefined,
       agentAdvisorId: organization.agentAdvisorId || undefined,
       agentLeadsId: organization.agentLeadsId || undefined,
+      agentBoxClasificationId: organization.agentBoxClasificationId || undefined,
       administrators: existingAdmins,
     })
     setShowModal(true)
@@ -416,6 +420,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           agentAdvisorChatId: data.agentAdvisorChatId || null,
           agentAdvisorId: data.agentAdvisorId || null,
           agentLeadsId: data.agentLeadsId || null,
+          agentBoxClasificationId: data.agentBoxClasificationId || null,
           administratorsToAdd:
             administratorsToAdd.length > 0 ? administratorsToAdd : undefined,
           administratorsToRemove:
@@ -436,6 +441,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           agentAdvisorChatId: data.agentAdvisorChatId,
           agentAdvisorId: data.agentAdvisorId,
           agentLeadsId: data.agentLeadsId,
+          agentBoxClasificationId: data.agentBoxClasificationId,
           custom: true,
           administrators: data.administrators.map((admin) => ({
             firstName: admin.firstName,
@@ -768,6 +774,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       /* { value: 'actions', label: 'Actions' }, */
                       { value: 'advisor', label: 'Digital Advisor' },
                       { value: 'leads', label: 'Leads' },
+                      { value: 'box-clasification', label: 'Box Clasification' },
                       /* { value: 'chat', label: 'Chat' }, */
 
                       /*{ value: 'phone-numbers', label: 'Phone Numbers' },*/
@@ -820,7 +827,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
 
                   {(() => {
                     const allowedPages = watch('allowedPages') || []
-                    const agentPages = ['pqr', 'rrhh', 'forecasting', 'advisor', 'leads']
+                    const agentPages = ['pqr', 'rrhh', 'forecasting', 'advisor', 'leads', 'box-clasification']
                     const enabledAgentPages = allowedPages.filter((page) =>
                       agentPages.includes(page)
                     )
@@ -828,7 +835,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                     if (enabledAgentPages.length === 0) {
                       return (
                         <p className="text-sm text-gray-500 italic">
-                          Enable PQR, RRHH, Forecasting, Digital Advisor, or Leads in Menu
+                          Enable PQR, RRHH, Forecasting, Digital Advisor, Leads, or Box Clasification in Menu
                           Restrictions to assign agents
                         </p>
                       )
@@ -875,6 +882,13 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                             { key: 'agentLeadsId', label: 'Leads Agent', type: 'leads' }
                           ]
                         })
+                      } else if (page === 'box-clasification') {
+                        pageAgentConfigs.push({
+                          page: 'box-clasification',
+                          agents: [
+                            { key: 'agentBoxClasificationId', label: 'Box Clasification Agent', type: 'box-clasification' }
+                          ]
+                        })
                       }
                     })
 
@@ -890,6 +904,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                               | 'agentAdvisorChatId'
                               | 'agentAdvisorId'
                               | 'agentLeadsId'
+                              | 'agentBoxClasificationId'
                             const selectedAgentId = watch(agentKey)
                             const selectedAgent = allAgents.find(
                               (a) => a.id === selectedAgentId
@@ -1235,6 +1250,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       /* { value: 'actions', label: 'Actions' }, */
                       { value: 'advisor', label: 'Digital Advisor' },
                       { value: 'leads', label: 'Leads' },
+                      { value: 'box-clasification', label: 'Box Clasification' },
                       /* { value: 'chat', label: 'Chat' }, */
 
                       /*{ value: 'phone-numbers', label: 'Phone Numbers' },*/
@@ -1315,7 +1331,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
 
                     {(() => {
                       const allowedPages = watch('allowedPages') || []
-                      const agentPages = ['pqr', 'rrhh', 'forecasting', 'advisor', 'leads']
+                      const agentPages = ['pqr', 'rrhh', 'forecasting', 'advisor', 'leads', 'box-clasification']
                       const enabledAgentPages = allowedPages.filter((page) =>
                         agentPages.includes(page)
                       )
@@ -1323,7 +1339,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                       if (enabledAgentPages.length === 0) {
                         return (
                           <p className="text-sm text-gray-500 italic">
-                            Enable PQR, RRHH, Forecasting, Digital Advisor, or Leads in Menu
+                            Enable PQR, RRHH, Forecasting, Digital Advisor, Leads, or Box Clasification in Menu
                             Restrictions to assign agents
                           </p>
                         )
@@ -1370,6 +1386,13 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                               { key: 'agentLeadsId', label: 'Leads Agent', type: 'leads' }
                             ]
                           })
+                        } else if (page === 'box-clasification') {
+                          pageAgentConfigs.push({
+                            page: 'box-clasification',
+                            agents: [
+                              { key: 'agentBoxClasificationId', label: 'Box Clasification Agent', type: 'box-clasification' }
+                            ]
+                          })
                         }
                       })
 
@@ -1385,6 +1408,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                                 | 'agentAdvisorChatId'
                                 | 'agentAdvisorId'
                                 | 'agentLeadsId'
+                                | 'agentBoxClasificationId'
                               const selectedAgentId = watch(agentKey)
                               const selectedAgent = allAgents.find(
                                 (a) => a.id === selectedAgentId
@@ -1646,14 +1670,16 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
               | 'agentRrhhChatId'
               | 'agentAdvisorChatId'
               | 'agentAdvisorId'
-              | 'agentLeadsId'> = {
+              | 'agentLeadsId'
+              | 'agentBoxClasificationId'> = {
               pqr: 'agentPqrId',
               rrhh: 'agentRrhhId',
               forecasting: 'agentForecastingId',
               rrhhChat: 'agentRrhhChatId',
               advisorChat: 'agentAdvisorChatId',
               advisor: 'agentAdvisorId',
-              leads: 'agentLeadsId'
+              leads: 'agentLeadsId',
+              'box-clasification': 'agentBoxClasificationId'
             }
             const agentKey = agentKeyMap[selectedAgentType]
             if (agentKey) {
@@ -1672,14 +1698,16 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
               | 'agentRrhhChatId'
               | 'agentAdvisorChatId'
               | 'agentAdvisorId'
-              | 'agentLeadsId'> = {
+              | 'agentLeadsId'
+              | 'agentBoxClasificationId'> = {
               pqr: 'agentPqrId',
               rrhh: 'agentRrhhId',
               forecasting: 'agentForecastingId',
               rrhhChat: 'agentRrhhChatId',
               advisorChat: 'agentAdvisorChatId',
               advisor: 'agentAdvisorId',
-              leads: 'agentLeadsId'
+              leads: 'agentLeadsId',
+              'box-clasification': 'agentBoxClasificationId'
             }
             const key = agentKeyMap[selectedAgentType]
             return key ? watch(key) : null
