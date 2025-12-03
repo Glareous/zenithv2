@@ -247,6 +247,7 @@ export const projectLeadRouter = createTRPCRouter({
               status: true,
             },
           },
+          analysis: true,
         },
       })
 

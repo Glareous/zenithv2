@@ -49,7 +49,7 @@ import { organizationFileRouter } from './routers/organizationFile'
 import { projectChatRouter } from './routers/projectChat'
 import { projectMessageRouter } from './routers/projectMessage'
 import { projectLeadsCompanyRouter } from './routers/projectLeadsCompany'
-import { projectLeadsCompanyAnalysisRouter } from './routers/projectLeadsCompanyAnalysis'
+import { projectLeadAnalysisRouter } from './routers/projectLeadAnalysis'
 import { projectBoxClasificationRouter } from './routers/projectBoxClasification'
 import { projectBoxClasificationFileRouter } from './routers/projectBoxClasificationFile'
 
@@ -108,7 +108,7 @@ export const appRouter = createTRPCRouter({
   projectChat: projectChatRouter,
   projectMessage: projectMessageRouter,
   projectLeadsCompany: projectLeadsCompanyRouter,
-  projectLeadsCompanyAnalysis: projectLeadsCompanyAnalysisRouter,
+  projectLeadAnalysis: projectLeadAnalysisRouter,
   projectBoxClasification: projectBoxClasificationRouter,
   projectBoxClasificationFile: projectBoxClasificationFileRouter,
 })

@@ -71,9 +71,6 @@ export const projectLeadsCompanyRouter = createTRPCRouter({
             ],
           },
         },
-        include: {
-          analysis: true,
-        },
       })
 
       if (!company) {
@@ -84,6 +81,44 @@ export const projectLeadsCompanyRouter = createTRPCRouter({
       }
 
       return company
+    }),
+
+  // Get single company for project (1-to-1 relationship)
+  getByProjectId: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      // Check if user has access to this project
+      const projectMember = await ctx.db.projectMember.findFirst({
+        where: {
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        },
+      })
+
+      const organizationMember = await ctx.db.organizationMember.findFirst({
+        where: {
+          organization: {
+            projects: {
+              some: {
+                id: input.projectId,
+              },
+            },
+          },
+          userId: ctx.session.user.id,
+          role: { in: ['OWNER', 'ADMIN'] },
+        },
+      })
+
+      if (!projectMember && !organizationMember) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: "You don't have access to this project",
+        })
+      }
+
+      return await ctx.db.projectLeadsCompany.findUnique({
+        where: { projectId: input.projectId },
+      })
     }),
 
   // Create a new company lead
@@ -239,5 +274,59 @@ export const projectLeadsCompanyRouter = createTRPCRouter({
       })
 
       return { success: true }
+    }),
+
+  // Upsert (create or update) company for project
+  upsert: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        companyName: z.string().min(1).max(200),
+        shortDescription: z.string().min(1).max(500),
+        mainServices: z.string().min(1),
+        targetAudience: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Check if user has admin access
+      const projectMember = await ctx.db.projectMember.findFirst({
+        where: {
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+          role: { in: ['ADMIN'] },
+        },
+      })
+
+      const organizationMember = await ctx.db.organizationMember.findFirst({
+        where: {
+          organization: {
+            projects: {
+              some: {
+                id: input.projectId,
+              },
+            },
+          },
+          userId: ctx.session.user.id,
+          role: { in: ['OWNER', 'ADMIN'] },
+        },
+      })
+
+      if (!projectMember && !organizationMember) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: "You don't have permission to manage company leads in this project",
+        })
+      }
+
+      const { projectId, ...data } = input
+
+      return await ctx.db.projectLeadsCompany.upsert({
+        where: { projectId },
+        create: {
+          ...data,
+          projectId,
+        },
+        update: data,
+      })
     }),
 })

@@ -2,15 +2,15 @@ import { createTRPCRouter, protectedProcedure } from '@src/server/api/trpc'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
-export const projectLeadsCompanyAnalysisRouter = createTRPCRouter({
-  // Get analysis by Company Lead ID
-  getByCompanyId: protectedProcedure
-    .input(z.object({ leadsCompanyId: z.string() }))
+export const projectLeadAnalysisRouter = createTRPCRouter({
+  // Get analysis by Lead ID
+  getByLeadId: protectedProcedure
+    .input(z.object({ leadId: z.string() }))
     .query(async ({ ctx, input }) => {
-      // Check if user has access to this company lead
-      const company = await ctx.db.projectLeadsCompany.findFirst({
+      // Check if user has access to this lead
+      const lead = await ctx.db.projectLead.findFirst({
         where: {
-          id: input.leadsCompanyId,
+          id: input.leadId,
           project: {
             OR: [
               {
@@ -35,23 +35,23 @@ export const projectLeadsCompanyAnalysisRouter = createTRPCRouter({
         },
       })
 
-      if (!company) {
+      if (!lead) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: "You don't have access to this company lead",
+          message: "You don't have access to this lead",
         })
       }
 
-      return await ctx.db.projectLeadsCompanyAnalysis.findUnique({
-        where: { leadsCompanyId: input.leadsCompanyId },
+      return await ctx.db.projectLeadAnalysis.findUnique({
+        where: { leadId: input.leadId },
       })
     }),
 
-  // Create analysis for a company lead (will be used by AI or DB injection)
+  // Create analysis for a lead (will be used by AI or DB injection)
   create: protectedProcedure
     .input(
       z.object({
-        leadsCompanyId: z.string(),
+        leadId: z.string(),
         // Lead Overview
         shortSummary: z.string().min(1),
         detectedNeeds: z.array(z.string()),
@@ -101,10 +101,10 @@ export const projectLeadsCompanyAnalysisRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Check if user has access to this company lead
-      const company = await ctx.db.projectLeadsCompany.findFirst({
+      // Check if user has access to this lead
+      const lead = await ctx.db.projectLead.findFirst({
         where: {
-          id: input.leadsCompanyId,
+          id: input.leadId,
           project: {
             OR: [
               {
@@ -129,26 +129,26 @@ export const projectLeadsCompanyAnalysisRouter = createTRPCRouter({
         },
       })
 
-      if (!company) {
+      if (!lead) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: "You don't have access to this company lead",
+          message: "You don't have access to this lead",
         })
       }
 
       // Check if analysis already exists
-      const existingAnalysis = await ctx.db.projectLeadsCompanyAnalysis.findUnique({
-        where: { leadsCompanyId: input.leadsCompanyId },
+      const existingAnalysis = await ctx.db.projectLeadAnalysis.findUnique({
+        where: { leadId: input.leadId },
       })
 
       if (existingAnalysis) {
         throw new TRPCError({
           code: 'CONFLICT',
-          message: 'Analysis already exists for this company lead',
+          message: 'Analysis already exists for this lead',
         })
       }
 
-      return await ctx.db.projectLeadsCompanyAnalysis.create({
+      return await ctx.db.projectLeadAnalysis.create({
         data: input,
       })
     }),
@@ -208,10 +208,10 @@ export const projectLeadsCompanyAnalysisRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // Check if user has access to this analysis
-      const existingAnalysis = await ctx.db.projectLeadsCompanyAnalysis.findFirst({
+      const existingAnalysis = await ctx.db.projectLeadAnalysis.findFirst({
         where: {
           id: input.id,
-          leadsCompany: {
+          lead: {
             project: {
               OR: [
                 {
@@ -247,7 +247,7 @@ export const projectLeadsCompanyAnalysisRouter = createTRPCRouter({
 
       const { id, ...updateData } = input
 
-      return await ctx.db.projectLeadsCompanyAnalysis.update({
+      return await ctx.db.projectLeadAnalysis.update({
         where: { id },
         data: updateData,
       })
@@ -258,10 +258,10 @@ export const projectLeadsCompanyAnalysisRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       // Check if user has access to this analysis
-      const existingAnalysis = await ctx.db.projectLeadsCompanyAnalysis.findFirst({
+      const existingAnalysis = await ctx.db.projectLeadAnalysis.findFirst({
         where: {
           id: input.id,
-          leadsCompany: {
+          lead: {
             project: {
               OR: [
                 {
@@ -296,7 +296,7 @@ export const projectLeadsCompanyAnalysisRouter = createTRPCRouter({
         })
       }
 
-      await ctx.db.projectLeadsCompanyAnalysis.delete({
+      await ctx.db.projectLeadAnalysis.delete({
         where: { id: input.id },
       })
 
@@ -307,7 +307,7 @@ export const projectLeadsCompanyAnalysisRouter = createTRPCRouter({
   upsert: protectedProcedure
     .input(
       z.object({
-        leadsCompanyId: z.string(),
+        leadId: z.string(),
         // Lead Overview
         shortSummary: z.string().min(1),
         detectedNeeds: z.array(z.string()),
@@ -357,10 +357,10 @@ export const projectLeadsCompanyAnalysisRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Check if user has access to this company lead
-      const company = await ctx.db.projectLeadsCompany.findFirst({
+      // Check if user has access to this lead
+      const lead = await ctx.db.projectLead.findFirst({
         where: {
-          id: input.leadsCompanyId,
+          id: input.leadId,
           project: {
             OR: [
               {
@@ -385,20 +385,20 @@ export const projectLeadsCompanyAnalysisRouter = createTRPCRouter({
         },
       })
 
-      if (!company) {
+      if (!lead) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: "You don't have access to this company lead",
+          message: "You don't have access to this lead",
         })
       }
 
-      const { leadsCompanyId, ...data } = input
+      const { leadId, ...data } = input
 
-      return await ctx.db.projectLeadsCompanyAnalysis.upsert({
-        where: { leadsCompanyId },
+      return await ctx.db.projectLeadAnalysis.upsert({
+        where: { leadId },
         create: {
           ...data,
-          leadsCompanyId,
+          leadId,
         },
         update: {
           ...data,
