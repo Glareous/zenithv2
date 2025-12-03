@@ -1,17 +1,10 @@
-import { generateStaticParamsFor, importPage } from 'nextra/pages'
+import { PdfDocViewerWrapper } from '@/components/common/PdfDocViewerWrapper'
 
-export const generateStaticParams = generateStaticParamsFor('mdxPath')
-
-export async function generateMetadata(props) {
-  const params = await props.params
-  const { metadata } = await importPage(params.mdxPath)
-  return metadata
+export const metadata = {
+  title: 'Zenith Documentation',
+  description: 'Complete documentation for Zenith modules',
 }
 
-export default async function Page(props) {
-  const params = await props.params
-  const result = await importPage(params.mdxPath)
-  const { default: MDXContent, toc, metadata } = result
-
-  return <MDXContent {...props} params={params} />
+export default function Page() {
+  return <PdfDocViewerWrapper pdfUrl="/test-file.pdf" />
 }
