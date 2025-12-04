@@ -11,10 +11,9 @@ export default function Page() {
   useEffect(() => {
     // Map paths to specific PDFs
     const pdfMap = {
-      '/docs': '/test-file.pdf',
-      // Add more path mappings here:
-      // '/docs/getting-started': '/getting-started.pdf',
-      // '/docs/api': '/api-docs.pdf',
+      '/docs/pqr': '/assets/pdfs/pqrs.pdf',
+      '/docs/lead': '/assets/pdfs/leads.pdf',
+      '/docs/nim': '/assets/pdfs/nimfraud.pdf',
     }
 
     // Find matching PDF or use default
