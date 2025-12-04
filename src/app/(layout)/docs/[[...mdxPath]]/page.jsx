@@ -14,7 +14,7 @@ export default function Page() {
       '/docs/pqr': '/assets/pdfs/pqrs.pdf',
       '/docs/lead': '/assets/pdfs/leads.pdf',
       '/docs/nim': '/assets/pdfs/nimfraud.pdf',
-
+      '/docs/forecasting': '/assets/pdfs/forecasting.pdf'
     }
 
     // Find matching PDF or use default
