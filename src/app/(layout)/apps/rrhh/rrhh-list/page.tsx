@@ -191,6 +191,13 @@ const RrhhList: NextPageWithLayout = () => {
         cell: ({ row }: { row: { original: any } }) => (
           <div className="flex items-center gap-2">
             <button
+              className="btn btn-sub-primary btn-icon !size-8"
+              onClick={() => {
+                router.push(`/apps/rrhh/rrhh-overview?id=${row.original.id}`)
+              }}>
+              <Eye className="size-4" />
+            </button>
+            <button
               className="btn btn-sub-gray btn-icon !size-8"
               onClick={() => handleEdit(row.original)}>
               <Pencil className="size-4" />
@@ -202,13 +209,6 @@ const RrhhList: NextPageWithLayout = () => {
                 onClickEventListDelete(row.original)
               }}>
               <Trash2 className="size-4" />
-            </button>
-            <button
-              className="btn btn-sub-primary btn-icon !size-8"
-              onClick={() => {
-                router.push(`/apps/rrhh/rrhh-overview?id=${row.original.id}`)
-              }}>
-              <Eye className="size-4" />
             </button>
           </div>
         ),

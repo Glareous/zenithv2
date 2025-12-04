@@ -368,8 +368,8 @@ const Sidebar = ({
                                       key={project.id}
                                       onClick={() => handleProjectSelect(project)}
                                       className={`w-full text-left p-2 rounded-md hover:bg-gray-50 ${currentProject?.id === project.id
-                                          ? 'bg-primary-50 text-primary-600'
-                                          : ''
+                                        ? 'bg-primary-50 text-primary-600'
+                                        : ''
                                         }`}>
                                       <div className="font-medium">
                                         {project.name}
@@ -391,6 +391,15 @@ const Sidebar = ({
                           </Dropdown>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* Project ID Display - only show for non-SUPERADMIN users */}
+                  {session?.user?.role !== 'SUPERADMIN' && currentProject && (
+                    <div className="px-4 py-2 group-data-[sidebar=small]:hidden">
+                      <p className="text-xs text-gray-500 font-mono truncate">
+                        ID: {currentProject.id}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -528,8 +537,8 @@ const Sidebar = ({
                                               }>
                                               <DropdownButton
                                                 colorClass={`nav-link ${isActive(child)
-                                                    ? 'active'
-                                                    : ''
+                                                  ? 'active'
+                                                  : ''
                                                   }`}
                                                 arrow={true}>
                                                 <span>{child.title}</span>
@@ -553,10 +562,12 @@ const Sidebar = ({
                                                               ? subChild.link
                                                               : '#'
                                                           }
+                                                          target={subChild.link?.startsWith('http') ? '_blank' : undefined}
+                                                          rel={subChild.link?.startsWith('http') ? 'noopener noreferrer' : undefined}
                                                           className={`${router ===
-                                                              subChild.link
-                                                              ? 'active'
-                                                              : ''
+                                                            subChild.link
+                                                            ? 'active'
+                                                            : ''
                                                             }`}>
                                                           {subChild.title}
                                                         </Link>
@@ -569,9 +580,11 @@ const Sidebar = ({
                                           ) : (
                                             <Link
                                               href={child.link || '#'}
+                                              target={child.link?.startsWith('http') ? '_blank' : undefined}
+                                              rel={child.link?.startsWith('http') ? 'noopener noreferrer' : undefined}
                                               className={` content ${router === child.link
-                                                  ? 'active'
-                                                  : ''
+                                                ? 'active'
+                                                : ''
                                                 }`}>
                                               {t(child.lang)}
                                             </Link>
@@ -590,6 +603,8 @@ const Sidebar = ({
                             item.link && (
                               <Link
                                 href={item.link}
+                                target={item.link.startsWith('http') ? '_blank' : undefined}
+                                rel={item.link.startsWith('http') ? 'noopener noreferrer' : undefined}
                                 className={`nav-link flex items-center gap-2 group-data-[sidebar=small]:px-2 group-data-[sidebar=small]:py-2 group-data-[sidebar=small]:mx-0 group-data-[sidebar=small]:h-10 group-data-[sidebar=small]:w-full group-data-[sidebar=small]:justify-center ${router === item.link ? 'active' : ''
                                   }`}>
                                 <span className="group-data-[sidebar=small]:w-full group-data-[sidebar=small]:flex group-data-[sidebar=small]:justify-center">

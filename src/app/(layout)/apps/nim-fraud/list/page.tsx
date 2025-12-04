@@ -176,11 +176,10 @@ const NimFraudList: NextPageWithLayout = () => {
 
           return (
             <span
-              className={`badge ${
-                prediccion === 'FRAUDE'
+              className={`badge ${prediccion === 'FRAUDE'
                   ? 'badge-sub-red'
                   : 'badge-sub-green'
-              }`}>
+                }`}>
               {prediccion}
             </span>
           )
@@ -199,6 +198,13 @@ const NimFraudList: NextPageWithLayout = () => {
         cell: ({ row }: { row: { original: any } }) => (
           <div className="flex items-center gap-2">
             <button
+              className="btn btn-sub-primary btn-icon !size-8"
+              onClick={() => {
+                router.push(`/apps/nim-fraud/overview/${row.original.id}`)
+              }}>
+              <Eye className="size-4" />
+            </button>
+            <button
               className="btn btn-sub-gray btn-icon !size-8"
               onClick={() => handleEdit(row.original)}>
               <Pencil className="size-4" />
@@ -210,13 +216,6 @@ const NimFraudList: NextPageWithLayout = () => {
                 onClickEventListDelete(row.original)
               }}>
               <Trash2 className="size-4" />
-            </button>
-            <button
-              className="btn btn-sub-primary btn-icon !size-8"
-              onClick={() => {
-                router.push(`/apps/nim-fraud/overview/${row.original.id}`)
-              }}>
-              <Eye className="size-4" />
             </button>
           </div>
         ),

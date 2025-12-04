@@ -473,11 +473,11 @@ const menu: MegaMenu[] = [
         link: '/docs/box-clasification',
         lang: 'Documentation',
       },
-      {
-        title: 'Box Clasification Agent',
-        link: '/apps/agents',
-        lang: 'Box Clasification Agent',
-      },
+      /*       {
+              title: 'Box Clasification Agent',
+              link: '/apps/agents',
+              lang: 'Box Clasification Agent',
+            }, */
       {
         title: 'API',
         link: 'https://claude.com/platform/api',

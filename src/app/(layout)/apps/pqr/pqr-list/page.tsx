@@ -252,6 +252,13 @@ const PQRListPage: NextPageWithLayout = () => {
           return (
             <div className="flex gap-2">
               <button
+                className="btn btn-sub-primary btn-icon !size-8"
+                onClick={() => {
+                  router.push(`/apps/pqr/pqr-overview?id=${row.original.id}`)
+                }}>
+                <Eye className="size-4" />
+              </button>
+              <button
                 onClick={() => openEditModal(row.original)}
                 className="btn btn-sub-gray btn-icon !size-8">
                 <Pencil className="size-4" />
@@ -260,13 +267,6 @@ const PQRListPage: NextPageWithLayout = () => {
                 onClick={() => handleDelete(row.original)}
                 className="btn btn-sub-red btn-icon !size-8">
                 <Trash2 className="h-4 w-4" />
-              </button>
-              <button
-                className="btn btn-sub-primary btn-icon !size-8"
-                onClick={() => {
-                  router.push(`/apps/pqr/pqr-overview?id=${row.original.id}`)
-                }}>
-                <Eye className="size-4" />
               </button>
             </div>
           )

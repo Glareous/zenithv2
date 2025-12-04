@@ -299,21 +299,21 @@ const BoxClasificationListPage: NextPageWithLayout = () => {
                         <div className="flex gap-2">
                             <button
                                 onClick={() => router.push(`/apps/box-clasification/overview/${box.id}`)}
-                                className="rounded p-1 text-blue-600 hover:bg-blue-50"
+                                className="btn btn-sub-primary btn-icon !size-8"
                                 title="View"
                             >
                                 <Eye className="h-4 w-4" />
                             </button>
                             <button
                                 onClick={() => openEditModal(box)}
-                                className="rounded p-1 text-yellow-600 hover:bg-yellow-50"
+                                className="btn btn-sub-gray btn-icon !size-8"
                                 title="Edit"
                             >
                                 <Pencil className="h-4 w-4" />
                             </button>
                             <button
                                 onClick={() => openDeleteModal(box)}
-                                className="rounded p-1 text-red-600 hover:bg-red-50"
+                                className="btn btn-sub-red btn-icon !size-8"
                                 title="Delete"
                             >
                                 <Trash2 className="h-4 w-4" />

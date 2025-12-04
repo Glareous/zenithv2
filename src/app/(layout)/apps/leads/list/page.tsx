@@ -9,16 +9,11 @@ import BreadCrumb from '@src/components/common/BreadCrumb'
 import DeleteModal from '@src/components/common/DeleteModal'
 import Pagination from '@src/components/common/Pagination'
 import { LAYOUT_DIRECTION } from '@src/components/constants/layout'
-import {
-    Dropdown,
-    DropdownButton,
-    DropdownMenu,
-} from '@src/components/custom/dropdown/dropdown'
 import TableContainer from '@src/components/custom/table/table'
 import { NextPageWithLayout } from '@src/dtos'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
-import { Download, Plus, Search, Trash } from 'lucide-react'
+import { Download, Eye, Pencil, Plus, Search, Trash, Trash2 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
@@ -335,45 +330,26 @@ const LeadsList: NextPageWithLayout = () => {
             },
             {
                 id: 'actions',
-                header: () => 'Action',
+                header: () => 'Actions',
                 accessorKey: 'action',
                 cell: ({ row }: { row: { original: LeadData } }) => (
-                    <Dropdown
-                        position="right"
-                        trigger="click"
-                        dropdownClassName="dropdown">
-                        <DropdownButton colorClass="flex items-center text-gray-500 dark:text-dark-500">
-                            <i className="ri-more-2-fill"></i>
-                        </DropdownButton>
-                        <DropdownMenu>
-                            <Link
-                                href={`/apps/leads/overview/${row.original.id}`}
-                                className="dropdown-item">
-                                <i className="align-middle ltr:mr-2 rtl:ml-2 ri-eye-line"></i>{' '}
-                                <span>Overview</span>
-                            </Link>
-                            <Link
-                                href="#!"
-                                className="dropdown-item"
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    handleOpenModal(true, row.original)
-                                }}>
-                                <i className="align-middle ltr:mr-2 rtl:ml-2 ri-pencil-line"></i>{' '}
-                                <span>Edit</span>
-                            </Link>
-                            <Link
-                                href="#!"
-                                className="dropdown-item dropdown-red"
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    handleDeleteRecord(row.original.id)
-                                }}>
-                                <i className="align-middle ltr:mr-2 rtl:ml-2 ri-delete-bin-line"></i>
-                                <span>Delete</span>
-                            </Link>
-                        </DropdownMenu>
-                    </Dropdown>
+                    <div className="flex gap-2">
+                        <Link
+                            href={`/apps/leads/overview/${row.original.id}`}
+                            className="btn btn-sub-primary btn-icon !size-8">
+                            <Eye className="size-4" />
+                        </Link>
+                        <button
+                            onClick={() => handleOpenModal(true, row.original)}
+                            className="btn btn-sub-gray btn-icon !size-8">
+                            <Pencil className="size-4" />
+                        </button>
+                        <button
+                            onClick={() => handleDeleteRecord(row.original.id)}
+                            className="btn btn-sub-red btn-icon !size-8">
+                            <Trash2 className="h-4 w-4" />
+                        </button>
+                    </div>
                 ),
             },
         ],
