@@ -9,7 +9,7 @@ import { AppDispatch } from '@src/slices/reducer'
 import { useSession } from 'next-auth/react'
 import { useDispatch } from 'react-redux'
 
-import DashboardsPage from './(layout)/dashboards/ecommerce/page'
+import DashboardsPage from './(layout)/page/starter/page'
 import Layout from './(layout)/layout'
 
 export default function Home() {
@@ -22,7 +22,7 @@ export default function Home() {
     if (status === 'unauthenticated') {
       router.push('/auth/signin-basic') // Redirects to login page if not authenticated
     } else {
-      router.push('/dashboards/ecommerce')
+      router.push('/page/starter')
     }
   }, [status, router, dispatch])
 

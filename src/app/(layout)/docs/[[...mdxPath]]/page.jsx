@@ -1,17 +1,25 @@
-import { generateStaticParamsFor, importPage } from 'nextra/pages'
+'use client'
 
-export const generateStaticParams = generateStaticParamsFor('mdxPath')
+import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { PdfDocViewerWrapper } from '@/components/common/PdfDocViewerWrapper'
 
-export async function generateMetadata(props) {
-  const params = await props.params
-  const { metadata } = await importPage(params.mdxPath)
-  return metadata
-}
+export default function Page() {
+  const pathname = usePathname()
+  const [pdfUrl, setPdfUrl] = useState('/test-file.pdf')
 
-export default async function Page(props) {
-  const params = await props.params
-  const result = await importPage(params.mdxPath)
-  const { default: MDXContent, toc, metadata } = result
+  useEffect(() => {
+    // Map paths to specific PDFs
+    const pdfMap = {
+      '/docs/pqr': '/assets/pdfs/pqrs.pdf',
+      '/docs/lead': '/assets/pdfs/leads.pdf',
+      '/docs/nim': '/assets/pdfs/nimfraud.pdf',
+    }
 
-  return <MDXContent {...props} params={params} />
+    // Find matching PDF or use default
+    const matchedPdf = pdfMap[pathname] || '/test-file.pdf'
+    setPdfUrl(matchedPdf)
+  }, [pathname])
+
+  return <PdfDocViewerWrapper pdfUrl={pdfUrl} />
 }

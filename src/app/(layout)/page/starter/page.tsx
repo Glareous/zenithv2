@@ -6,7 +6,7 @@ import { NextPageWithLayout } from '@src/dtos'
 const Starter: NextPageWithLayout = () => {
   return (
     <React.Fragment>
-      <BreadCrumb title="Starter" subTitle="UI" />
+      <BreadCrumb title="Bienvenido al Proyecto Zenith - SAS  COLOMBIA" subTitle="UI" />
     </React.Fragment>
   )
 }

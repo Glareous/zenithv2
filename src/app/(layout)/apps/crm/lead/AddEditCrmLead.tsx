@@ -27,6 +27,7 @@ const leadSchema = z.object({
   jobPosition: z.string().optional(),
   industry: z.string().optional(),
   contactId: z.string().optional(),
+  emailToNotify: z.string().email('Invalid email format').optional().or(z.literal('')),
 })
 
 type LeadFormData = z.infer<typeof leadSchema>
@@ -127,6 +128,7 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
       jobPosition: '',
       industry: '',
       contactId: undefined,
+      emailToNotify: '',
     })
     setGender(null)
     setPreview(null)
@@ -148,6 +150,7 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
       setValue('jobPosition', currentLead.jobPosition || '')
       setValue('industry', currentLead.industry || '')
       setValue('contactId', currentLead.contactId || undefined)
+      setValue('emailToNotify', currentLead.emailToNotify || '')
 
       if (currentLead.gender) {
         setGender({
@@ -473,7 +476,7 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
                 />
               </div>
 
-              <div className="col-span-7">
+              <div className="col-span-12">
                 <label htmlFor="phoneNumber" className="form-label">
                   Phone Number
                 </label>
@@ -517,6 +520,22 @@ const AddEditCrmLead: React.FC<AddEditCrmLeadProps> = ({
                   placeholder="e.g. Technology, Healthcare"
                   {...register('industry')}
                 />
+              </div>
+
+              <div className="col-span-12">
+                <label htmlFor="emailToNotifyInput" className="form-label">
+                  Email to Notify
+                </label>
+                <input
+                  type="email"
+                  id="emailToNotifyInput"
+                  className="form-input"
+                  placeholder="notify@example.com (optional)"
+                  {...register('emailToNotify')}
+                />
+                {errors.emailToNotify && (
+                  <span className="text-red-500">{errors.emailToNotify.message}</span>
+                )}
               </div>
 
               <div className="col-span-12">

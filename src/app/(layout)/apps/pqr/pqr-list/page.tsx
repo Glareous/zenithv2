@@ -28,7 +28,7 @@ const pqrSchema = z.object({
   documentType: z.enum(['CC', 'CE', 'PASSPORT', 'NIT']),
   documentNumber: z.string().min(1, 'Document number is required'),
   message: z.string().min(1, 'Message is required'),
-  status: z.enum(['PROCESSING', 'COMPLETED', 'FAILED']),
+  emailToNotify: z.string().email('Invalid email').optional().or(z.literal('')),
 })
 
 type PQRFormData = z.infer<typeof pqrSchema>
@@ -38,12 +38,6 @@ const documentTypeOptions = [
   { value: 'CE', label: 'CE - Foreign ID' },
   { value: 'PASSPORT', label: 'Passport' },
   { value: 'NIT', label: 'NIT - Tax ID' },
-]
-
-const statusOptions = [
-  { value: 'PROCESSING', label: 'Processing' },
-  { value: 'COMPLETED', label: 'Completed' },
-  { value: 'FAILED', label: 'Failed' },
 ]
 
 const PQRListPage: NextPageWithLayout = () => {
@@ -71,6 +65,7 @@ const PQRListPage: NextPageWithLayout = () => {
       documentType: 'CC',
       documentNumber: '',
       message: '',
+      emailToNotify: '',
     },
   })
 
@@ -128,6 +123,7 @@ const PQRListPage: NextPageWithLayout = () => {
       documentType: 'CC',
       documentNumber: '',
       message: '',
+      emailToNotify: '',
     })
     setShowModal(true)
   }
@@ -144,6 +140,7 @@ const PQRListPage: NextPageWithLayout = () => {
       documentType: pqr.documentType,
       documentNumber: pqr.documentNumber,
       message: pqr.message,
+      emailToNotify: pqr.emailToNotify || '',
     })
     setShowModal(true)
   }
@@ -171,6 +168,7 @@ const PQRListPage: NextPageWithLayout = () => {
         await createMutation.mutateAsync({
           ...data,
           projectId: currentProject.id,
+          status: 'PROCESSING',
         })
       }
 
@@ -491,31 +489,23 @@ const PQRListPage: NextPageWithLayout = () => {
                 )}
               </div>
 
-              {/* Status */}
+              {/* Email to Notify */}
               <div className="mb-4">
                 <label
-                  htmlFor="status"
+                  htmlFor="emailToNotify"
                   className="block mb-2 text-sm font-medium">
-                  Status <span className="text-red-500">*</span>
+                  Email to Notify
                 </label>
-                <Controller
-                  name="status"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      {...field}
-                      options={statusOptions}
-                      value={statusOptions.find((opt) => opt.value === field.value)}
-                      onChange={(option) => field.onChange(option?.value)}
-                      className="react-select-container"
-                      classNamePrefix="react-select"
-                      placeholder="Select status..."
-                    />
-                  )}
+                <input
+                  type="email"
+                  id="emailToNotify"
+                  {...register('emailToNotify')}
+                  className={`form-input ${errors.emailToNotify ? 'border-red-500' : ''}`}
+                  placeholder="Enter email to notify (optional)"
                 />
-                {errors.status && (
+                {errors.emailToNotify && (
                   <p className="mt-1 text-sm text-red-600">
-                    {errors.status.message}
+                    {errors.emailToNotify.message}
                   </p>
                 )}
               </div>

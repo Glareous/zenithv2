@@ -1,6 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from '@src/server/api/trpc'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
+import { triggerForecastAsync } from '@src/server/services/backendAsync'
 
 export const projectForecastingRouter = createTRPCRouter({
   // Get all forecasting records for a project
@@ -166,7 +167,7 @@ export const projectForecastingRouter = createTRPCRouter({
         },
       })
 
-      return await ctx.db.projectForecasting.create({
+      const forecasting = await ctx.db.projectForecasting.create({
         data: {
           ...data,
           projectId,
@@ -174,6 +175,13 @@ export const projectForecastingRouter = createTRPCRouter({
           createdById: ctx.session.user.id,
         },
       })
+      triggerForecastAsync(forecasting.id).catch((err) => {
+        console.error('[Forecast Router] Failed to trigger async:', err)
+      })
+
+
+
+      return forecasting
     }),
 
   // Update a forecasting record
@@ -229,10 +237,18 @@ export const projectForecastingRouter = createTRPCRouter({
 
       const { id, ...updateData } = input
 
-      return await ctx.db.projectForecasting.update({
+      const updatedForecasting = await ctx.db.projectForecasting.update({
         where: { id },
         data: updateData,
       })
+
+      // Trigger async processing (fire and forget)
+      console.log('[Forecast Router] About to trigger async for updated Forecast:', updatedForecasting.id)
+      triggerForecastAsync(updatedForecasting.id).catch((err) => {
+        console.error('[Forecast Router] Failed to trigger async:', err)
+      })
+
+      return updatedForecasting
     }),
 
   // Delete a forecasting record

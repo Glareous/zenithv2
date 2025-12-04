@@ -1,6 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from '@src/server/api/trpc'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
+import { triggerLeadsAsync } from '@src/server/services/backendAsync'
 
 const createLeadSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -96,6 +97,12 @@ export const projectLeadRouter = createTRPCRouter({
             },
           },
         },
+      })
+
+      // Trigger async processing (fire and forget)
+      console.log('[Leads Router] About to trigger async for created Lead:', lead.id)
+      triggerLeadsAsync(lead.id).catch((err) => {
+        console.error('[Leads Router] Failed to trigger async:', err)
       })
 
       return lead
@@ -333,6 +340,12 @@ export const projectLeadRouter = createTRPCRouter({
             },
           },
         },
+      })
+
+      // Trigger async processing (fire and forget)
+      console.log('[Leads Router] About to trigger async for updated Lead:', updatedLead.id)
+      triggerLeadsAsync(updatedLead.id).catch((err) => {
+        console.error('[Leads Router] Failed to trigger async:', err)
       })
 
       return updatedLead

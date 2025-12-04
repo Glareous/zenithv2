@@ -1,5 +1,3 @@
-import 'nextra-theme-docs/style.css'
-
 export const metadata = {
   title: 'Zenith Documentation',
   description: 'Complete documentation for Zenith modules',
