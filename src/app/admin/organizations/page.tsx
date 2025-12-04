@@ -834,7 +834,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
 
                     if (enabledAgentPages.length === 0) {
                       return (
-                        <p className="text-sm text-gray-500 italic">
+                        <p className="text-sm text-gray-500 italic hidden">
                           Enable PQR, RRHH, Forecasting, Digital Advisor, Leads, or Box Clasification in Menu
                           Restrictions to assign agents
                         </p>
@@ -861,7 +861,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                             { key: 'agentAdvisorChatId', label: 'Advisor Chat Agent', type: 'advisorChat' }
                           ]
                         })
-                      } else if (page === 'pqr') {
+                      }/*  else if (page === 'pqr') {
                         pageAgentConfigs.push({
                           page: 'pqr',
                           agents: [
@@ -882,7 +882,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                             { key: 'agentLeadsId', label: 'Leads Agent', type: 'leads' }
                           ]
                         })
-                      } else if (page === 'box-clasification') {
+                      } */ else if (page === 'box-clasification') {
                         pageAgentConfigs.push({
                           page: 'box-clasification',
                           agents: [
@@ -897,13 +897,13 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                         {pageAgentConfigs.flatMap((config) =>
                           config.agents.map((agentConfig) => {
                             const agentKey = agentConfig.key as
-                              | 'agentPqrId'
+                              /* | 'agentPqrId' */
                               | 'agentRrhhId'
-                              | 'agentForecastingId'
+                              /* | 'agentForecastingId' */
                               | 'agentRrhhChatId'
                               | 'agentAdvisorChatId'
                               | 'agentAdvisorId'
-                              | 'agentLeadsId'
+                              /* | 'agentLeadsId' */
                               | 'agentBoxClasificationId'
                             const selectedAgentId = watch(agentKey)
                             const selectedAgent = allAgents.find(
@@ -1338,7 +1338,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
 
                       if (enabledAgentPages.length === 0) {
                         return (
-                          <p className="text-sm text-gray-500 italic">
+                          <p className="text-sm text-gray-500 italic hidden">
                             Enable PQR, RRHH, Forecasting, Digital Advisor, Leads, or Box Clasification in Menu
                             Restrictions to assign agents
                           </p>
@@ -1401,13 +1401,13 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                           {pageAgentConfigs.flatMap((config) =>
                             config.agents.map((agentConfig) => {
                               const agentKey = agentConfig.key as
-                                | 'agentPqrId'
+                                /* | 'agentPqrId' */
                                 | 'agentRrhhId'
-                                | 'agentForecastingId'
+                                /* | 'agentForecastingId' */
                                 | 'agentRrhhChatId'
                                 | 'agentAdvisorChatId'
                                 | 'agentAdvisorId'
-                                | 'agentLeadsId'
+                                /* | 'agentLeadsId' */
                                 | 'agentBoxClasificationId'
                               const selectedAgentId = watch(agentKey)
                               const selectedAgent = allAgents.find(

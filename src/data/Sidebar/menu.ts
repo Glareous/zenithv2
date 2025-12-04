@@ -208,11 +208,11 @@ const menu: MegaMenu[] = [
         link: '/docs/pqr',
         lang: 'Documentation',
       },
-      {
+      /*{
         title: 'Pqr Agent',
         link: '/apps/agents',
         lang: 'Pqr Agent',
-      },
+      },*/
     ],
   },
   {
@@ -237,11 +237,11 @@ const menu: MegaMenu[] = [
         link: '/docs/forecasting',
         lang: 'Documentation',
       },
-      {
+      /*{
         title: 'Forecasting Agent',
         link: '/apps/agents',
         lang: 'Forecasting Agent',
-      },
+      },*/
     ],
   },
   {
@@ -265,6 +265,11 @@ const menu: MegaMenu[] = [
         title: 'Documentation',
         link: '/docs/nim',
         lang: 'Documentation',
+      },
+      {
+        title: 'Add Api',
+        link: 'https://claude.com/platform/api',
+        lang: 'Add Api',
       },
     ],
   },
@@ -299,6 +304,11 @@ const menu: MegaMenu[] = [
         title: 'Chat',
         link: '/apps/chat/default',
         lang: 'Chat',
+      },
+      {
+        title: 'Add Api',
+        link: 'https://claude.com/platform/api',
+        lang: 'Add Api',
       },
     ],
   },
@@ -384,6 +394,11 @@ const menu: MegaMenu[] = [
         link: '/apps/advisor/chat',
         lang: 'Chat',
       },
+      {
+        title: 'Add Api',
+        link: 'https://claude.com/platform/api',
+        lang: 'Add Api',
+      },
     ],
   },
   {
@@ -408,15 +423,20 @@ const menu: MegaMenu[] = [
         link: '/docs/lead',
         lang: 'Documentation',
       },
-      {
+      /*{
         title: 'Leads Agent',
         link: '/apps/agents',
         lang: 'Leads Agent',
-      },
+      },*/
       {
         title: 'Company Info',
         link: '/apps/leads/companyInfo/company-list',
         lang: 'Company Info',
+      },
+      {
+        title: 'Add Api',
+        link: 'https://claude.com/platform/api',
+        lang: 'Add Api',
       },
     ],
   },
@@ -446,6 +466,11 @@ const menu: MegaMenu[] = [
         title: 'Box Clasification Agent',
         link: '/apps/agents',
         lang: 'Box Clasification Agent',
+      },
+      {
+        title: 'Add Api',
+        link: 'https://claude.com/platform/api',
+        lang: 'Add Api',
       },
     ],
   },
