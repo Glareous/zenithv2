@@ -32,7 +32,7 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(['development', 'test', 'production'])
       .default('development'),
-    BACKEND_URL: z.string().url(),
+    BACKEND_URL: z.string().url().optional(),
   },
 
   /**

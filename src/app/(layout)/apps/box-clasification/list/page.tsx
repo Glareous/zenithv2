@@ -144,16 +144,53 @@ const BoxClasificationListPage: NextPageWithLayout = () => {
         }
     }
 
-    const uploadVideoToS3 = async (): Promise<string | null> => {
-        if (!videoFile) return null
+    const getUploadUrlMutation = api.projectBoxClasification.getUploadUrl.useMutation()
+    const createFileMutation = api.projectBoxClasificationFile.create.useMutation()
+
+    const uploadVideoToS3 = async (boxClasificationId: string): Promise<string | null> => {
+        if (!videoFile || !currentProject?.id) return null
 
         setIsUploadingVideo(true)
         try {
-            // TODO: Implement S3 upload logic here
-            // For now, return a mock URL
-            const mockS3Url = `https://example.com/videos/${videoFile.name}`
-            return mockS3Url
+            // Step 1: Get presigned URL from backend
+            const { uploadUrl, s3Key, s3Url, fileName } = await getUploadUrlMutation.mutateAsync({
+                projectId: currentProject.id,
+                fileName: videoFile.name,
+                fileType: videoFile.type,
+                fileSize: videoFile.size,
+            })
+
+            // Step 2: Upload file to S3 using presigned URL
+            const uploadResponse = await fetch(uploadUrl, {
+                method: 'PUT',
+                body: videoFile,
+                headers: {
+                    'Content-Type': videoFile.type,
+                },
+            })
+
+            if (!uploadResponse.ok) {
+                throw new Error('Failed to upload video to S3')
+            }
+
+            // Step 3: Create file record in database
+            await createFileMutation.mutateAsync({
+                name: videoFile.name,
+                fileName: fileName,
+                fileType: 'VIDEO',
+                mimeType: videoFile.type,
+                fileSize: videoFile.size,
+                s3Key: s3Key,
+                s3Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME || 'vchatlife',
+                s3Url: s3Url,
+                description: 'Original uploaded video',
+                isProcessed: false,
+                boxClasificationId: boxClasificationId,
+            })
+
+            return s3Url
         } catch (error) {
+            console.error('Upload error:', error)
             toast.error('Failed to upload video')
             return null
         } finally {
@@ -167,28 +204,42 @@ const BoxClasificationListPage: NextPageWithLayout = () => {
             return
         }
 
-        let videoUrl = data.video
-
-        // Upload video if a new file was selected
-        if (videoFile) {
-            const uploadedUrl = await uploadVideoToS3()
-            if (uploadedUrl) {
-                videoUrl = uploadedUrl
-            }
-        }
-
         if (isEditMode && selectedBox) {
+            // Edit mode: upload video if new file selected
+            let videoUrl = selectedBox.video
+
+            if (videoFile) {
+                const uploadedUrl = await uploadVideoToS3(selectedBox.id)
+                if (uploadedUrl) {
+                    videoUrl = uploadedUrl
+                }
+            }
+
             await updateMutation.mutateAsync({
                 id: selectedBox.id,
                 ...data,
                 video: videoUrl,
             })
         } else {
-            await createMutation.mutateAsync({
-                ...data,
-                video: videoUrl,
+            // Create mode: first create the box clasification, then upload video
+            const createdBox = await createMutation.mutateAsync({
+                name: data.name,
+                description: data.description,
                 projectId: currentProject.id,
             })
+
+            // If video file selected, upload it
+            if (videoFile && createdBox) {
+                const uploadedUrl = await uploadVideoToS3(createdBox.id)
+
+                // Update the box clasification with the video URL
+                if (uploadedUrl) {
+                    await updateMutation.mutateAsync({
+                        id: createdBox.id,
+                        video: uploadedUrl,
+                    })
+                }
+            }
         }
     }
 
