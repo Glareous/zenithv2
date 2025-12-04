@@ -6,7 +6,7 @@ import { PdfDocViewerWrapper } from '@/components/common/PdfDocViewerWrapper'
 
 export default function Page() {
   const pathname = usePathname()
-  const [pdfUrl, setPdfUrl] = useState('/test-file.pdf')
+  const [pdfUrl, setPdfUrl] = useState('/assets/pdfs/inprogress.pdf')
 
   useEffect(() => {
     // Map paths to specific PDFs
@@ -14,10 +14,11 @@ export default function Page() {
       '/docs/pqr': '/assets/pdfs/pqrs.pdf',
       '/docs/lead': '/assets/pdfs/leads.pdf',
       '/docs/nim': '/assets/pdfs/nimfraud.pdf',
+
     }
 
     // Find matching PDF or use default
-    const matchedPdf = pdfMap[pathname] || '/test-file.pdf'
+    const matchedPdf = pdfMap[pathname] || '/assets/pdfs/inprogress.pdf'
     setPdfUrl(matchedPdf)
   }, [pathname])
 

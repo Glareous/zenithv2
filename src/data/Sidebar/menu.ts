@@ -213,6 +213,11 @@ const menu: MegaMenu[] = [
         link: '/apps/agents',
         lang: 'Pqr Agent',
       },*/
+      {
+        title: 'API',
+        link: 'http://201.217.192.13:82/api/pqr/docs',
+        lang: 'API',
+      },
     ],
   },
   {
@@ -242,6 +247,11 @@ const menu: MegaMenu[] = [
         link: '/apps/agents',
         lang: 'Forecasting Agent',
       },*/
+      {
+        title: 'API',
+        link: 'http://201.217.192.13:82/api/forecast/docs',
+        lang: 'API',
+      },
     ],
   },
   {
@@ -267,14 +277,14 @@ const menu: MegaMenu[] = [
         lang: 'Documentation',
       },
       {
-        title: 'Add Api',
-        link: 'https://claude.com/platform/api',
-        lang: 'Add Api',
+        title: 'API',
+        link: 'http://201.217.192.13:84/docs',
+        lang: 'API',
       },
     ],
   },
   {
-    title: 'RRHH',
+    title: 'RRHH COACH',
     lang: 'pe-rrhh',
     icon: 'users-round',
     link: '/apps/rrhh/',
@@ -306,9 +316,9 @@ const menu: MegaMenu[] = [
         lang: 'Chat',
       },
       {
-        title: 'Add Api',
-        link: 'https://claude.com/platform/api',
-        lang: 'Add Api',
+        title: 'API',
+        link: '#',
+        lang: 'API',
       },
     ],
   },
@@ -395,9 +405,9 @@ const menu: MegaMenu[] = [
         lang: 'Chat',
       },
       {
-        title: 'Add Api',
-        link: 'https://claude.com/platform/api',
-        lang: 'Add Api',
+        title: 'API',
+        link: '#',
+        lang: 'API',
       },
     ],
   },
@@ -434,9 +444,9 @@ const menu: MegaMenu[] = [
         lang: 'Company Info',
       },
       {
-        title: 'Add Api',
-        link: 'https://claude.com/platform/api',
-        lang: 'Add Api',
+        title: 'API',
+        link: 'http://201.217.192.13:82/api/leads/docs',
+        lang: 'API',
       },
     ],
   },
@@ -468,9 +478,9 @@ const menu: MegaMenu[] = [
         lang: 'Box Clasification Agent',
       },
       {
-        title: 'Add Api',
+        title: 'API',
         link: 'https://claude.com/platform/api',
-        lang: 'Add Api',
+        lang: 'API',
       },
     ],
   },
