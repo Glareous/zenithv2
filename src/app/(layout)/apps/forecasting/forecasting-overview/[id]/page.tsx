@@ -24,6 +24,7 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
   const [showFormatModal, setShowFormatModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [fileToDelete, setFileToDelete] = useState<string | null>(null)
+  const [dataPointsLimit, setDataPointsLimit] = useState<number | 'all'>('all')
 
   const {
     data: forecasting,
@@ -46,17 +47,27 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
       (a: any, b: any) => a.order - b.order
     )
 
-    const processedSeries = sortedSeries.map((series: any) => ({
-      name: series.name,
-      data: series.values.map((v: any) => ({
+    const processedSeries = sortedSeries.map((series: any) => {
+      const allValues = series.values.map((v: any) => ({
         timestamp: v.timestamp,
         value: v.value,
-      })),
-      order: series.order,
-    }))
+      }))
+
+      // Apply data points limit filter
+      const filteredValues =
+        dataPointsLimit === 'all'
+          ? allValues
+          : allValues.slice(0, dataPointsLimit)
+
+      return {
+        name: series.name,
+        data: filteredValues,
+        order: series.order,
+      }
+    })
 
     return processedSeries
-  }, [forecasting?.series])
+  }, [forecasting?.series, dataPointsLimit])
 
   const handleUploadClick = () => {
     fileInputRef.current?.click()
@@ -301,6 +312,27 @@ const ForecastingOverviewPage = ({ params }: ForecastingOverviewPageProps) => {
         </div>
       </div>
       <div className="card card-body">
+        {/* Data Points Filter */}
+        <div className="mb-6">
+          <h6 className="text-sm font-semibold mb-3 text-gray-700">
+            Data Points Filter
+          </h6>
+          <div className="flex flex-wrap gap-2">
+            {[50, 150, 300, 500, 1150, 'all'].map((limit) => (
+              <button
+                key={limit}
+                onClick={() => setDataPointsLimit(limit as number | 'all')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  dataPointsLimit === limit
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}>
+                {limit === 'all' ? 'All' : limit}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div dir="ltr">
           <GradientLineChart
             chartColors="[bg-orange-500, bg-blue-500, bg-green-500, bg-purple-500]"
