@@ -255,6 +255,45 @@ const menu: MegaMenu[] = [
     ],
   },
   {
+    title: 'LEADS',
+    lang: 'pe-leads',
+    icon: 'pencil-ruler',
+    link: '/apps/leads/',
+    separator: false,
+    children: [
+      {
+        title: 'Create-view',
+        lang: 'Add/Edit/View',
+        link: '/apps/leads/list',
+      },
+      {
+        title: 'Landing',
+        link: '/apps/leads/landing',
+        lang: 'Landing page',
+      },
+      {
+        title: 'Documentation',
+        link: '/docs/lead',
+        lang: 'Documentation',
+      },
+      /*{
+        title: 'Leads Agent',
+        link: '/apps/agents',
+        lang: 'Leads Agent',
+      },*/
+      {
+        title: 'Company Info',
+        link: '/apps/leads/companyInfo/company-list',
+        lang: 'Company Info',
+      },
+      {
+        title: 'API',
+        link: 'http://201.217.192.13:82/api/leads/docs',
+        lang: 'API',
+      },
+    ],
+  },
+  {
     title: 'NVIDIA - NIM FRAUD',
     lang: 'pe-nim-fraud',
     icon: 'gem',
@@ -411,45 +450,7 @@ const menu: MegaMenu[] = [
       },
     ],
   },
-  {
-    title: 'LEADS',
-    lang: 'pe-leads',
-    icon: 'pencil-ruler',
-    link: '/apps/leads/',
-    separator: false,
-    children: [
-      {
-        title: 'Create-view',
-        lang: 'Add/Edit/View',
-        link: '/apps/leads/list',
-      },
-      {
-        title: 'Landing',
-        link: '/apps/leads/landing',
-        lang: 'Landing page',
-      },
-      {
-        title: 'Documentation',
-        link: '/docs/lead',
-        lang: 'Documentation',
-      },
-      /*{
-        title: 'Leads Agent',
-        link: '/apps/agents',
-        lang: 'Leads Agent',
-      },*/
-      {
-        title: 'Company Info',
-        link: '/apps/leads/companyInfo/company-list',
-        lang: 'Company Info',
-      },
-      {
-        title: 'API',
-        link: 'http://201.217.192.13:82/api/leads/docs',
-        lang: 'API',
-      },
-    ],
-  },
+
   {
     title: 'BOX CLASIFICATION',
     lang: 'pe-box-clasification',
