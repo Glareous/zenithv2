@@ -760,8 +760,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       /* { value: 'dashboards', label: 'Dashboards' }, */
-                      /*  { value: 'projects', label: 'Projects' },
-                      { value: 'ecommerce', label: 'Ecommerce' }, */
+                      { value: 'projects', label: 'Projects' },
+                      /* { value: 'ecommerce', label: 'Ecommerce' }, */
                       { value: 'rrhh', label: 'RRHH' },
                       /*{ value: 'orders', label: 'Orders' },
                       { value: 'crm', label: 'CRM' },
@@ -1236,8 +1236,8 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       /* { value: 'dashboards', label: 'Dashboards' }, */
-                      /*  { value: 'projects', label: 'Projects' },
-                      { value: 'ecommerce', label: 'Ecommerce' }, */
+                      { value: 'projects', label: 'Projects' },
+                      /* { value: 'ecommerce', label: 'Ecommerce' }, */
                       { value: 'rrhh', label: 'RRHH' },
                       /*{ value: 'orders', label: 'Orders' },
                       { value: 'crm', label: 'CRM' },
