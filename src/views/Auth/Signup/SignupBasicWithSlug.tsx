@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
 
 import whiteLogo from '@assets/images/logo-white.png'
 import mainLogo from '@assets/images/main-logo.png'
@@ -13,8 +13,7 @@ import { api } from '@src/trpc/react'
 import { Eye, EyeOff } from 'lucide-react'
 import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
-import { ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { toast } from 'react-toastify'
 import { z } from 'zod'
 
 const signupSchema = z
@@ -34,17 +33,26 @@ const signupSchema = z
 
 type SignupFormData = z.infer<typeof signupSchema>
 
-export default function SignupPage() {
+export default function SignupBasicWithSlug() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const params = useParams()
+  const slug = params.slug as string
   const [showPassword, setShowPassword] = useState(false)
   const [, setLoading] = useState(false)
-  
+
   // Invitation context from URL params
   const invitationToken = searchParams.get('invitation')
   const invitationEmail = searchParams.get('email')
   const invitationProject = searchParams.get('project')
-  
+
+  // Fetch organization by slug
+  const {
+    data: organization,
+    isLoading: isLoadingOrg,
+    error: orgError,
+  } = api.organization.getBySlug.useQuery({ slug }, { enabled: !!slug })
+
   // Accept invitation mutation
   const acceptInvitation = api.projectMember.acceptInvitation.useMutation()
 
@@ -62,10 +70,43 @@ export default function SignupPage() {
       email: invitationEmail || '',
       password: '',
       confirmPassword: '',
-      agreeToTerms: true, // <-- must be true to match z.literal(true)
+      agreeToTerms: true,
     },
   })
-  
+
+  // Handle organization not found
+  useEffect(() => {
+    if (orgError) {
+      toast.error('Organization not found')
+      router.push('/auth/signup-basic')
+    }
+  }, [orgError, router])
+
+  // Require invitation token for organization signup
+  useEffect(() => {
+    if (organization && !invitationToken && !isLoadingOrg) {
+      toast.error('You need an invitation to join this organization. Please check your email for an invitation link.')
+      router.push(`/auth/signin-basic/${slug}`)
+    }
+  }, [organization, invitationToken, isLoadingOrg, router, slug])
+
+  // Check if email already exists
+  const { data: emailCheck } = api.auth.checkEmailExists.useQuery(
+    { email: invitationEmail || '' },
+    {
+      enabled: !!invitationEmail && !!invitationToken,
+      refetchOnWindowFocus: false,
+    }
+  )
+
+  // Redirect to signin if email already exists
+  useEffect(() => {
+    if (emailCheck?.exists && invitationToken && invitationEmail) {
+      toast.info('Account already exists. Redirecting to sign in...')
+      router.push(`/auth/signin-basic/${slug}?invitation=${invitationToken}&email=${invitationEmail}&project=${invitationProject}`)
+    }
+  }, [emailCheck, invitationToken, invitationEmail, invitationProject, router, slug])
+
   // Handle invitation context on component mount
   useEffect(() => {
     if (invitationEmail && invitationProject) {
@@ -78,7 +119,6 @@ export default function SignupPage() {
 
   const onSubmit = async (data: SignupFormData) => {
     setLoading(true)
-    console.log('Form data:', data)
 
     try {
       await signUpMutation.mutateAsync({
@@ -89,7 +129,7 @@ export default function SignupPage() {
         password: data.password,
         invitationToken: invitationToken || undefined,
       })
-      
+
       // If there's an invitation, automatically sign in and accept it
       if (invitationToken) {
         try {
@@ -99,36 +139,54 @@ export default function SignupPage() {
             password: data.password,
             redirect: false,
           })
-          
+
           if (signInResult?.error) {
             throw new Error('Failed to sign in after registration')
           }
-          
+
           // Accept the invitation
           const invitationResult = await acceptInvitation.mutateAsync({
             token: invitationToken,
           })
-          
+
           if (invitationResult.success && invitationResult.redirectTo) {
             toast.success('Account created and invitation accepted successfully!')
-            router.push(invitationResult.redirectTo)
+            window.location.href = invitationResult.redirectTo
             return
           }
         } catch (invitationError) {
           console.error('Failed to accept invitation:', invitationError)
           toast.success('Account created successfully! Please verify your email and sign in to accept the invitation.')
-          router.push(`/auth/signin-basic?invitation=${invitationToken}&email=${invitationEmail}&project=${invitationProject}`)
+          router.push(`/auth/signin-basic/${slug}?invitation=${invitationToken}&email=${invitationEmail}&project=${invitationProject}`)
           return
         }
       }
-      
+
       toast.success('Account created successfully! Please verify your email.')
-      router.push('/auth/signin-basic')
+      router.push(`/auth/signin-basic/${slug}`)
     } catch (err: any) {
+      // If user already exists and there's an invitation, redirect to signin
+      if (err?.message?.includes('User with this email already exists') && invitationToken) {
+        toast.info('Account already exists. Please sign in to accept the invitation.')
+        router.push(`/auth/signin-basic/${slug}?invitation=${invitationToken}&email=${data.email}&project=${invitationProject}`)
+        return
+      }
+
       toast.error(err?.message || 'Something went wrong')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (isLoadingOrg) {
+    return (
+      <div className="relative flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -139,24 +197,36 @@ export default function SignupPage() {
             <div className="md:p-10 card-body">
               <div className="mb-5 text-center">
                 <Link href="/">
-                  <Image
-                    src={mainLogo}
-                    alt="mainLogo"
-                    className="h-8 mx-auto dark:hidden"
-                    width={175}
-                    height={32}
-                  />
-                  <Image
-                    src={whiteLogo}
-                    alt="whiteLogo"
-                    className="hidden h-8 mx-auto dark:inline-block"
-                    width={175}
-                    height={32}
-                  />
+                  {organization?.logoUrl ? (
+                    <Image
+                      src={organization.logoUrl}
+                      alt={organization.name}
+                      className="h-10 mx-auto"
+                      width={105}
+                      height={32}
+                    />
+                  ) : (
+                    <>
+                      <Image
+                        src={mainLogo}
+                        alt="mainLogo"
+                        className="h-10 mx-auto dark:hidden"
+                        width={105}
+                        height={32}
+                      />
+                      <Image
+                        src={whiteLogo}
+                        alt="whiteLogo"
+                        className="hidden h-10 mx-auto dark:inline-block"
+                        width={105}
+                        height={32}
+                      />
+                    </>
+                  )}
                 </Link>
               </div>
               <h4 className="mb-2 font-bold leading-relaxed text-center text-transparent drop-shadow-lg ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-primary-500 vie-purple-500 to-pink-500 bg-clip-text">
-                {invitationProject ? `Join "${invitationProject}"` : 'Create a New Account'}
+                {invitationProject ? `Join "${invitationProject}"` : `Join ${organization?.name || 'Organization'}`}
               </h4>
               {invitationProject && (
                 <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
@@ -169,7 +239,7 @@ export default function SignupPage() {
               <p className="mb-5 text-center text-gray-500 dark:text-dark-500">
                 Already have an account?
                 <Link
-                  href={invitationToken ? `/auth/signin-basic?invitation=${invitationToken}&email=${invitationEmail}&project=${invitationProject}` : "/auth/signin-basic"}
+                  href={invitationToken ? `/auth/signin-basic/${slug}?invitation=${invitationToken}&email=${invitationEmail}&project=${invitationProject}` : `/auth/signin-basic/${slug}`}
                   className="font-medium link link-primary">
                   Sign In
                 </Link>
@@ -341,7 +411,6 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   )
 }

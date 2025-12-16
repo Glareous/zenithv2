@@ -22,10 +22,12 @@ export const authRouter = createTRPCRouter({
         username: z.string().min(3),
         email: z.string().email(),
         password: z.string().min(8),
+        invitationToken: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       console.log('Signup input:', input)
+      console.log('Has invitation token:', !!input.invitationToken)
 
       const existingUser = await ctx.db.user.findUnique({
         where: { email: input.email },
@@ -52,6 +54,29 @@ export const authRouter = createTRPCRouter({
 
       const hashedPassword = await hash(input.password, 12)
 
+      // If user is signing up via invitation, ONLY create the user (no org/project)
+      // The invitation acceptance process will add them to the existing org/project
+      if (input.invitationToken) {
+        const user = await ctx.db.user.create({
+          data: {
+            firstName: input.firstName,
+            lastName: input.lastName,
+            username: input.username,
+            email: input.email,
+            password: hashedPassword,
+            isVerified: true, // Auto-verify users who sign up via invitation
+          },
+        })
+
+        return {
+          success: true,
+          message: 'Account created successfully. Please accept your invitation to join the project.',
+          userId: user.id,
+          hasInvitation: true,
+        }
+      }
+
+      // Normal signup flow (without invitation) - create user, org, and project
       // Extract organization name from email (part before @)
       const emailPrefix = input.email.split('@')[0]
       const organizationName = `${emailPrefix} organization`
@@ -771,5 +796,17 @@ export const authRouter = createTRPCRouter({
 
         return { allowed: true }
       }
+    }),
+
+  // Check if email exists (public endpoint for signup validation)
+  checkEmailExists: publicProcedure
+    .input(z.object({ email: z.string().email() }))
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: { email: input.email },
+        select: { id: true, email: true },
+      })
+
+      return { exists: !!user }
     }),
 })

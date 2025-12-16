@@ -36,7 +36,7 @@ export default function InvitationAcceptPage({ params }: InvitationAcceptPagePro
         console.log('Invitation result:', result)
 
         if (result.requiresAuth) {
-          // User needs to sign in/up - redirect to auth with invitation info
+          // User needs to sign up - redirect to signup with invitation info
           const searchParams = new URLSearchParams({
             invitation: token,
             email: result.email,
@@ -45,11 +45,11 @@ export default function InvitationAcceptPage({ params }: InvitationAcceptPagePro
 
           // Check if organization is custom and has a slug
           if (result.organization?.custom && result.organization?.slug) {
-            // Redirect to custom organization sign-in page
-            router.push(`/auth/signin-basic/${result.organization.slug}?${searchParams.toString()}`)
+            // Redirect to custom organization signup page
+            router.push(`/auth/signup-basic/${result.organization.slug}?${searchParams.toString()}`)
           } else {
-            // Redirect to standard sign-in page
-            router.push(`/auth/signin-basic?${searchParams.toString()}`)
+            // Redirect to standard signup page
+            router.push(`/auth/signup-basic?${searchParams.toString()}`)
           }
           return
         }
@@ -67,17 +67,29 @@ export default function InvitationAcceptPage({ params }: InvitationAcceptPagePro
         } else {
           router.push('/apps/projects/grid')
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error accepting invitation:', error)
+
+        // Check if error contains organization info
+        let redirectPath = '/auth/signin-basic'
+
+        // Try to extract organization slug from error metadata
+        const organizationSlug = error?.data?.organizationSlug || error?.organizationSlug
+        const organizationCustom = error?.data?.organizationCustom || error?.organizationCustom
+
+        if (organizationCustom && organizationSlug) {
+          redirectPath = `/auth/signin-basic/${organizationSlug}`
+        }
+
         toast.error('Failed to accept invitation. The link may be invalid or expired.')
-        
+
         // Redirect to sign in with error
         const searchParams = new URLSearchParams({
           error: 'invalid_invitation',
           message: 'The invitation link is invalid or has expired.',
         })
 
-        router.push(`/auth/signin-basic?${searchParams.toString()}`)
+        router.push(`${redirectPath}?${searchParams.toString()}`)
       } finally {
         setIsLoading(false)
       }

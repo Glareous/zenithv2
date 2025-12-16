@@ -850,7 +850,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                           page: 'rrhh',
                           agents: [
                             { key: 'agentRrhhId', label: 'RRHH Agent', type: 'rrhh' },
-                            { key: 'agentRrhhChatId', label: 'RRHH Chat Agent', type: 'rrhhChat' }
+                            /* { key: 'agentRrhhChatId', label: 'RRHH Chat Agent', type: 'rrhhChat' } */
                           ]
                         })
                       } else if (page === 'advisor') {
@@ -1354,7 +1354,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                             page: 'rrhh',
                             agents: [
                               { key: 'agentRrhhId', label: 'RRHH Agent', type: 'rrhh' },
-                              { key: 'agentRrhhChatId', label: 'RRHH Chat Agent', type: 'rrhhChat' }
+                              /* { key: 'agentRrhhChatId', label: 'RRHH Chat Agent', type: 'rrhhChat' } */
                             ]
                           })
                         } else if (page === 'advisor') {

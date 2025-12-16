@@ -353,31 +353,44 @@ export const projectMemberRouter = createTRPCRouter({
         })
       }
 
-      // Delete any existing pending invitations for this email and project
-      await ctx.db.projectInvitation.deleteMany({
-        where: {
-          projectId: input.projectId,
-          email: input.email,
-          used: false,
-          expires: { gt: new Date() },
-        },
-      })
-
       // Generate invitation token
       const invitationToken = crypto.randomUUID()
       const invitationExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-      // Create invitation record
-      const invitation = await ctx.db.projectInvitation.create({
-        data: {
-          email: input.email,
-          role: input.role,
-          token: invitationToken,
-          expires: invitationExpiry,
+      // Check if an invitation already exists for this email and project
+      const existingInvitation = await ctx.db.projectInvitation.findFirst({
+        where: {
           projectId: input.projectId,
-          invitedById: ctx.session.user.id,
+          email: input.email,
         },
       })
+
+      let invitation
+      if (existingInvitation) {
+        // Update existing invitation with new token and expiry
+        invitation = await ctx.db.projectInvitation.update({
+          where: { id: existingInvitation.id },
+          data: {
+            role: input.role,
+            token: invitationToken,
+            expires: invitationExpiry,
+            used: false,
+            invitedById: ctx.session.user.id,
+          },
+        })
+      } else {
+        // Create new invitation record
+        invitation = await ctx.db.projectInvitation.create({
+          data: {
+            email: input.email,
+            role: input.role,
+            token: invitationToken,
+            expires: invitationExpiry,
+            projectId: input.projectId,
+            invitedById: ctx.session.user.id,
+          },
+        })
+      }
 
       // Send invitation email
       const invitationUrl = `${process.env.NEXTAUTH_URL ?? 'http://localhost:3000'}/invitation/accept/${invitationToken}`
@@ -460,7 +473,7 @@ export const projectMemberRouter = createTRPCRouter({
     .input(z.object({ token: z.string() }))
     .mutation(async ({ ctx, input }) => {
       console.log('Looking for invitation with token:', input.token)
-      
+
       // Find the invitation
       const invitation = await ctx.db.projectInvitation.findFirst({
         where: {
@@ -476,7 +489,7 @@ export const projectMemberRouter = createTRPCRouter({
           },
         },
       })
-      
+
       console.log('Found invitation:', invitation ? 'YES' : 'NO')
       if (!invitation) {
         // Let's also check if there's an invitation with this token regardless of status
@@ -488,6 +501,35 @@ export const projectMemberRouter = createTRPCRouter({
       }
 
       if (!invitation) {
+        // Check if there's an invitation with this token (even if used/expired) to get org info
+        const expiredInvitation = await ctx.db.projectInvitation.findFirst({
+          where: { token: input.token },
+          include: {
+            project: {
+              include: {
+                organization: {
+                  select: {
+                    slug: true,
+                    custom: true,
+                  },
+                },
+              },
+            },
+          },
+        })
+
+        // If we found an expired/used invitation, include org info in error
+        if (expiredInvitation?.project?.organization) {
+          const error = new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Invalid or expired invitation token',
+          })
+            // Add organization info to error metadata
+            ; (error as any).organizationSlug = expiredInvitation.project.organization.slug
+            ; (error as any).organizationCustom = expiredInvitation.project.organization.custom
+          throw error
+        }
+
         throw new TRPCError({
           code: 'BAD_REQUEST',
           message: 'Invalid or expired invitation token',
@@ -531,7 +573,7 @@ export const projectMemberRouter = createTRPCRouter({
       // Check if user's email matches the invitation email (case-insensitive)
       const userEmail = ctx.session.user.email.toLowerCase().trim()
       const invitationEmail = invitation.email.toLowerCase().trim()
-      
+
       console.log('Email comparison:', {
         userEmail,
         invitationEmail,
@@ -539,7 +581,7 @@ export const projectMemberRouter = createTRPCRouter({
         originalInvitationEmail: invitation.email,
         match: userEmail === invitationEmail
       })
-      
+
       if (userEmail !== invitationEmail) {
         throw new TRPCError({
           code: 'FORBIDDEN',
@@ -565,12 +607,20 @@ export const projectMemberRouter = createTRPCRouter({
         return {
           success: true,
           message: 'You are already a member of this project',
-          redirectTo: `/apps/projects/${invitation.projectId}/overview`,
+          redirectTo: `/apps/projects/grid`,
         }
       }
 
-      // Add user to project and mark invitation as used
-      await ctx.db.$transaction([
+      // Check if user is already a member of the organization
+      const existingOrgMember = await ctx.db.organizationMember.findFirst({
+        where: {
+          organizationId: invitation.project.organizationId,
+          userId: ctx.session.user.id,
+        },
+      })
+
+      // Add user to organization (if not already) and project, then mark invitation as used
+      const transactionOperations: any[] = [
         ctx.db.projectMember.create({
           data: {
             projectId: invitation.projectId,
@@ -582,12 +632,27 @@ export const projectMemberRouter = createTRPCRouter({
           where: { id: invitation.id },
           data: { used: true },
         }),
-      ])
+      ]
+
+      // Only add to organization if not already a member
+      if (!existingOrgMember) {
+        transactionOperations.unshift(
+          ctx.db.organizationMember.create({
+            data: {
+              organizationId: invitation.project.organizationId,
+              userId: ctx.session.user.id,
+              role: 'MEMBER', // Default role for invited users
+            },
+          })
+        )
+      }
+
+      await ctx.db.$transaction(transactionOperations)
 
       return {
         success: true,
         message: 'Successfully joined the project!',
-        redirectTo: `/apps/projects/${invitation.projectId}/overview`,
+        redirectTo: `/apps/projects/grid`,
       }
     }),
 

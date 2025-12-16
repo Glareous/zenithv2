@@ -92,6 +92,7 @@ const Sidebar = ({
     useState<DropdownPosition>('top-right')
   const router = usePathname()
   const [scrolled, setScrolled] = useState(false)
+  const [lastSyncedUrl, setLastSyncedUrl] = useState('')
   const { layoutType, layoutSidebar } = useSelector(
     (state: RootState) => state.Layout
   )
@@ -151,6 +152,36 @@ const Sidebar = ({
       dispatch(setCurrentProject(serializedProject))
     }
   }, [fetchedProjects, currentProject, dispatch, isProjectsLoading])
+
+  // Sync currentProject with URL when navigating to project overview page
+  useEffect(() => {
+    // Only sync if the URL actually changed (not when currentProject changes)
+    if (router === lastSyncedUrl) {
+      return
+    }
+
+    // Check if URL is /apps/projects/{projectId}/overview
+    const projectOverviewMatch = router.match(/\/apps\/projects\/([^\/]+)\/overview/)
+    if (projectOverviewMatch && projectOverviewMatch[1] && fetchedProjects) {
+      const projectIdFromUrl = projectOverviewMatch[1]
+
+      // Only update if the URL project is different from current project
+      if (currentProject?.id !== projectIdFromUrl) {
+        const projectFromUrl = fetchedProjects.find(
+          (project) => project.id === projectIdFromUrl
+        )
+
+        if (projectFromUrl) {
+          const serializedProject = serializeProject(projectFromUrl)
+          dispatch(setCurrentProject(serializedProject))
+          localStorage.setItem('selectedProjectId', projectFromUrl.id)
+          setLastSyncedUrl(router) // Mark this URL as synced
+        }
+      } else {
+        setLastSyncedUrl(router) // Already in sync, just mark it
+      }
+    }
+  }, [router, fetchedProjects, currentProject, dispatch, lastSyncedUrl])
 
   // Handle project selection
   const handleProjectSelect = (project: any) => {

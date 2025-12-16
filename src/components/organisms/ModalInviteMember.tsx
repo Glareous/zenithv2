@@ -6,7 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ProjectRole } from '@prisma/client'
 import { api } from '@src/trpc/react'
 import { Mail, UserPlus } from 'lucide-react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
+import Select from 'react-select'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
@@ -18,6 +19,11 @@ const inviteMemberSchema = z.object({
 })
 
 type InviteMemberFormData = z.infer<typeof inviteMemberSchema>
+
+const roleOptions = [
+  { value: 'MEMBER', label: 'Member' },
+  { value: 'ADMIN', label: 'Admin' },
+]
 
 interface ModalInviteMemberProps {
   isOpen: boolean
@@ -35,6 +41,7 @@ const ModalInviteMember: React.FC<ModalInviteMemberProps> = ({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<InviteMemberFormData>({
@@ -103,17 +110,21 @@ const ModalInviteMember: React.FC<ModalInviteMemberProps> = ({
         <label htmlFor="role" className="block text-sm font-medium mb-2">
           Role
         </label>
-        <select
-          {...register('role')}
-          id="role"
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary ${
-            errors.role
-              ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-              : 'border-gray-300'
-          }`}>
-          <option value="MEMBER">Member</option>
-          <option value="ADMIN">Admin</option>
-        </select>
+        <Controller
+          name="role"
+          control={control}
+          render={({ field }) => (
+            <Select
+              {...field}
+              options={roleOptions}
+              value={roleOptions.find((opt) => opt.value === field.value)}
+              onChange={(option) => field.onChange(option?.value)}
+              className="react-select-container"
+              classNamePrefix="react-select"
+              placeholder="Select role..."
+            />
+          )}
+        />
         {errors.role && (
           <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
         )}
