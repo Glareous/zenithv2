@@ -15,7 +15,7 @@ interface UserChatBoardProps {
   selectedChatId: string | null
   selectedEmployeeId?: string | null  // Optional for ADVISOR type
   onBack?: () => void                 // Optional for desktop view
-  chatType?: 'EMPLOYEE' | 'ADVISOR'   // Type of chat
+  chatType?: 'EMPLOYEE' | 'ADVISOR' | 'NIM_FRAUD'   // Type of chat
   showEmployeeInfo?: boolean          // Show employee info in header
 }
 
@@ -77,7 +77,9 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
       // Invalidate chat list to update unread count badges
       if (chatType === 'EMPLOYEE') {
         utils.projectChat.getByEmployeeId.invalidate()
-      } else {
+      } else if (chatType === 'ADVISOR') {
+        utils.projectChat.getByUserId.invalidate()
+      } else if (chatType === 'NIM_FRAUD') {
         utils.projectChat.getByUserId.invalidate()
       }
     },

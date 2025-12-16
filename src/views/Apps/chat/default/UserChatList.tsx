@@ -15,7 +15,7 @@ interface UserChatListProps {
   selectedEmployeeId?: string | null  // Optional for ADVISOR type
   selectedChatId: string | null
   onSelectChat: (chatId: string) => void
-  chatType?: 'EMPLOYEE' | 'ADVISOR'   // Type of chat
+  chatType?: 'EMPLOYEE' | 'ADVISOR' | 'NIM_FRAUD'   // Type of chat
   userId?: string                      // Current user ID for ADVISOR chats
 }
 
@@ -48,7 +48,7 @@ const UserChatList: React.FC<UserChatListProps> = ({
         {
           userId: userId || '',
           status: 'ACTIVE',
-          chatType: 'ADVISOR',
+          chatType: chatType,
         },
         {
           enabled: !!userId,
@@ -112,7 +112,7 @@ const UserChatList: React.FC<UserChatListProps> = ({
           source: 'web',
         },
       })
-    } else {
+    } else if (chatType === 'ADVISOR') {
       // ADVISOR chat
       if (!userId) {
         toast.error('User not authenticated')
@@ -130,6 +130,26 @@ const UserChatList: React.FC<UserChatListProps> = ({
         chatType: 'ADVISOR',
         metadata: {
           source: 'web-advisor',
+        },
+      })
+    } else if (chatType === 'NIM_FRAUD') {
+      // NIM FRAUD chat
+      if (!userId) {
+        toast.error('User not authenticated')
+        return
+      }
+
+      if (!organization?.agentNimFraudChatId) {
+        toast.error('No NIM Fraud chat agent configured for this organization')
+        return
+      }
+
+      createChatMutation.mutate({
+        userId: userId,
+        agentId: organization.agentNimFraudChatId,
+        chatType: 'NIM_FRAUD',
+        metadata: {
+          source: 'web-nim-fraud',
         },
       })
     }
@@ -196,7 +216,9 @@ const UserChatList: React.FC<UserChatListProps> = ({
                 createChatMutation.isPending ||
                 (chatType === 'EMPLOYEE'
                   ? !organization?.agentRrhhChatId
-                  : !organization?.agentAdvisorChatId)
+                  : chatType === 'ADVISOR'
+                  ? !organization?.agentAdvisorChatId
+                  : !organization?.agentNimFraudChatId)
               }>
               {createChatMutation.isPending ? (
                 'Creating...'
@@ -224,6 +246,8 @@ const UserChatList: React.FC<UserChatListProps> = ({
                     const displayName =
                       chatType === 'ADVISOR'
                         ? chat.agent?.name || 'Digital Advisor'
+                        : chatType === 'NIM_FRAUD'
+                        ? chat.agent?.name || 'NIM Fraud Assistant'
                         : chat.employee
                           ? `${chat.employee.firstName} ${chat.employee.lastName}`
                           : chat.userId
@@ -244,6 +268,8 @@ const UserChatList: React.FC<UserChatListProps> = ({
                           <div className={`relative flex items-center justify-center font-semibold transition duration-200 ease-linear rounded-full size-10 shrink-0 ${
                             chatType === 'ADVISOR'
                               ? 'bg-gradient-to-br from-primary-500 to-purple-500 text-white'
+                              : chatType === 'NIM_FRAUD'
+                              ? 'bg-gradient-to-br from-green-500 to-emerald-500 text-white'
                               : 'bg-gray-100 dark:bg-dark-850'
                           }`}>
                             {chatType === 'EMPLOYEE' && chat.employee?.image ? (

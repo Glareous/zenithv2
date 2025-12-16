@@ -6,7 +6,7 @@ const createChatSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
   agentId: z.string().min(1, 'Agent ID is required'),
   employeeId: z.string().optional(),
-  chatType: z.enum(['EMPLOYEE', 'ADVISOR']).default('EMPLOYEE'),
+  chatType: z.enum(['EMPLOYEE', 'ADVISOR', 'NIM_FRAUD']).default('EMPLOYEE'),
   metadata: z.any().optional(),
 })
 
@@ -182,7 +182,7 @@ export const projectChatRouter = createTRPCRouter({
         userId: z.string(),
         agentId: z.string().optional(),
         status: z.enum(['ACTIVE', 'CLOSED', 'ARCHIVED']).optional(),
-        chatType: z.enum(['EMPLOYEE', 'ADVISOR']).optional(),
+        chatType: z.enum(['EMPLOYEE', 'ADVISOR', 'NIM_FRAUD']).optional(),
         page: z.number().min(1).default(1),
         limit: z.number().min(1).max(100).default(20),
       })

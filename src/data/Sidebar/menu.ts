@@ -316,6 +316,11 @@ const menu: MegaMenu[] = [
         lang: 'Documentation',
       },
       {
+        title: 'Chat',
+        link: '/apps/nim-fraud/chat',
+        lang: 'Nvidia - Assistent',
+      },
+      {
         title: 'API',
         link: 'http://201.217.192.13:84/docs',
         lang: 'API',

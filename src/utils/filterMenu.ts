@@ -12,6 +12,7 @@ interface Organization {
   agentAdvisorId?: string | null
   agentLeadsId?: string | null
   agentBoxClasificationId?: string | null
+  agentNimFraudChatId?: string | null
 }
 
 /**

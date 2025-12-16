@@ -45,6 +45,7 @@ enum ChatStatus {
 enum ChatType {
     EMPLOYEE  // Chat with employees (current default)
     ADVISOR   // Direct chat with advisor agent (user-to-agent)
+    NIM_FRAUD // Direct chat with NIM Fraud agent
 }
 
 enum MessageMediaType {
@@ -257,6 +258,7 @@ model Organization {
     agentAdvisorId      String?  // Reference to ProjectAgent.id (global agent)
     agentLeadsId        String?  // Reference to ProjectAgent.id (global agent)
     agentBoxClasificationId String?  // Reference to ProjectAgent.id (global agent)
+    agentNimFraudChatId String?  // Reference to ProjectAgent.id (global agent for NIM Fraud chat)
 
     // Relations
     owner        User                 @relation("OrganizationOwner", fields: [ownerId], references: [id])
@@ -276,6 +278,7 @@ model Organization {
   @@index([agentRrhhChatId])
   @@index([agentAdvisorChatId])
   @@index([agentBoxClasificationId])
+  @@index([agentNimFraudChatId])
 }
 
 // Junction table for organization members with roles

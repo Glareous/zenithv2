@@ -184,6 +184,7 @@ export const projectAgentRouter = createTRPCRouter({
           agentForecastingId: true,
           agentRrhhChatId: true,
           agentAdvisorChatId: true,
+          agentNimFraudChatId: true,
           agentAdvisorId: true,
           agentLeadsId: true,
           agentBoxClasificationId: true,
@@ -197,6 +198,7 @@ export const projectAgentRouter = createTRPCRouter({
         organization?.agentForecastingId,
         organization?.agentRrhhChatId,
         organization?.agentAdvisorChatId,
+        organization?.agentNimFraudChatId,
         organization?.agentAdvisorId,
         organization?.agentLeadsId,
         organization?.agentBoxClasificationId,
@@ -315,6 +317,7 @@ export const projectAgentRouter = createTRPCRouter({
               agentForecastingId: true,
               agentRrhhChatId: true,
               agentAdvisorChatId: true,
+              agentNimFraudChatId: true,
               agentAdvisorId: true,
               agentLeadsId: true,
               agentBoxClasificationId: true,
@@ -331,6 +334,7 @@ export const projectAgentRouter = createTRPCRouter({
           userOrganization.organization.agentForecastingId === input.id ||
           userOrganization.organization.agentRrhhChatId === input.id ||
           userOrganization.organization.agentAdvisorChatId === input.id ||
+          userOrganization.organization.agentNimFraudChatId === input.id ||
           userOrganization.organization.agentAdvisorId === input.id ||
           userOrganization.organization.agentLeadsId === input.id ||
           userOrganization.organization.agentBoxClasificationId === input.id)
@@ -611,6 +615,7 @@ export const projectAgentRouter = createTRPCRouter({
               { agentForecastingId: input.id },
               { agentRrhhChatId: input.id },
               { agentAdvisorChatId: input.id },
+              { agentNimFraudChatId: input.id },
               { agentAdvisorId: input.id },
               { agentLeadsId: input.id },
               { agentBoxClasificationId: input.id },
@@ -707,6 +712,7 @@ export const projectAgentRouter = createTRPCRouter({
             { agentForecastingId: input.id },
             { agentRrhhChatId: input.id },
             { agentAdvisorChatId: input.id },
+            { agentNimFraudChatId: input.id },
             { agentAdvisorId: input.id },
             { agentLeadsId: input.id },
             { agentBoxClasificationId: input.id },

@@ -65,6 +65,7 @@ const organizationSchema = z.object({
   agentAdvisorId: z.string().optional(),
   agentLeadsId: z.string().optional(),
   agentBoxClasificationId: z.string().optional(),
+  agentNimFraudChatId: z.string().optional(),
 })
 
 type OrganizationFormData = z.infer<typeof organizationSchema>
@@ -82,7 +83,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
   const [showAgentModal, setShowAgentModal] = useState(false)
   const [selectedAgentType, setSelectedAgentType] = useState<
-    'pqr' | 'rrhh' | 'forecasting' | 'advisor' | 'leads' | 'rrhhChat' | 'advisorChat' | 'box-clasification' | null
+    'pqr' | 'rrhh' | 'forecasting' | 'advisor' | 'leads' | 'rrhhChat' | 'advisorChat' | 'nimFraudChat' | 'box-clasification' | null
   >(null)
 
   // Check if user is SUPERADMIN
@@ -133,6 +134,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
       agentAdvisorId: undefined,
       agentLeadsId: undefined,
       agentBoxClasificationId: undefined,
+      agentNimFraudChatId: undefined,
     },
   })
 
@@ -362,6 +364,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
       agentAdvisorId: organization.agentAdvisorId || undefined,
       agentLeadsId: organization.agentLeadsId || undefined,
       agentBoxClasificationId: organization.agentBoxClasificationId || undefined,
+      agentNimFraudChatId: organization.agentNimFraudChatId || undefined,
       administrators: existingAdmins,
     })
     setShowModal(true)
@@ -418,6 +421,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           agentForecastingId: data.agentForecastingId || null,
           agentRrhhChatId: data.agentRrhhChatId || null,
           agentAdvisorChatId: data.agentAdvisorChatId || null,
+          agentNimFraudChatId: data.agentNimFraudChatId || null,
           agentAdvisorId: data.agentAdvisorId || null,
           agentLeadsId: data.agentLeadsId || null,
           agentBoxClasificationId: data.agentBoxClasificationId || null,
@@ -439,6 +443,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
           agentForecastingId: data.agentForecastingId,
           agentRrhhChatId: data.agentRrhhChatId,
           agentAdvisorChatId: data.agentAdvisorChatId,
+          agentNimFraudChatId: data.agentNimFraudChatId,
           agentAdvisorId: data.agentAdvisorId,
           agentLeadsId: data.agentLeadsId,
           agentBoxClasificationId: data.agentBoxClasificationId,
@@ -827,7 +832,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
 
                   {(() => {
                     const allowedPages = watch('allowedPages') || []
-                    const agentPages = ['pqr', 'rrhh', 'forecasting', 'advisor', 'leads', 'box-clasification']
+                    const agentPages = ['pqr', 'rrhh', 'forecasting', 'advisor', 'leads', 'box-clasification', 'nim-fraud']
                     const enabledAgentPages = allowedPages.filter((page) =>
                       agentPages.includes(page)
                     )
@@ -889,6 +894,13 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                             { key: 'agentBoxClasificationId', label: 'Box Clasification Agent', type: 'box-clasification' }
                           ]
                         })
+                      } else if (page === 'nim-fraud') {
+                        pageAgentConfigs.push({
+                          page: 'nim-fraud',
+                          agents: [
+                            { key: 'agentNimFraudChatId', label: 'NIM Fraud Chat Agent', type: 'nimFraudChat' }
+                          ]
+                        })
                       }
                     })
 
@@ -902,6 +914,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                               /* | 'agentForecastingId' */
                               | 'agentRrhhChatId'
                               | 'agentAdvisorChatId'
+                              | 'agentNimFraudChatId'
                               | 'agentAdvisorId'
                               /* | 'agentLeadsId' */
                               | 'agentBoxClasificationId'
@@ -1331,7 +1344,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
 
                     {(() => {
                       const allowedPages = watch('allowedPages') || []
-                      const agentPages = ['pqr', 'rrhh', 'forecasting', 'advisor', 'leads', 'box-clasification']
+                      const agentPages = ['pqr', 'rrhh', 'forecasting', 'advisor', 'leads', 'box-clasification', 'nim-fraud']
                       const enabledAgentPages = allowedPages.filter((page) =>
                         agentPages.includes(page)
                       )
@@ -1391,6 +1404,13 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
                             page: 'box-clasification',
                             agents: [
                               { key: 'agentBoxClasificationId', label: 'Box Clasification Agent', type: 'box-clasification' }
+                            ]
+                          })
+                        } else if (page === 'nim-fraud') {
+                          pageAgentConfigs.push({
+                            page: 'nim-fraud',
+                            agents: [
+                              { key: 'agentNimFraudChatId', label: 'NIM Fraud Chat Agent', type: 'nimFraudChat' }
                             ]
                           })
                         }
@@ -1669,6 +1689,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
               | 'agentForecastingId'
               | 'agentRrhhChatId'
               | 'agentAdvisorChatId'
+              | 'agentNimFraudChatId'
               | 'agentAdvisorId'
               | 'agentLeadsId'
               | 'agentBoxClasificationId'> = {
@@ -1677,6 +1698,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
               forecasting: 'agentForecastingId',
               rrhhChat: 'agentRrhhChatId',
               advisorChat: 'agentAdvisorChatId',
+              nimFraudChat: 'agentNimFraudChatId',
               advisor: 'agentAdvisorId',
               leads: 'agentLeadsId',
               'box-clasification': 'agentBoxClasificationId'
@@ -1697,6 +1719,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
               | 'agentForecastingId'
               | 'agentRrhhChatId'
               | 'agentAdvisorChatId'
+              | 'agentNimFraudChatId'
               | 'agentAdvisorId'
               | 'agentLeadsId'
               | 'agentBoxClasificationId'> = {
@@ -1705,6 +1728,7 @@ const OrganizationManagementPage: NextPageWithLayout = () => {
               forecasting: 'agentForecastingId',
               rrhhChat: 'agentRrhhChatId',
               advisorChat: 'agentAdvisorChatId',
+              nimFraudChat: 'agentNimFraudChatId',
               advisor: 'agentAdvisorId',
               leads: 'agentLeadsId',
               'box-clasification': 'agentBoxClasificationId'
