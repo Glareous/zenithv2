@@ -41,6 +41,7 @@ const Default: NextPageWithLayout = () => {
   }, [])
 
   const handleSelectEmployee = (employeeId: string) => {
+    console.log('Selected employee ID (Prisma PK):', employeeId)
     setSelectedEmployeeId(employeeId)
     setSelectedChatId(null) // Reset chat selection when changing employee
   }
@@ -83,7 +84,7 @@ const Default: NextPageWithLayout = () => {
   return (
     <React.Fragment>
       <BreadCrumb title="Employee Chat" subTitle="Chats" />
-      <div className="grid grid-cols-12 gap-x-space">
+      <div className="grid grid-cols-12 gap-x-space w-full">
         {/* Employee menu */}
         <EmployeeMenu
           selectedEmployeeId={selectedEmployeeId}
@@ -105,8 +106,17 @@ const Default: NextPageWithLayout = () => {
               onBack={handleBackToChatList}
             />
           )
+        ) : !selectedEmployeeId ? (
+          // No employee selected - show full-width placeholder
+          <div className="col-span-12 2xl:col-span-11 card">
+            <div className="card-body">
+              <div className="flex items-center justify-center h-96 text-gray-500 dark:text-dark-500">
+                <p>Select an employee to view their chats</p>
+              </div>
+            </div>
+          </div>
         ) : (
-          // If not mobile view, display both components
+          // Employee selected - display both components
           <>
             <UserChatList
               selectedEmployeeId={selectedEmployeeId}

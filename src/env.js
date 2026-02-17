@@ -45,6 +45,7 @@ export const env = createEnv({
     NEXT_PUBLIC_IS_API_ACTIVE: z.enum(['true', 'false']),
     NEXT_PUBLIC_IS_LOCAL_STORAGE: z.enum(['true', 'false']),
     NEXT_PUBLIC_BASE_URL: z.string().url(),
+    NEXT_PUBLIC_BACKEND_URL: z.string().url(),
   },
 
   /**
@@ -70,6 +71,7 @@ export const env = createEnv({
     NEXT_PUBLIC_IS_API_ACTIVE: process.env.NEXT_PUBLIC_IS_API_ACTIVE,
     NEXT_PUBLIC_IS_LOCAL_STORAGE: process.env.NEXT_PUBLIC_IS_LOCAL_STORAGE,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+    NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     SENDER_EMAIL: process.env.SENDER_EMAIL,
     AWS_ACCESS_API_KEY: process.env.AWS_ACCESS_API_KEY,
