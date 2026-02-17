@@ -1,0 +1,212 @@
+{
+    "heroBanner": {
+        "texts": {
+            "badge": "AI-Powered Box Classification & Counting System",
+            "title": {
+                "part1": "Real-Time",
+                "part2": "YOLO Box Detection",
+                "part3": "for Logistics"
+            },
+            "description": "An advanced, locally-hosted AI system using the latest YOLO models for real-time box counting, size classification, and dimension estimation. Optimized for warehouses and logistics centers: detects, counts, and categorizes boxes on conveyors or shelves with high accuracy, integrating seamlessly with your inventory systems."
+        },
+        "images": {
+            "mainHome": "/assets/images/hospital/landing/main-box.png",
+            "whiteLogo": "/assets/images/logo-white.png",
+            "darkLogo": "/assets/images/main-logo.png"
+        },
+        "colors": {
+            "background": "bg-gradient-to-b from-gray-200 via-silver-100 to-gray-100",
+            "badge": {
+                "text": "text-gray-600",
+                "border": "bg-gray-200 border-gray-400"
+            },
+            "title": {
+                "highlight": "text-gray-700",
+                "decoration": "decoration-blue-400"
+            },
+            "description": "text-gray-600",
+            "card": {
+                "background": "bg-white shadow-md shadow-gray-300/40",
+                "text": "text-gray-800",
+                "shadow": "shadow-lg shadow-blue-200/30"
+            },
+            "metricText": "text-blue-500"
+        },
+        "metrics": [
+            {
+                "value": "99",
+                "suffix": "%",
+                "label": "Detection accuracy with latest YOLO"
+            },
+            {
+                "value": "Real",
+                "suffix": "-Time",
+                "label": "Processing at 30+ FPS on edge devices"
+            },
+            {
+                "value": "50",
+                "suffix": "%",
+                "label": "Reduction in manual inventory errors"
+            },
+            {
+                "value": "0",
+                "suffix": "",
+                "label": "Data leaves your warehouse network"
+            }
+        ]
+    },
+    "availableFacilities": {
+        "colors": {
+            "cardBg": "bg-gray-100 border border-gray-300 shadow-sm shadow-gray-200",
+            "cardBorder": "border-gray-300",
+            "cardHover": "hover:bg-gray-200/50 hover:shadow-md hover:shadow-blue-300/20 hover:border-blue-300",
+            "iconBg": "bg-gray-200",
+            "iconColor": "text-gray-600",
+            "titleColor": "text-gray-800",
+            "descColor": "text-gray-500"
+        },
+        "facilities": [
+            {
+                "icon": "BrainCircuit",
+                "title": "YOLO-Powered Object Detection",
+                "description": "Latest YOLO models fine-tuned for box shapes, sizes, and labels in real-time",
+                "href": "#!"
+            },
+            {
+                "icon": "PackageSearch",
+                "title": "Automated Size Classification",
+                "description": "Classifies small, medium, large, or custom sizes based on dimensions and volume",
+                "href": "#!"
+            },
+            {
+                "icon": "Tally5",
+                "title": "Instant Box Counting",
+                "description": "Counts boxes on conveyors, pallets, or shelves with multi-object tracking",
+                "href": "#!"
+            },
+            {
+                "icon": "Ruler",
+                "title": "Dimension Estimation",
+                "description": "Measures length, width, height using camera calibration and AI inference",
+                "href": "#!"
+            },
+            {
+                "icon": "FileSearch",
+                "title": "Full Audit & Reporting",
+                "description": "Logs every detection with timestamps, images, and integration to ERP systems",
+                "href": "#!"
+            },
+            {
+                "icon": "ShieldCheck",
+                "title": "Edge Computing & Secure",
+                "description": "Runs on-premise – no cloud dependency, full data privacy in your facility",
+                "href": "#!"
+            }
+        ]
+    },
+    "ourDoctorsTeam": {
+        "images": {
+            "aboutImage": "/assets/images/hospital/landing/nvidia2.jpg"
+        },
+        "texts": {
+            "title": {
+                "part1": "Your Warehouse,",
+                "part2": "Your Boxes,",
+                "part3": "YOLO AI Detection"
+            },
+            "description": "Powered by the latest YOLO architecture, our system is trained on millions of warehouse scenarios. It detects and classifies boxes in real-time, reducing errors, speeding up operations, and providing actionable insights for inventory management."
+        },
+        "colors": {
+            "titleHighlight": "text-gray-700",
+            "titleDecoration": "decoration-blue-400",
+            "description": "text-gray-600",
+            "iconColor": "text-blue-500",
+            "featureDesc": "text-gray-500"
+        },
+        "features": [
+            {
+                "icon": "Zap",
+                "title": "High-Speed Inference",
+                "description": "Processes video feeds at real-time speeds on standard hardware"
+            },
+            {
+                "icon": "TrendingUp",
+                "title": "Inventory Optimization",
+                "description": "Provides size-based insights for better space utilization and packing"
+            },
+            {
+                "icon": "Warehouse",
+                "title": "Logistics Integration",
+                "description": "Seamless API hooks to WMS, ERP, and automation systems"
+            },
+            {
+                "icon": "FileCheck",
+                "title": "Customizable Reports",
+                "description": "Generates daily/weekly summaries of counts, sizes, and anomalies"
+            }
+        ]
+    },
+    "healthService": {
+        "texts": {
+            "title": {
+                "part1": "Revolutionize Logistics",
+                "part2": "with YOLO AI Detection",
+                "part3": ""
+            },
+            "description": "Real impacts warehouses are achieving with our real-time box classification system."
+        },
+        "colors": {
+            "sectionBg": "bg-gradient-to-b from-gray-100 to-white",
+            "titleHighlight": "text-gray-700",
+            "titleDecoration": "decoration-blue-400",
+            "description": "text-gray-600",
+            "cardBg": "bg-white border border-gray-300 shadow-md shadow-gray-200",
+            "cardHover": "hover:bg-gray-100 hover:shadow-blue-300/30 hover:-translate-y-2 hover:border-blue-300",
+            "serviceDesc": "text-gray-500"
+        },
+        "services": [
+            {
+                "icon": "Package",
+                "iconBg": "bg-gray-200",
+                "iconColor": "text-gray-600",
+                "title": "Inbound Receiving",
+                "description": "Auto-count and size incoming shipments for faster processing"
+            },
+            {
+                "icon": "ConveyorBelt",
+                "iconBg": "bg-blue-200/50",
+                "iconColor": "text-blue-500",
+                "title": "Sortation Optimization",
+                "description": "Classify boxes for efficient routing and handling"
+            },
+            {
+                "icon": "Warehouse",
+                "iconBg": "bg-gray-200",
+                "iconColor": "text-gray-600",
+                "title": "Shelf Inventory",
+                "description": "Real-time stock level monitoring by size categories"
+            },
+            {
+                "icon": "AlertTriangle",
+                "iconBg": "bg-amber-200/50",
+                "iconColor": "text-amber-500",
+                "title": "Anomaly Detection",
+                "description": "Flags damaged, mis-sized, or missing boxes instantly"
+            },
+            {
+                "icon": "Truck",
+                "iconBg": "bg-blue-200/50",
+                "iconColor": "text-blue-500",
+                "title": "Outbound Loading",
+                "description": "Optimizes truck packing based on box dimensions"
+            },
+            {
+                "icon": "BarChart3",
+                "iconBg": "bg-gray-200",
+                "iconColor": "text-gray-600",
+                "title": "Analytics Dashboard",
+                "description": "Size distribution trends and efficiency metrics"
+            }
+        ]
+    }
+}

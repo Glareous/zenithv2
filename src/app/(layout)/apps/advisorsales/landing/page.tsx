@@ -1,11 +1,11 @@
 import React from 'react'
 
 import { NextPageWithLayout } from '@src/dtos'
-import AvailableFacilities from '@src/views/landing/landingAdvisor/availableFacilities'
-import Footer from '@src/views/landing/landingAdvisor/footer'
-import HealthService from '@src/views/landing/landingAdvisor/healthService'
-import HeroBanner from '@src/views/landing/landingAdvisor/heroBanner'
-import OurDoctorsTeam from '@src/views/landing/landingAdvisor/ourDoctorsTeam'
+import AvailableFacilities from '@src/views/landing/landingRRHH/availableFacilities'
+import Footer from '@src/views/landing/landingRRHH/footer'
+import HealthService from '@src/views/landing/landingRRHH/healthService'
+import HeroBanner from '@src/views/landing/landingRRHH/heroBanner'
+import OurDoctorsTeam from '@src/views/landing/landingRRHH/ourDoctorsTeam'
 
 
 const ADVISORLanding: NextPageWithLayout = () => {

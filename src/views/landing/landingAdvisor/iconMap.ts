@@ -1,0 +1,38 @@
+// src/components/icons/iconMap.ts
+import {
+  Activity,
+  BrainCircuit,
+  Crown,
+  FileCheck,
+  FileSearch,
+  Handshake,
+  MessageSquareWarning,
+  Scale,
+  ShieldCheck,
+  Siren,
+  Target,
+  Timer,
+  TrendingUp,
+  Trophy,
+  UsersRound,
+  Zap,
+} from 'lucide-react'
+
+export const iconMap = {
+  Activity,
+  BrainCircuit,
+  Crown,
+  FileCheck,
+  FileSearch,
+  Handshake,
+  MessageSquareWarning,
+  Scale,
+  ShieldCheck,
+  Siren,
+  Target,
+  Timer,
+  TrendingUp,
+  Trophy,
+  UsersRound,
+  Zap,
+} as const

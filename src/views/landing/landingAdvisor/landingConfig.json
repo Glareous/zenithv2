@@ -1,0 +1,212 @@
+{
+    "heroBanner": {
+        "texts": {
+            "badge": "AI-Powered Sales Acceleration Agent",
+            "title": {
+                "part1": "Your Personal",
+                "part2": "AI Sales Assistant",
+                "part3": "Available 24/7"
+            },
+            "description": "A locally-hosted, OpenAI-compatible AI agent fine-tuned with your full product catalog, pricing, competitive intel, objection handlers, and winning sales playbooks. Guides reps in real-time via chat: uncovers needs, recommends solutions, overcomes objections, drives upsell/cross-sell, and maximizes close rates."
+        },
+        "images": {
+            "mainHome": "/assets/images/hospital/landing/main-advisor.png",
+            "whiteLogo": "/assets/images/logo-white.png",
+            "darkLogo": "/assets/images/main-logo.png"
+        },
+        "colors": {
+            "background": "bg-gradient-to-b from-white via-blue-50/50 to-cyan-50/30",
+            "badge": {
+                "text": "text-blue-600",
+                "border": "bg-blue-100/80 border-blue-200"
+            },
+            "title": {
+                "highlight": "text-cyan-600",
+                "decoration": "decoration-purple-400"
+            },
+            "description": "text-gray-700",
+            "card": {
+                "background": "bg-white shadow-lg shadow-blue-200/30",
+                "text": "text-gray-900",
+                "shadow": "shadow-xl shadow-cyan-200/40"
+            },
+            "metricText": "text-cyan-600"
+        },
+        "metrics": [
+            {
+                "value": "24",
+                "suffix": "/7",
+                "label": "AI sales coach always on"
+            },
+            {
+                "value": "100",
+                "suffix": "%",
+                "label": "Fully aligned with your catalog & playbook"
+            },
+            {
+                "value": "52",
+                "suffix": "%",
+                "label": "Average increase in win rate"
+            },
+            {
+                "value": "0",
+                "suffix": "",
+                "label": "Sensitive data never leaves your infrastructure"
+            }
+        ]
+    },
+    "availableFacilities": {
+        "colors": {
+            "cardBg": "bg-white border border-gray-200 shadow-md shadow-blue-100/20",
+            "cardBorder": "border-gray-200",
+            "cardHover": "hover:bg-blue-50/50 hover:shadow-xl hover:shadow-cyan-300/30 hover:border-cyan-200",
+            "iconBg": "bg-cyan-100/70",
+            "iconColor": "text-cyan-600",
+            "titleColor": "text-gray-900",
+            "descColor": "text-gray-600"
+        },
+        "facilities": [
+            {
+                "icon": "BrainCircuit",
+                "title": "Deep Product & Catalog Knowledge",
+                "description": "Fine-tuned on your SKUs, specs, pricing tiers, bundles, and competitor comparisons",
+                "href": "#!"
+            },
+            {
+                "icon": "MessageSquare",
+                "title": "Real-Time Chat Guidance",
+                "description": "Coaches reps live or engages prospects directly in natural conversation",
+                "href": "#!"
+            },
+            {
+                "icon": "Target",
+                "title": "Opportunity & Intent Detection",
+                "description": "Spots upsell/cross-sell moments, budget signals, and buying intent instantly",
+                "href": "#!"
+            },
+            {
+                "icon": "Timer",
+                "title": "Smart Objection Handling",
+                "description": "Delivers tailored, proven responses to price, timing, competition, and more",
+                "href": "#!"
+            },
+            {
+                "icon": "FileSearch",
+                "title": "Full Conversation Audit Trail",
+                "description": "Complete, searchable history of every interaction and recommendation",
+                "href": "#!"
+            },
+            {
+                "icon": "ShieldCheck",
+                "title": "On-Premise & Enterprise-Grade Security",
+                "description": "Runs locally – customer & deal data stays fully private",
+                "href": "#!"
+            }
+        ]
+    },
+    "ourDoctorsTeam": {
+        "images": {
+            "aboutImage": "/assets/images/hospital/landing/nvidia2.jpg"
+        },
+        "texts": {
+            "title": {
+                "part1": "Your Catalog,",
+                "part2": "Your Playbook,",
+                "part3": "Your AI Closer"
+            },
+            "description": "OpenAI-compatible agent fine-tuned on thousands of your real sales calls, win/loss analyses, discount strategies, and top-rep transcripts. It thinks and talks like your best performers, accelerating every stage of the funnel while keeping data 100% secure."
+        },
+        "colors": {
+            "titleHighlight": "text-cyan-600",
+            "titleDecoration": "decoration-purple-400",
+            "description": "text-gray-700",
+            "iconColor": "text-blue-500",
+            "featureDesc": "text-gray-600"
+        },
+        "features": [
+            {
+                "icon": "Zap",
+                "title": "Instant Deal Coaching",
+                "description": "Real-time pitch suggestions, rebuttals, and next-best-action guidance"
+            },
+            {
+                "icon": "TrendingUp",
+                "title": "Pipeline & Forecast Insights",
+                "description": "Identifies at-risk deals, expansion opportunities, and accurate forecasting"
+            },
+            {
+                "icon": "Handshake",
+                "title": "Rep Enablement & Skill Building",
+                "description": "Personalized coaching to improve discovery, negotiation, and closing"
+            },
+            {
+                "icon": "FileCheck",
+                "title": "Automated Sales Reports & Analytics",
+                "description": "Generates deal summaries, performance dashboards, and actionable insights"
+            }
+        ]
+    },
+    "healthService": {
+        "texts": {
+            "title": {
+                "part1": "Supercharge Your Sales",
+                "part2": "with a Private AI Assistant",
+                "part3": ""
+            },
+            "description": "Real results leading sales teams are achieving today with their on-premise AI sales agent."
+        },
+        "colors": {
+            "sectionBg": "bg-gradient-to-b from-blue-50/40 to-white",
+            "titleHighlight": "text-cyan-600",
+            "titleDecoration": "decoration-purple-400",
+            "description": "text-gray-700",
+            "cardBg": "bg-white border border-gray-200 shadow-lg shadow-blue-100/20",
+            "cardHover": "hover:bg-cyan-50/60 hover:shadow-cyan-300/40 hover:-translate-y-2 hover:border-cyan-300",
+            "serviceDesc": "text-gray-600"
+        },
+        "services": [
+            {
+                "icon": "Target",
+                "iconBg": "bg-purple-100/70",
+                "iconColor": "text-purple-600",
+                "title": "Faster Deal Velocity",
+                "description": "AI-guided next steps that shorten sales cycles significantly"
+            },
+            {
+                "icon": "DollarSign",
+                "iconBg": "bg-cyan-100/70",
+                "iconColor": "text-cyan-600",
+                "title": "Intelligent Upsell & Cross-sell",
+                "description": "Perfect timing recommendations to increase average deal size"
+            },
+            {
+                "icon": "Users",
+                "iconBg": "bg-blue-100/70",
+                "iconColor": "text-blue-600",
+                "title": "Continuous Rep Coaching",
+                "description": "Tailored feedback and training based on live performance"
+            },
+            {
+                "icon": "MessageCircle",
+                "iconBg": "bg-emerald-100/70",
+                "iconColor": "text-emerald-600",
+                "title": "Prospect & Lead Qualification",
+                "description": "24/7 chat engagement that scores and nurtures leads automatically"
+            },
+            {
+                "icon": "AlertTriangle",
+                "iconBg": "bg-amber-100/70",
+                "iconColor": "text-amber-600",
+                "title": "Early Churn & Risk Detection",
+                "description": "Flags at-risk accounts and suggests proactive retention plays"
+            },
+            {
+                "icon": "BarChart3",
+                "iconBg": "bg-indigo-100/70",
+                "iconColor": "text-indigo-600",
+                "title": "Real-Time Revenue Intelligence",
+                "description": "Dynamic forecasts, pipeline health, and actionable dashboards"
+            }
+        ]
+    }
+}
