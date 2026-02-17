@@ -211,7 +211,14 @@ const UserChatList: React.FC<UserChatListProps> = ({
 
           {/* Start new chat button */}
           <button
-            onClick={() => onSelectChat(crypto.randomUUID())}
+            onClick={() => {
+              const uuid = typeof crypto.randomUUID === 'function'
+                ? crypto.randomUUID()
+                : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, (c) =>
+                  (Number(c) ^ (crypto.getRandomValues(new Uint8Array(1))[0]! & (15 >> (Number(c) / 4)))).toString(16)
+                )
+              onSelectChat(uuid)
+            }}
             className="btn btn-primary w-full mt-3 flex items-center justify-center gap-2">
             <Plus className="size-4" />
             Start new chat
@@ -233,9 +240,8 @@ const UserChatList: React.FC<UserChatListProps> = ({
                         key={session.sessionId}
                         onClick={() => onSelectChat(session.sessionId)}>
                         <button
-                          className={`${
-                            isActive ? 'active' : ''
-                          } flex items-center gap-2 px-space py-2.5 hover:bg-gray-50 dark:hover:bg-dark-850 [&.active]:bg-primary-500/10 transition ease-linear duration-300 group/item w-full text-left`}>
+                          className={`${isActive ? 'active' : ''
+                            } flex items-center gap-2 px-space py-2.5 hover:bg-gray-50 dark:hover:bg-dark-850 [&.active]:bg-primary-500/10 transition ease-linear duration-300 group/item w-full text-left`}>
                           <div className="relative flex items-center justify-center font-semibold bg-gray-100 dark:bg-dark-850 rounded-full size-10 shrink-0">
                             <MessageSquare className="size-5 text-gray-500 dark:text-dark-500" />
                           </div>
