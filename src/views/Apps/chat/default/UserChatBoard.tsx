@@ -9,7 +9,6 @@ import { api } from '@src/trpc/react'
 import { Bot, ChevronsLeft, Phone, Send, Video } from 'lucide-react'
 import { toast } from 'react-toastify'
 import SimpleBar from 'simplebar-react'
-import { Socket, io } from 'socket.io-client'
 
 interface UserChatBoardProps {
   selectedChatId: string | null
@@ -17,6 +16,7 @@ interface UserChatBoardProps {
   onBack?: () => void
   chatType?: 'EMPLOYEE' | 'ADVISOR' | 'NIM_FRAUD'
   showEmployeeInfo?: boolean
+  onSessionCreated?: () => void
 }
 
 interface Message {
@@ -42,15 +42,15 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
   onBack,
   chatType = 'EMPLOYEE',
   showEmployeeInfo = true,
+  onSessionCreated,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
-  const socketRef = useRef<Socket | null>(null)
   const [messageInput, setMessageInput] = useState('')
-  const [realtimeMessages, setRealtimeMessages] = useState<Message[]>([])
   const [historyMessages, setHistoryMessages] = useState<Message[]>([])
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
-  const [isTyping, setIsTyping] = useState(false)
   const [isSending, setIsSending] = useState(false)
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [streamingContent, setStreamingContent] = useState('')
 
   // Get employee details (needed for header display + id for external API)
   const { data: employee, isLoading: isLoadingEmployee } =
@@ -70,11 +70,13 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
       return
     }
 
+    console.log('Selected session id:', selectedChatId)
+
     const fetchSessionMessages = async () => {
       setIsLoadingHistory(true)
       try {
         const response = await fetch(
-          `${env.NEXT_PUBLIC_BACKEND_URL}/chat/history/${employee.id}`
+          `${env.NEXT_PUBLIC_BACKEND_URL}/api/rrhh/chat/history/${employee.id}?limit=1000`
         )
 
         if (!response.ok) {
@@ -99,6 +101,7 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
           chatId: selectedChatId,
         }))
 
+        console.log('Session messages:', mapped)
         setHistoryMessages(mapped)
       } catch (error) {
         console.error('Error fetching session messages:', error)
@@ -111,89 +114,156 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
     fetchSessionMessages()
   }, [employee?.id, selectedChatId])
 
-  // Initialize WebSocket connection
-  useEffect(() => {
-    if (!selectedChatId || !employee?.id) return
+  // Build the displayed messages list
+  const allMessages = React.useMemo(() => {
+    const sorted = [...historyMessages].sort(
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    )
 
-    // Clear realtime messages when changing session
-    setRealtimeMessages([])
-    setIsTyping(false)
-
-    // Connect to WebSocket server
-    const socket = io('http://localhost:4000', {
-      transports: ['websocket'],
-    })
-
-    socketRef.current = socket
-
-    socket.on('connect', () => {
-      console.log('WebSocket connected:', socket.id)
-      socket.emit('join-chat', {
-        chatId: selectedChatId,
-        userId: employee.id,
+    // Append a temporary streaming message while the agent is responding
+    if (isStreaming && streamingContent) {
+      sorted.push({
+        id: 'streaming',
+        content: streamingContent,
+        type: 'AGENT',
+        mediaType: 'TEXT',
+        timestamp: new Date(),
+        chatId: selectedChatId || '',
       })
-    })
-
-    socket.on('joined-chat', ({ chatId }) => {
-      console.log('Joined chat:', chatId)
-    })
-
-    // Listen for new messages
-    socket.on('message-received', ({ message }) => {
-      console.log('Message received:', message)
-      setRealtimeMessages((prev) => [...prev, message])
-    })
-
-    // Listen for typing indicators
-    socket.on('user-typing', ({ userId, isTyping }) => {
-      if (userId === 'agent') {
-        setIsTyping(isTyping)
-      }
-    })
-
-    socket.on('error', ({ message }) => {
-      toast.error(message)
-    })
-
-    // Cleanup on unmount or session change
-    return () => {
-      if (selectedChatId) {
-        socket.emit('leave-chat', { chatId: selectedChatId })
-      }
-      socket.disconnect()
     }
-  }, [selectedChatId, employee?.id])
 
-  // Combine history messages with realtime messages
-  const allMessages = [
-    ...historyMessages,
-    ...realtimeMessages.filter(
-      (rtMsg) => !historyMessages.some((msg) => msg.id === rtMsg.id)
-    ),
-  ].sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-  )
+    return sorted
+  }, [historyMessages, isStreaming, streamingContent, selectedChatId])
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll to bottom when messages change or streaming content updates
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [allMessages, isTyping])
+  }, [allMessages, streamingContent])
 
-  // Send message
-  const handleSendMessage = () => {
-    if (!messageInput.trim() || !selectedChatId || !socketRef.current) return
+  // Send message via SSE streaming endpoint
+  const handleSendMessage = async () => {
+    if (
+      !messageInput.trim() ||
+      !selectedChatId ||
+      !employee?.id ||
+      isSending ||
+      isStreaming
+    )
+      return
 
-    setIsSending(true)
+    const message = messageInput.trim()
 
-    socketRef.current.emit('send-message', {
-      chatId: selectedChatId,
-      content: messageInput.trim(),
+    // Optimistically add user message to history
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      content: message,
       type: 'USER',
-      metadata: {},
-    })
-
+      mediaType: 'TEXT',
+      timestamp: new Date(),
+      chatId: selectedChatId,
+    }
+    setHistoryMessages((prev) => [...prev, userMessage])
     setMessageInput('')
-    setIsSending(false)
+    setIsSending(true)
+    setIsStreaming(true)
+    setStreamingContent('')
+
+    try {
+      const response = await fetch(
+        `${env.NEXT_PUBLIC_BACKEND_URL}/api/rrhh/chat/stream`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            employee_id: employee.id,
+            message,
+            session_id: selectedChatId,
+            debug: false,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`Stream request failed: ${response.status}`)
+      }
+
+      const reader = response.body?.getReader()
+      if (!reader) throw new Error('No response body')
+
+      const decoder = new TextDecoder()
+      let accumulated = ''
+      let buffer = ''
+      let receivedDone = false
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+
+        // Process complete lines from the buffer
+        const lines = buffer.split('\n')
+        // Keep the last incomplete line in the buffer
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          const trimmed = line.trim()
+          if (!trimmed || !trimmed.startsWith('data: ')) continue
+
+          try {
+            const json = JSON.parse(trimmed.slice(6))
+
+            if (json.type === 'token') {
+              accumulated += json.content
+              setStreamingContent(accumulated)
+            } else if (json.type === 'done') {
+              receivedDone = true
+              const finalContent = json.full_response || accumulated
+
+              // Add the complete agent message to history
+              const agentMessage: Message = {
+                id: `agent-${Date.now()}`,
+                content: finalContent,
+                type: 'AGENT',
+                mediaType: 'TEXT',
+                timestamp: new Date(),
+                chatId: selectedChatId,
+              }
+              setHistoryMessages((prev) => [...prev, agentMessage])
+              setStreamingContent('')
+              setIsStreaming(false)
+              onSessionCreated?.()
+            }
+            // type: "meta" — no UI action needed
+          } catch {
+            // Skip malformed JSON lines
+          }
+        }
+      }
+
+      // If stream ended without a "done" event, finalize with whatever we accumulated
+      if (accumulated && !receivedDone) {
+        const agentMessage: Message = {
+          id: `agent-${Date.now()}`,
+          content: accumulated,
+          type: 'AGENT',
+          mediaType: 'TEXT',
+          timestamp: new Date(),
+          chatId: selectedChatId,
+        }
+        setHistoryMessages((prev) => [...prev, agentMessage])
+        setStreamingContent('')
+        setIsStreaming(false)
+        onSessionCreated?.()
+      }
+    } catch (error) {
+      console.error('Streaming error:', error)
+      toast.error('Failed to send message. Please try again.')
+      setIsStreaming(false)
+    } finally {
+      setIsSending(false)
+    }
   }
 
   // Handle Enter key
@@ -408,15 +478,18 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
                 </div>
               )}
 
-              {/* Typing indicator */}
-              {isTyping && (
-                <div className="flex justify-end">
-                  <div className="bg-primary-500/50 text-white rounded-lg p-2 max-w-[70%]">
+              {/* Streaming indicator — show bouncing dots before first token arrives */}
+              {isStreaming && !streamingContent && (
+                <div className="flex gap-2 justify-end">
+                  <div className="bg-primary-500/50 text-white rounded-lg p-3 max-w-[70%]">
                     <div className="flex gap-1">
-                      <span className="w-1 h-1 bg-white rounded-full animate-bounce"></span>
-                      <span className="w-1 h-1 bg-white rounded-full animate-bounce delay-100"></span>
-                      <span className="w-1 h-1 bg-white rounded-full animate-bounce delay-200"></span>
+                      <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce"></span>
+                      <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0.1s]"></span>
+                      <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0.2s]"></span>
                     </div>
+                  </div>
+                  <div className="flex items-center justify-center font-semibold bg-primary-100 dark:bg-primary-900 rounded-full size-8 shrink-0">
+                    <Bot className="size-6 text-gray-600 dark:text-gray-400" />
                   </div>
                 </div>
               )}
@@ -435,12 +508,12 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                disabled={isSending}
+                disabled={isSending || isStreaming}
               />
               <button
                 className="btn btn-primary flex items-center gap-2"
                 onClick={handleSendMessage}
-                disabled={!messageInput.trim() || isSending}>
+                disabled={!messageInput.trim() || isSending || isStreaming}>
                 <Send className="size-4" />
                 Send
               </button>

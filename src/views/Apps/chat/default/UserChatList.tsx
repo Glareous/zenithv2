@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { env } from '@src/env'
 import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
-import { MessageSquare, Search } from 'lucide-react'
+import { MessageSquare, Plus, Search } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import SimpleBar from 'simplebar-react'
 
@@ -29,6 +29,7 @@ interface UserChatListProps {
   onSelectChat: (chatId: string) => void
   chatType?: 'EMPLOYEE' | 'ADVISOR' | 'NIM_FRAUD'
   userId?: string
+  refreshTrigger?: number
 }
 
 const UserChatList: React.FC<UserChatListProps> = ({
@@ -36,6 +37,7 @@ const UserChatList: React.FC<UserChatListProps> = ({
   selectedChatId,
   onSelectChat,
   chatType = 'EMPLOYEE',
+  refreshTrigger = 0,
 }) => {
   const { currentProject } = useSelector((state: RootState) => state.Project)
   const [searchValue, setSearchValue] = useState('')
@@ -64,7 +66,7 @@ const UserChatList: React.FC<UserChatListProps> = ({
       setIsLoadingHistory(true)
       try {
         const response = await fetch(
-          `${env.NEXT_PUBLIC_BACKEND_URL}/chat/history/${employee.id}`
+          `${env.NEXT_PUBLIC_BACKEND_URL}/api/rrhh/chat/history/${employee.id}?limit=1000`
         )
 
         if (!response.ok) {
@@ -108,6 +110,7 @@ const UserChatList: React.FC<UserChatListProps> = ({
             new Date(a.lastTimestamp).getTime()
         )
 
+        console.log('Sessions:', sessionList)
         setSessions(sessionList)
       } catch (error) {
         console.error('Error fetching chat history:', error)
@@ -119,7 +122,7 @@ const UserChatList: React.FC<UserChatListProps> = ({
     }
 
     fetchHistory()
-  }, [employee?.id])
+  }, [employee?.id, refreshTrigger])
 
   // Filter sessions by search
   const filteredSessions = sessions.filter((session) => {
@@ -184,6 +187,14 @@ const UserChatList: React.FC<UserChatListProps> = ({
               <Search className="size-4" />
             </button>
           </div>
+
+          {/* Start new chat button */}
+          <button
+            onClick={() => onSelectChat(crypto.randomUUID())}
+            className="btn btn-primary w-full mt-3 flex items-center justify-center gap-2">
+            <Plus className="size-4" />
+            Start new chat
+          </button>
 
           {isLoading ? (
             <div className="flex items-center justify-center h-64 mt-4">
