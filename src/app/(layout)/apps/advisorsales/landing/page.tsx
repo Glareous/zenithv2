@@ -1,4 +1,4 @@
-import React from 'react' //
+import React from 'react' ///
 
 import { NextPageWithLayout } from '@src/dtos'
 import AvailableFacilities from '@src/views/landing/landingRRHH/availableFacilities'
