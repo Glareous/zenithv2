@@ -184,22 +184,22 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
 
     try {
       const streamUrl = isAdvisor
-        ? `${env.NEXT_PUBLIC_BACKEND_URL}/api/advisor/chat/stream`
+        ? `${env.NEXT_PUBLIC_BACKEND_URL}/api/advisor/advisor/chat/stream`
         : `${env.NEXT_PUBLIC_BACKEND_URL}/api/rrhh/chat/stream`
 
       const streamBody = isAdvisor
         ? {
-            conversationId: selectedChatId,
-            projectId: currentProject?.id,
-            message,
-            userId,
-          }
+          conversationId: selectedChatId,
+          projectId: currentProject?.id,
+          message,
+          userId,
+        }
         : {
-            employee_id: senderId,
-            message,
-            session_id: selectedChatId,
-            debug: false,
-          }
+          employee_id: senderId,
+          message,
+          session_id: selectedChatId,
+          debug: false,
+        }
 
       const response = await fetch(streamUrl, {
         method: 'POST',
@@ -232,15 +232,18 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
 
         for (const line of lines) {
           const trimmed = line.trim()
-          if (!trimmed || !trimmed.startsWith('data: ')) continue
+          if (!trimmed) continue
+          if (isAdvisor) console.log('[Advisor Stream] Raw line:', trimmed)
+          if (!trimmed.startsWith('data: ')) continue
 
           try {
             const json = JSON.parse(trimmed.slice(6))
 
-            if (json.type === 'token') {
+            // RRHH uses "token"/"done", Advisor uses "chunk"/"end"
+            if (json.type === 'token' || json.type === 'chunk') {
               accumulated += json.content
               setStreamingContent(accumulated)
-            } else if (json.type === 'done') {
+            } else if (json.type === 'done' || json.type === 'end') {
               receivedDone = true
               const finalContent = json.full_response || accumulated
 
@@ -258,9 +261,47 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
               setIsStreaming(false)
               onSessionCreated?.()
             }
-            // type: "meta" — no UI action needed
+            // type: "meta" / "start" — no UI action needed
           } catch {
             // Skip malformed JSON lines
+          }
+        }
+      }
+
+      // If stream ended without parseable content, fall back to history refetch
+      if (!accumulated && !receivedDone) {
+        console.warn('[Chat] Stream ended without parseable content - falling back to history refetch')
+        await new Promise((resolve) => setTimeout(resolve, 1500))
+        onSessionCreated?.()
+
+        // Refetch chat history for this session
+        const fetchId = isAdvisor ? userId : employee?.id
+        if (fetchId) {
+          try {
+            const url = isAdvisor
+              ? `${env.NEXT_PUBLIC_BACKEND_URL}/api/advisor/advisor/history/${fetchId}`
+              : `${env.NEXT_PUBLIC_BACKEND_URL}/api/rrhh/chat/history/${fetchId}?limit=1000`
+
+            const historyResponse = await fetch(url)
+            if (historyResponse.ok) {
+              const data = await historyResponse.json()
+              const allMsgs: ApiMessage[] = data.messages || []
+              const sessionMessages = allMsgs.filter((msg) => {
+                const sid = isAdvisor ? msg.conversationId || '' : msg.session_id
+                return sid === selectedChatId
+              })
+              const mapped: Message[] = sessionMessages.map((msg, index) => ({
+                id: `${index}-${msg.timestamp}`,
+                content: msg.content,
+                type: msg.role === 'user' ? 'USER' : 'AGENT',
+                mediaType: 'TEXT',
+                timestamp: new Date(msg.timestamp),
+                chatId: selectedChatId,
+              }))
+              setHistoryMessages(mapped)
+            }
+          } catch (histErr) {
+            console.error('[Chat] History fallback failed:', histErr)
           }
         }
       }
@@ -283,9 +324,10 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
     } catch (error) {
       console.error('Streaming error:', error)
       toast.error('Failed to send message. Please try again.')
-      setIsStreaming(false)
     } finally {
       setIsSending(false)
+      setIsStreaming(false)
+      setStreamingContent('')
     }
   }
 
@@ -469,20 +511,18 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
                       )}
 
                       <div
-                        className={`max-w-[70%] ${
-                          isAgent
+                        className={`max-w-[70%] ${isAgent
                             ? 'bg-primary-500 text-white'
                             : 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-gray-100'
-                        } rounded-lg p-3`}>
+                          } rounded-lg p-3`}>
                         <p className="text-sm whitespace-pre-wrap break-words">
                           {message.content}
                         </p>
                         <p
-                          className={`text-xs mt-1 ${
-                            isAgent
+                          className={`text-xs mt-1 ${isAgent
                               ? 'text-primary-100'
                               : 'text-gray-500 dark:text-dark-500'
-                          }`}>
+                            }`}>
                           {formatTime(message.timestamp)}
                         </p>
                       </div>
