@@ -19,6 +19,11 @@ const AdvisorChat: NextPageWithLayout = () => {
   const [currentView, setCurrentView] = useState<'chatList' | 'chatBoard'>(
     'chatList'
   )
+  const [sessionRefreshTrigger, setSessionRefreshTrigger] = useState(0)
+
+  const handleSessionCreated = () => {
+    setSessionRefreshTrigger((prev) => prev + 1)
+  }
 
   // Detect window resize and set mobile view state
   useEffect(() => {
@@ -127,6 +132,7 @@ const AdvisorChat: NextPageWithLayout = () => {
               onSelectChat={handleSelectChat}
               chatType="ADVISOR"
               userId={session.user.id}
+              refreshTrigger={sessionRefreshTrigger}
             />
           ) : (
             <UserChatBoard
@@ -134,6 +140,8 @@ const AdvisorChat: NextPageWithLayout = () => {
               onBack={handleBackToChatList}
               chatType="ADVISOR"
               showEmployeeInfo={false}
+              userId={session.user.id}
+              onSessionCreated={handleSessionCreated}
             />
           )
         ) : (
@@ -143,11 +151,14 @@ const AdvisorChat: NextPageWithLayout = () => {
               onSelectChat={handleSelectChat}
               chatType="ADVISOR"
               userId={session.user.id}
+              refreshTrigger={sessionRefreshTrigger}
             />
             <UserChatBoard
               selectedChatId={selectedChatId}
               chatType="ADVISOR"
               showEmployeeInfo={false}
+              userId={session.user.id}
+              onSessionCreated={handleSessionCreated}
             />
           </>
         )}
