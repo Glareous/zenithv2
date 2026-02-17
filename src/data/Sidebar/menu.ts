@@ -361,7 +361,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'API',
-        link: '#',
+        link: 'http://201.217.192.13:82/api/rrhh/docs',
         lang: 'API',
       },
     ],
@@ -450,7 +450,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'API',
-        link: '#',
+        link: 'http://201.217.192.13:82/api/advisor/docs',
         lang: 'API',
       },
     ],
@@ -485,7 +485,7 @@ const menu: MegaMenu[] = [
             }, */
       {
         title: 'API',
-        link: 'https://claude.com/platform/api',
+        link: 'http://201.217.192.13:82/api/box/docs',
         lang: 'API',
       },
     ],
