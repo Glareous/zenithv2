@@ -21,6 +21,7 @@ interface ApiMessage {
   content: string
   timestamp: string
   session_id: string
+  conversationId?: string
 }
 
 interface UserChatListProps {
@@ -37,6 +38,7 @@ const UserChatList: React.FC<UserChatListProps> = ({
   selectedChatId,
   onSelectChat,
   chatType = 'EMPLOYEE',
+  userId,
   refreshTrigger = 0,
 }) => {
   const { currentProject } = useSelector((state: RootState) => state.Project)
@@ -45,47 +47,61 @@ const UserChatList: React.FC<UserChatListProps> = ({
   const [allApiMessages, setAllApiMessages] = useState<ApiMessage[]>([])
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
 
-  // Get employee details (needed to get employee.id for the external API)
+  // Get employee details (needed to get employee.id for the external API) — skip for ADVISOR
   const { data: employee, isLoading: isLoadingEmployee } =
     api.projectEmployee.getById.useQuery(
       { id: selectedEmployeeId || '' },
-      { enabled: !!selectedEmployeeId }
+      { enabled: chatType === 'EMPLOYEE' && !!selectedEmployeeId }
     )
 
-  // Fetch chat history from external API when employee.id is available
+  // Fetch chat history from external API
   useEffect(() => {
-    if (!employee?.id) {
+    const isAdvisor = chatType === 'ADVISOR'
+    const fetchId = isAdvisor ? userId : employee?.id
+
+    console.log('[ChatList] useEffect entry:', { chatType, isAdvisor, userId, employeeId: employee?.id, fetchId, refreshTrigger })
+
+    if (!fetchId) {
+      console.log('[ChatList] No fetchId — bailing out early')
       setSessions([])
       setAllApiMessages([])
       return
     }
 
-    console.log('Employee Prisma id:', employee.id)
-
     const fetchHistory = async () => {
       setIsLoadingHistory(true)
       try {
-        const response = await fetch(
-          `${env.NEXT_PUBLIC_BACKEND_URL}/api/rrhh/chat/history/${employee.id}?limit=1000`
-        )
+        const url = isAdvisor
+          ? `${env.NEXT_PUBLIC_BACKEND_URL}/api/advisor/advisor/history/${fetchId}`
+          : `${env.NEXT_PUBLIC_BACKEND_URL}/api/rrhh/chat/history/${fetchId}?limit=1000`
+
+        console.log('[ChatList] Fetching URL:', url)
+        const response = await fetch(url)
 
         if (!response.ok) {
           throw new Error(`Failed to fetch chat history: ${response.status}`)
         }
 
         const data = await response.json()
+        console.log('[ChatList] API response data:', data)
         const messages: ApiMessage[] = data.messages || []
+        console.log('[ChatList] Parsed messages count:', messages.length, 'first message:', messages[0])
         setAllApiMessages(messages)
 
-        // Group messages by session_id
+        // Group messages by conversationId (ADVISOR) or session_id (EMPLOYEE)
         const sessionMap = new Map<string, ApiMessage[]>()
         for (const msg of messages) {
-          const sid = msg.session_id
+          const sid = isAdvisor
+            ? msg.conversationId || ''
+            : msg.session_id
+          if (!sid) continue
           if (!sessionMap.has(sid)) {
             sessionMap.set(sid, [])
           }
           sessionMap.get(sid)!.push(msg)
         }
+
+        console.log('[ChatList] Session grouping done. sessionMap size:', sessionMap.size, 'keys:', [...sessionMap.keys()])
 
         // Build session list
         const sessionList: ChatSession[] = []
@@ -110,10 +126,10 @@ const UserChatList: React.FC<UserChatListProps> = ({
             new Date(a.lastTimestamp).getTime()
         )
 
-        console.log('Sessions:', sessionList)
+        console.log('[ChatList] Final sessionList:', sessionList.length, sessionList)
         setSessions(sessionList)
       } catch (error) {
-        console.error('Error fetching chat history:', error)
+        console.error('[ChatList] CATCH block — full error:', error)
         setSessions([])
         setAllApiMessages([])
       } finally {
@@ -122,7 +138,7 @@ const UserChatList: React.FC<UserChatListProps> = ({
     }
 
     fetchHistory()
-  }, [employee?.id, refreshTrigger])
+  }, [chatType, userId, employee?.id, refreshTrigger])
 
   // Filter sessions by search
   const filteredSessions = sessions.filter((session) => {
@@ -133,15 +149,20 @@ const UserChatList: React.FC<UserChatListProps> = ({
     if (session.sessionId.toLowerCase().includes(searchLower)) return true
 
     // Search in messages belonging to this session
-    const sessionMessages = allApiMessages.filter(
-      (m) => m.session_id === session.sessionId
-    )
+    const sessionMessages = allApiMessages.filter((m) => {
+      const sid =
+        chatType === 'ADVISOR' ? m.conversationId || '' : m.session_id
+      return sid === session.sessionId
+    })
     return sessionMessages.some((m) =>
       m.content.toLowerCase().includes(searchLower)
     )
   })
 
-  const isLoading = isLoadingEmployee || isLoadingHistory
+  console.log('[ChatList] Render — sessions:', sessions.length, 'filtered:', filteredSessions.length, 'isLoadingHistory:', isLoadingHistory)
+
+  const isLoading =
+    (chatType === 'EMPLOYEE' && isLoadingEmployee) || isLoadingHistory
 
   // Format session display name
   const formatSessionName = (session: ChatSession): string => {

@@ -5,8 +5,10 @@ import React, { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 
 import { env } from '@src/env'
+import { RootState } from '@src/slices/reducer'
 import { api } from '@src/trpc/react'
 import { Bot, ChevronsLeft, Phone, Send, Video } from 'lucide-react'
+import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import SimpleBar from 'simplebar-react'
 
@@ -17,6 +19,7 @@ interface UserChatBoardProps {
   chatType?: 'EMPLOYEE' | 'ADVISOR' | 'NIM_FRAUD'
   showEmployeeInfo?: boolean
   onSessionCreated?: () => void
+  userId?: string
 }
 
 interface Message {
@@ -34,6 +37,7 @@ interface ApiMessage {
   content: string
   timestamp: string
   session_id: string
+  conversationId?: string
 }
 
 const UserChatBoard: React.FC<UserChatBoardProps> = ({
@@ -43,7 +47,9 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
   chatType = 'EMPLOYEE',
   showEmployeeInfo = true,
   onSessionCreated,
+  userId,
 }) => {
+  const { currentProject } = useSelector((state: RootState) => state.Project)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const [messageInput, setMessageInput] = useState('')
   const [historyMessages, setHistoryMessages] = useState<Message[]>([])
@@ -52,32 +58,36 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
   const [isStreaming, setIsStreaming] = useState(false)
   const [streamingContent, setStreamingContent] = useState('')
 
-  // Get employee details (needed for header display + id for external API)
+  const isAdvisor = chatType === 'ADVISOR'
+
+  // Get employee details (needed for header display + id for external API) — skip for ADVISOR
   const { data: employee, isLoading: isLoadingEmployee } =
     api.projectEmployee.getById.useQuery(
       { id: selectedEmployeeId || '' },
       {
-        enabled: !!selectedEmployeeId,
+        enabled: !isAdvisor && !!selectedEmployeeId,
         refetchOnMount: true,
         refetchOnWindowFocus: false,
       }
     )
 
-  // Fetch chat history from external API filtered by session_id
+  // Fetch chat history from external API filtered by session/conversation ID
   useEffect(() => {
-    if (!employee?.id || !selectedChatId) {
+    const fetchId = isAdvisor ? userId : employee?.id
+
+    if (!fetchId || !selectedChatId) {
       setHistoryMessages([])
       return
     }
 
-    console.log('Selected session id:', selectedChatId)
-
     const fetchSessionMessages = async () => {
       setIsLoadingHistory(true)
       try {
-        const response = await fetch(
-          `${env.NEXT_PUBLIC_BACKEND_URL}/api/rrhh/chat/history/${employee.id}?limit=1000`
-        )
+        const url = isAdvisor
+          ? `${env.NEXT_PUBLIC_BACKEND_URL}/api/advisor/advisor/history/${fetchId}`
+          : `${env.NEXT_PUBLIC_BACKEND_URL}/api/rrhh/chat/history/${fetchId}?limit=1000`
+
+        const response = await fetch(url)
 
         if (!response.ok) {
           throw new Error(`Failed to fetch chat history: ${response.status}`)
@@ -86,10 +96,13 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
         const data = await response.json()
         const allMessages: ApiMessage[] = data.messages || []
 
-        // Filter by selected session_id
-        const sessionMessages = allMessages.filter(
-          (msg) => msg.session_id === selectedChatId
-        )
+        // Filter by conversationId (ADVISOR) or session_id (EMPLOYEE)
+        const sessionMessages = allMessages.filter((msg) => {
+          const sid = isAdvisor
+            ? msg.conversationId || ''
+            : msg.session_id
+          return sid === selectedChatId
+        })
 
         // Map to internal Message format
         const mapped: Message[] = sessionMessages.map((msg, index) => ({
@@ -101,7 +114,6 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
           chatId: selectedChatId,
         }))
 
-        console.log('Session messages:', mapped)
         setHistoryMessages(mapped)
       } catch (error) {
         console.error('Error fetching session messages:', error)
@@ -112,7 +124,7 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
     }
 
     fetchSessionMessages()
-  }, [employee?.id, selectedChatId])
+  }, [isAdvisor, userId, employee?.id, selectedChatId])
 
   // Build the displayed messages list
   const allMessages = React.useMemo(() => {
@@ -143,10 +155,11 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
 
   // Send message via SSE streaming endpoint
   const handleSendMessage = async () => {
+    const senderId = isAdvisor ? userId : employee?.id
     if (
       !messageInput.trim() ||
       !selectedChatId ||
-      !employee?.id ||
+      !senderId ||
       isSending ||
       isStreaming
     )
@@ -170,19 +183,29 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
     setStreamingContent('')
 
     try {
-      const response = await fetch(
-        `${env.NEXT_PUBLIC_BACKEND_URL}/api/rrhh/chat/stream`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            employee_id: employee.id,
+      const streamUrl = isAdvisor
+        ? `${env.NEXT_PUBLIC_BACKEND_URL}/api/advisor/chat/stream`
+        : `${env.NEXT_PUBLIC_BACKEND_URL}/api/rrhh/chat/stream`
+
+      const streamBody = isAdvisor
+        ? {
+            conversationId: selectedChatId,
+            projectId: currentProject?.id,
+            message,
+            userId,
+          }
+        : {
+            employee_id: senderId,
             message,
             session_id: selectedChatId,
             debug: false,
-          }),
-        }
-      )
+          }
+
+      const response = await fetch(streamUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(streamBody),
+      })
 
       if (!response.ok) {
         throw new Error(`Stream request failed: ${response.status}`)
@@ -323,7 +346,8 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
     )
   }
 
-  const isLoading = isLoadingEmployee || isLoadingHistory
+  const isLoading =
+    (!isAdvisor && isLoadingEmployee) || isLoadingHistory
 
   if (isLoading) {
     return (
