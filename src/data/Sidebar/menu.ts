@@ -349,11 +349,11 @@ const menu: MegaMenu[] = [
         link: '/docs/rrhh',
         lang: 'Documentation',
       },
-      {
-        title: 'RRHH Agent',
-        link: '/apps/agents',
-        lang: 'RRHH Agent',
-      },
+      // {
+      //   title: 'RRHH Agent',
+      //   link: '/apps/agents',
+      //   lang: 'RRHH Agent',
+      // },
       {
         title: 'Chat',
         link: '/apps/chat/default',
@@ -438,11 +438,11 @@ const menu: MegaMenu[] = [
         link: '/docs/advisor',
         lang: 'Documentation',
       },
-      {
-        title: 'Advisor Agent',
-        link: '/apps/agents',
-        lang: 'Advisor Agent',
-      },
+      // {
+      //   title: 'Advisor Agent',
+      //   link: '/apps/agents',
+      //   lang: 'Advisor Agent',
+      // },
       {
         title: 'Chat',
         link: '/apps/advisor/chat',
