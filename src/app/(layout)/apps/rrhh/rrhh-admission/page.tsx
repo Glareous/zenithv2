@@ -172,10 +172,10 @@ const RrhhAdmission: NextPageWithLayout = () => {
         age: employee.age || '',
         birthDate: employee.birthDate
           ? new Date(employee.birthDate).toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-            })
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })
           : '',
         phone: employee.phone || '',
         alternativePhone: employee.alternativePhone || '',
@@ -189,10 +189,10 @@ const RrhhAdmission: NextPageWithLayout = () => {
         class: employee.class || '',
         admissionDate: employee.admissionDate
           ? new Date(employee.admissionDate).toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-            })
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })
           : '',
         religion: employee.religion || '',
         fatherName: employee.fatherName || '',
@@ -313,7 +313,7 @@ const RrhhAdmission: NextPageWithLayout = () => {
       toast.success('Employee submitted successfully')
       localStorage.removeItem('editEmployeeId')
       router.push('/apps/rrhh/rrhh-list')
-    } catch (error) {}
+    } catch (error) { }
   }
 
   return (
@@ -343,7 +343,7 @@ const RrhhAdmission: NextPageWithLayout = () => {
                       }
                     />
                   </Tab>
-                  <Tab label="Educational Background">
+                  <Tab label="Family background">
                     <EducationalBackground
                       onPreviousTab={handlePreviousTab}
                       onNextTab={() => handleNextTab(1)}

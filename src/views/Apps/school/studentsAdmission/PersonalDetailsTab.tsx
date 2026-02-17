@@ -192,7 +192,7 @@ const PersonalDetailsTab: React.FC<PersonalDetailsTabProps> = ({
 
           <div className="col-span-12 sm:col-span-6 2xl:col-span-4">
             <label htmlFor="classInput" className="form-label">
-              Class
+              Departament
             </label>
             <input
               type="text"
