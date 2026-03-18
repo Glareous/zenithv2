@@ -362,7 +362,7 @@ const RrhhAdmission: NextPageWithLayout = () => {
                       employeeId={editEmployeeId}
                     />
                   </Tab>
-                  <Tab label="Application Overview">
+                  <Tab label="Overview & Save">
                     <ApplicationOverviewTab
                       onPreviousTab={handlePreviousTab}
                       onSubmit={handleFinalSubmit}

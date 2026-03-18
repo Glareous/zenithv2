@@ -215,7 +215,7 @@ const menu: MegaMenu[] = [
       },*/
       {
         title: 'API',
-        link: 'http://201.217.192.13:82/api/pqr/docs',
+        link: 'http://201.217.192.14:82/api/pqr/docs',
         lang: 'API',
       },
     ],
@@ -249,7 +249,7 @@ const menu: MegaMenu[] = [
       },*/
       {
         title: 'API',
-        link: 'http://201.217.192.13:82/api/forecast/docs',
+        link: 'http://201.217.192.14:82/api/forecast/docs',
         lang: 'API',
       },
     ],
@@ -288,7 +288,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'API',
-        link: 'http://201.217.192.13:82/api/leads/docs',
+        link: 'http://201.217.192.14:82/api/leads/docs',
         lang: 'API',
       },
     ],
@@ -322,7 +322,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'API',
-        link: 'http://201.217.192.13:84/docs',
+        link: 'http://201.217.192.14:84/docs',
         lang: 'API',
       },
     ],
@@ -361,7 +361,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'API',
-        link: 'http://201.217.192.13:82/api/rrhh/docs',
+        link: 'http://201.217.192.14:82/api/rrhh/docs',
         lang: 'API',
       },
     ],
@@ -450,7 +450,7 @@ const menu: MegaMenu[] = [
       },
       {
         title: 'API',
-        link: 'http://201.217.192.13:82/api/advisor/docs',
+        link: 'http://201.217.192.14:82/api/advisor/docs',
         lang: 'API',
       },
     ],
@@ -485,7 +485,7 @@ const menu: MegaMenu[] = [
             }, */
       {
         title: 'API',
-        link: 'http://201.217.192.13:82/api/box/docs',
+        link: 'http://201.217.192.14:82/api/box/docs',
         lang: 'API',
       },
     ],
