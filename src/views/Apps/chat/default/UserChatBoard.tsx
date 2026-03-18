@@ -71,7 +71,7 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
       }
     )
 
-  // Fetch chat history from external API filtered by session/conversation IDssss
+  // Fetch chat history from external API filtered by session/conversation IDsssss
   useEffect(() => {
     const fetchId = isAdvisor ? userId : employee?.id
 
