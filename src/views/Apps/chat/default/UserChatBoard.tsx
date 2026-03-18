@@ -71,7 +71,7 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
       }
     )
 
-  // Fetch chat history from external API filtered by session/conversation ID
+  // Fetch chat history from external API filtered by session/conversation IDss
   useEffect(() => {
     const fetchId = isAdvisor ? userId : employee?.id
 
@@ -512,16 +512,16 @@ const UserChatBoard: React.FC<UserChatBoardProps> = ({
 
                       <div
                         className={`max-w-[70%] ${isAgent
-                            ? 'bg-primary-500 text-white'
-                            : 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-gray-100'
+                          ? 'bg-primary-500 text-white'
+                          : 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-gray-100'
                           } rounded-lg p-3`}>
                         <p className="text-sm whitespace-pre-wrap break-words">
                           {message.content}
                         </p>
                         <p
                           className={`text-xs mt-1 ${isAgent
-                              ? 'text-primary-100'
-                              : 'text-gray-500 dark:text-dark-500'
+                            ? 'text-primary-100'
+                            : 'text-gray-500 dark:text-dark-500'
                             }`}>
                           {formatTime(message.timestamp)}
                         </p>
