@@ -14,34 +14,34 @@ const adminMenu: MegaMenu[] = [
     link: '/admin/organizations',
     separator: false,
   },
-  {
-    title: 'Agents',
-    lang: 'agents',
-    icon: 'bot',
-    link: '/admin/agents',
-    separator: false,
-  },
-  {
-    title: 'Actions',
-    lang: 'pe-actions',
-    icon: 'life-buoy',
-    link: '/admin/dashboard-actions',
-    separator: false,
-  },
-  {
-    title: 'Models',
-    lang: 'pe-models',
-    icon: 'dna',
-    link: '/admin/models',
-    separator: false,
-  },
-  {
-    title: 'Api key',
-    lang: 'pe-api-key',
-    icon: 'box',
-    link: '/admin/api-keys',
-    separator: false,
-  },
+  // {
+  //   title: 'Agents',
+  //   lang: 'agents',
+  //   icon: 'bot',
+  //   link: '/admin/agents',
+  //   separator: false,
+  // },
+  // {
+  //   title: 'Actions',
+  //   lang: 'pe-actions',
+  //   icon: 'life-buoy',
+  //   link: '/admin/dashboard-actions',
+  //   separator: false,
+  // },
+  // {
+  //   title: 'Models',
+  //   lang: 'pe-models',
+  //   icon: 'dna',
+  //   link: '/admin/models',
+  //   separator: false,
+  // },
+  // {
+  //   title: 'Api key',
+  //   lang: 'pe-api-key',
+  //   icon: 'box',
+  //   link: '/admin/api-keys',
+  //   separator: false,
+  // },
 ]
 
 export { adminMenu }
